@@ -10,16 +10,67 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## R Markdown
-##Homework 2: Data Visualization
-###Loading Packages Needed for Exercises
+## Homework 2: Data Visualization
+### Loading Packages Needed for Exercises
 Before beginning the exercises I confirmed installation of and loaded several packages. 
 ```{r}
 library(dplyr)
 library(ggplot2)
 library(readr)
 ```
-Next I will load the dataset on births in NC. 
+### Next I will load the dataset on births in NC. 
 ```{r}
 nc <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTm2WZwNBoQdZhMgot7urbtu8eG7tzAq-60ZJsQ_nupykCAcW0OXebVpHksPWyR4x8xJTVQ8KAulAFS/pub?gid=202410847&single=true&output=csv")
 ```
+I will use glimpse to view the file.
+```{r}
+glimpse(nc)
+```
+I will try to use the help feature to understand the meaning of the columns.
+```{r}
+?nc
+```
+This attempt to use the help function gave the output "No documentation for 'nc' in specified packages and libraries. I will return to troubleshoot this at another time.
 
+### Exercise 1
+Habit is a character variable and visits is a double value variable meaning I can expect decimals. 
+
+#### Preparing for Exercises 2-5
+For the next exercises I first set the data frame to nc.
+```{r}
+data = nc 
+```
+Then I use ggplot to create a scatter plot of weeks on x axis and weight on y axis to explore the relationship between pregnancy length and birth weight.
+```{r}
+ggplot(data = nc, aes(x=weeks, y = weight)) +
+  geom_point() +
+  labs( x = "Pregnancy Length (weeks)", y = "Birth Weight of Newborn (pounds)", title = "Relationship between Pregnancy Length and Birth Weight")
+```
+
+### Exercise 2
+
+There is a positive relationship between the length of pregnancy and newborns' birth weight. As pregnancy lengths increase, birth weights increase. 
+
+### Exercise 3
+
+For this exercise I will create and run a code to graph pregnancy length in weeks on the x-axis and weight gained by the pregnant person on the y-axis. 
+```{r}
+ggplot(data = nc, aes(x=weeks, y = gained)) +
+  geom_point() +
+  labs( x = "Pregnancy Length (weeks)", y = "Weight Gained in Pregnancy (pounds)", title = "Relationship between Pregnancy Length and Weight Gained During Pregnancy by Pregnant Persons")
+```
+
+### Exercise 4
+
+Next I will add a new argument in the above code to indicate values that correspond with a premature birth weight. 
+```{r}
+ggplot(data = nc, aes(x=weeks, y = gained, color = premie)) +
+  geom_point() +
+  labs( x = "Pregnancy Length (weeks)", y = "Weight Gained in Pregnancy (pounds)", title = "Pregnancy Length and Weight Gained During Pregnancy by Pregnant Persons")
+```
+
+A) The argument color = premie added colors to data points to distinguish between values with full term versus premature newborn birth weights. 
+
+B) Three variables are now displayed, which are premie, weeks, and gained. Premie can be thought of as a binary categorical variable.  
+
+C) 36 (and a quarter) weeks is the rough cutoff for when a baby is considered full term or premature. Greater than ~36 is considered full term; less than or equal to ~36 is premature.  
