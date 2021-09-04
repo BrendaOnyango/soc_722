@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## R Markdown
 ## Homework 2: Data Visualization
-### Loading Packages Needed for Exercises
+
 Before beginning the exercises I confirmed installation of and loaded several packages. 
 ```{r}
 library(dplyr)
@@ -40,7 +40,7 @@ For the next exercises I first set the data frame to nc.
 ```{r}
 data = nc 
 ```
-Then I use ggplot to create a scatter plot of weeks on x axis and weight on y axis to explore the relationship between pregnancy length and birth weight.
+Then I use ggplot to create a scatterplot of weeks on x axis and weight on y axis to explore the relationship between pregnancy length and birth weight.
 ```{r}
 ggplot(data = nc, aes(x=weeks, y = weight)) +
   geom_point() +
@@ -74,3 +74,149 @@ A) The argument color = premie added colors to data points to distinguish betwee
 B) Three variables are now displayed, which are premie, weeks, and gained. Premie can be thought of as a binary categorical variable.  
 
 C) 36 (and a quarter) weeks is the rough cutoff for when a baby is considered full term or premature. Greater than ~36 is considered full term; less than or equal to ~36 is premature.  
+
+### Exercise 5
+
+For this exercise I created a new scatterplot showing mage on the x-axis and birth weight on the y-axis. The plot also includes color based on the newborn's sex. 
+
+```{r}
+ggplot(data = nc, aes(x=mage, y = weight, color = gender)) +
+  geom_point() +
+  labs( x = "Pregnant Persons' Age (years)", y = "Birth Weight of Newborns (pounds)", title = "Pregnant Persons' Age, Newborn Sex, and Birth Weight of Newborns")
+```
+
+There is not a strong relationship between maternal age and birth weight. Babies that weigh over six pounds seem to have similar frequency between ages 20 and 40, which are also the ages people tend to have children. Below is a second plot showing maternal age, birt hweight of newborns, and premature status. 
+
+```{r}
+ggplot(data = nc, aes(x=mage, y = weight, color = premie)) +
+  geom_point() +
+  labs( x = "Pregnant Persons' Age (years)", y = "Birth Weight of Newborns (pounds)", title = "Pregnant Persons' Age, Premature Status, and Birth Weight of Newborns")
+```
+
+#### Preparing for Exercises 6 and 7. 
+
+In this section I am using histograms to explore distributions of single numerical values.
+I'll start with pregnancy duration.
+```{r}
+ggplot(data = nc, aes(x=weeks)) +
+  geom_histogram()
+```
+
+Next I will change bindwidth and colors on the graph. 
+
+```{r}
+ggplot(data = nc, aes(x = weeks)) +
+  geom_histogram(binwidth = 1, color = "white", fill = "steelblue")
+```
+
+### Exercise 6
+
+A) The value being counted is weeks pregnant across each person. So for example, about 130 people had a pregnancy length of 40 weeks. 
+B) The distribution seems symmetrical so the average length of pregnancy is around 38 or 39 weeks. 
+C) If binwidth were changed to 100 there would be 1 bin with all 800 observations.The histogram below demonstrates how as binwidth increases the distribution of observations becomes less clear and more observations are placed in fewer bins.  
+```{r}
+ggplot(data = nc, aes(x = weeks)) +
+  geom_histogram(binwidth = 25, color = "white", fill = "steelblue")
+```
+
+### Exercise 7 
+Below is a histogram of the birth weight of newborns. 
+
+```{r}
+ggplot(data = nc, aes(x = weight)) +
+  geom_histogram(binwidth = 2, color = "white", fill = "blue") + 
+  labs( x = "Birthweight of Newborns (pounds)", y = "Frequency of Newborns in Each Weight Group", title = "Birth Weight of Newborns in North Carolina")
+```
+Below is the histogram with shorter binwidth.
+
+```{r}
+ggplot(data = nc, aes(x = weight)) +
+  geom_histogram(binwidth = 1, color = "white", fill = "blue") + 
+  labs( x = "Birthweight of Newborns (pounds)", y = "Frequency of Newborns in Each Weight Group", title = "Birth Weight of Newborns in North Carolina")
+```
+#### Preparing for Exercise 8
+
+The below histograms will show the distribution of newborns' birth weights and maturity status of moms. 
+
+```{r}
+ggplot (data = nc, aes(x = weeks)) +
+  geom_histogram(binwidth = 1, color = "white", fill = "steelblue") + facet_wrap(~ mature, ncol = 1) + 
+  labs(title = "Frequency of Newborn Birth Weights among Mature and Younger Moms")
+```
+
+### Exercise 8 
+
+The next histogram will show newborn birth weight split by the newborns' sex. 
+
+```{r}
+ggplot (data = nc, aes(x = weight)) +
+  geom_histogram(binwidth = 0.5, color = "white", fill = "steelblue") + facet_wrap(~ gender, ncol = 1) + 
+  labs(title = "Frequency of Newborn Birth Weights among Male and Female Newborns")
+```
+
+Females seem to have a slightly larger average birth weight. 
+
+#### Preparing for exercise 9 and 10. 
+
+```{r}
+ggplot(data = nc, aes(x = gender, y = gained)) +
+  geom_boxplot(fill = "springgreen")
+```
+
+### Exercise 9 
+The following boxplot shows weight gained during pregnnacy split by the maturity status of mothers. 
+
+```{r}
+ggplot(data = nc, aes(x = mature, y = gained)) +
+  geom_boxplot(fill = "royalblue3") + 
+  labs(x = "Maturity", y = "Weight Gained (pounds)", title = "Distribution of Weight Gained During Pregnancy among Mature and Younger Moms")
+```
+
+The median of weight gain during pregnancy is higher among younger moms than mature moms. 
+
+### Exercise 10
+
+The below boxplot shows pregnancy duration in weeks grouped by smoking habit. 
+```{r}
+ggplot(data = nc, aes(x = habit, y = weeks)) +
+  geom_boxplot(fill = "green") + 
+  labs(x = "Smoking Status", y = "Pregnancy Duration (weeks)", title = "Distribution of Pregnancy Duration among Nonsmokers and Smokers")
+```
+
+Smokers have more variability than nonsmokers. Their IQR is larger and the tail above the 75th quartile is longer. 
+
+### Exercise 11
+I will use a histogram to assess if father's age has a skew. 
+
+```{r}
+ggplot(data = nc, aes(x = fage)) +
+  geom_histogram(binwidth = 3, color = "white", fill = "steelblue") + 
+  labs( x = "Fathers' Age (years)", y = "Frequency of Fathers' Age", title = "Frequency of Fathers' Age in NC")
+```
+
+The graph is slightly skewed to the right (most data is on the left; in other words fathers tend to be ~35 and younger).  
+
+### Exercise 12
+
+I will use a boxplot to compare median birth weights of white and non-white mothers. 
+
+```{r}
+ggplot(data = nc, aes(x = whitemom, y = weight)) +
+  geom_boxplot(fill = "steelblue") + 
+  labs(x = "Mother's Race", y = "Weight of Newborns (pounds)", title = "Distribution of Newborn Weight among Non-white and White Mothers")
+```
+
+The median birth weight of newborns is greater among white mothers than non-white mothers. 
+
+### Exercise 13
+
+I will use a scatterplot to assess if maternal age and duration of pregnancy have a relationship. 
+
+```{r}
+ggplot(data = nc, aes(x=mage, y = weeks)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  labs( x = "Pregnant Persons' Age (years)", y = "Pregnancy Duration (weeks)", title = "Pregnant Persons' Age and Pregnancy Duration")
+```
+
+The scatterplot shows a slightly negative relationship between a person's age and pregnancy duration. As age increases the duration of pregnancy decreases slightly. The slope of the line is not a large magnitude and many points fall above and below so it is a very week  association based on this plot. 
