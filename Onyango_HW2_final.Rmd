@@ -341,7 +341,7 @@ Generating dallas_sum
 ```{r}
 dallas |> mutate(dallas_sum = sum(dallas$sales))
 
-dallas_sum <- sum(dallas$sales) #Making sure dallas_sum is added as a column. 
+dallas_sum <- sum(dallas$sales) 
 ```
 Next I will create a dataset and table with the relevant information from both Austin and Dallas. 
 
@@ -354,6 +354,11 @@ austin_dallas <- rbind(austin, dallas)
 ```
 Will remove all data but for sales and year. 
 ```{r}
-austin_dallas |> filter(year == 2000 | year == 2001) |> select(city, year, sales)
+austin_dallas <- austin_dallas |> filter(year == 2000 | year == 2001) |> select(city, year, sales)
 ```
+I will group by city and sum by group. 
+```{r}
+austin_dallas |> group_by(city) |> summarize(salesum = sum(sales))
+```
+The tibble above shows correct sums  for house sales in 2000 and 2001 for Austin and Dallas. Earlier tables showed values that weren't filtered by year. 
 
