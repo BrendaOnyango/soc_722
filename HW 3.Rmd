@@ -86,15 +86,138 @@ sample_n(deck, 5, replace = FALSE) #fifth random hand
 
 What is the total number of *different* hands you could draw in poker? This question is asking from 52 cards, how many groups of 5 can I form. I will use a combination function to solve this. 
 ```{r}
-choose(52, 5) # this function performed 52C5 = (52!)/(5!(52-5)!)
+a <- choose(52, 5) # this function performed 52C5 = (52!)/(5!(52-5)!)
 ```
+
 ### Question 3
 What is the probability that each suit is represented in one hand (5 cards) of poker?
 
-First I checked the deck and saw each of the four suits has 13 cards.I assume we're drawing cards to form a hand of 5 without replacement. 
+First I checked the deck and saw each of the four suits has 13 cards.I assume we're drawing cards to form a hand of 5 without replacement. One suit will be drawn twice. 
 
-There are 4 wa
+```{r}
+s <- choose(4,1) #Choosing one suit out of 4 to be drawn twice
+ss <- choose(13,2) #choosing 2 from one suit with 13 cards 
+```
+Multiplying "s" and "2s" by 13 x 13 x 13 gives the number of hands with 1 card from each suit. 
+```{r}
+s *ss * (13^3) #cubing 13 because 13 choose 1 is done 3 times for each of the other cards in the 5-card suit
+```
+To find the probability I will use the above as the numerator and the number of total possible hand outcomes as the denominator. 
+```{r}
+(s*ss*(13^3))/a
+```
+
+### Question 4
+
+What is the probability of getting at least 1 ace in one 5-card hand? 
+First I will find the probability of not getting aces. There are 4 aces in a 52-card deck. Without replacement the probability of drawing other cards 5 times is below. 
+```{r}
+not_ace <- (48/52)*(47/51)*(46/50)*(45/49)*(44/48)
+```
+Subtracting the probability of not_ace from 1 will give the probability of at least one ace. 
+```{r}
+1 - not_ace
+```
+Another way I could find this is by using a combination of 48 choose 5. 
+```{r}
+no_ace <- choose(48,5) #number of possible hands with no aces
+```
+Then using object "a" (the number of possible 5-card hands) as the denominator to find probability of no aces. 
+```{r}
+prob_noace <- (no_ace/a) #probability of hands with no aces 
+```
+Then subtract this from 1 to find the probability of a hand with at least 1 ace. 
+```{r}
+1 - prob_noace #complement rule to find probability of at least 1 ace
+```
+
+### Question 5 
+To prepare for this question I enter the info from stackoverflow.
+```{r}
+df <- tibble(
+  id = 1:6,
+  name = c("Alice", "Bob", "Charlie", "Diane", "Fred", "Jenny")
+) #creating dataframe with 6 names for the committee
+```
+Then I using crossing (de-duplicates and sorts inputs) and unite (pastes multiple columns into one) to create a dataframe of possible pairs for the committee. 
+```{r}
+df_pairs <- df |> 
+  rename(id1 = id, name1 = name) |>  
+  crossing(df |> 
+             select(id2 = id, name2 = name)) |> 
+  filter(id1 < id2) |> 
+  unite(id, id1, id2) |> 
+  unite(name, name1, name2)
+
+df_pairs
+```
+I could also find the number of combinations possible using  choose().
+```{r}
+choose(6,2)
+```
+
+### Question 6
+Modify the code above so it shows all combinations when order does matter.
+
+```{r}
+df_orderpairs <- df |> 
+  rename(id1 = id, name1 = name) |>  
+  crossing(df |> 
+             select(id2 = id, name2 = name)) |> 
+  filter(id1 != id2) |> #changed filter from earlier code to find all pairs in which names don't equal each other to find all ordered pairs
+  unite(id, id1, id2) |> 
+  unite(name, name1, name2)
+
+df_orderpairs
+```
+Analytically I can perform a permutation.
+```{r}
+factorial(6)/factorial(4) #the denominator is correcting for counting pairs with same name e.g. Fred_Fred and equals (6 - 2)!
+```
+
+### Question 7 
+
+A) 1000 draws of a fair die with a plot. 
+First I will create a die object. 
+```{r}
+die <- 1:6
+  
+```
+Next I will roll the die 1000 times  using the sample() function and set.seed() to save the rolls.  
+```{r}
+set.seed(1)
+replicate(1000, sample(die,1)) |> hist() #roll 1 die and repeat 1000 times 
+
+```
+
+B) A 1000 draws of a die which lands on 6 for 50% of the time. 
+
+I will start by making a weighted die with probabilities for each value inclusive of 1 through 6.
+
+```{r}
+weighted_die <- 1:6
+prob = c(".1", ".1",".1",".1", ".1", ".5")
+
+```
+
+Next I will roll weighted_die 1000 times and create a histogram. 
+
+```{r}
+set.seed(2)
+replicate(1000, sample(weighted_die,1)) |> hist() #roll 1 weighted die and repeat 1000 times 
+```
+
+C) For C, I will repeat the steps in B with different probabilities. 
+
+```{r}
+weighted_die2 <- 1:6
+prob = c("(1/6)", "(1/6)","(1/6)","(1/6)", "(1/3)", "(1/3)")
+
+set.seed(4)
+replicate(1000,sample(weighted_die2,1)) |> hist()
+
+
+```
 
 
 
-0
