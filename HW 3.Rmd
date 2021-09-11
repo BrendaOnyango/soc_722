@@ -87,6 +87,7 @@ sample_n(deck, 5, replace = FALSE) #fifth random hand
 What is the total number of *different* hands you could draw in poker? This question is asking from 52 cards, how many groups of 5 can I form. I will use a combination function to solve this. 
 ```{r}
 a <- choose(52, 5) # this function performed 52C5 = (52!)/(5!(52-5)!)
+choose(52,5)
 ```
 
 ### Question 3
@@ -188,6 +189,8 @@ Next I will roll the die 1000 times  using the sample() function and set.seed() 
 set.seed(1)
 replicate(1000, sample(die,1)) |> hist() #roll 1 die and repeat 1000 times 
 
+mean(replicate(1000, sample(die,1))) #gives mean of 3.48
+
 ```
 
 B) A 1000 draws of a die which lands on 6 for 50% of the time. 
@@ -205,6 +208,8 @@ Next I will roll weighted_die 1000 times and create a histogram.
 ```{r}
 set.seed(2)
 replicate(1000, sample(weighted_die,1)) |> hist() #roll 1 weighted die and repeat 1000 times 
+
+mean(replicate(1000, sample(weighted_die,1))) #gives mean of 3.441
 ```
 
 C) For C, I will repeat the steps in B with different probabilities. 
@@ -216,8 +221,10 @@ prob = c("(1/6)", "(1/6)","(1/6)","(1/6)", "(1/3)", "(1/3)")
 set.seed(4)
 replicate(1000,sample(weighted_die2,1)) |> hist()
 
+mean(replicate(1000,sample(weighted_die2))) #calculating mean
+
 
 ```
 
-
-
+## Citation 
+Used the following link to think about question 3: https://math.stackexchange.com/questions/3670963/probability-calculating-the-probability-of-choosing-5-cards-with-4-different-s
