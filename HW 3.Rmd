@@ -1,0 +1,100 @@
+---
+title: "HW 3"
+author: "Brenda Onyango"
+date: "9/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# HW 3: Probability Workshop
+
+### Preparing for exercises. 
+First I loaded tidyverse.
+```{r}
+library(tidyverse)
+```
+Next I create the data frame of a deck of cards. 
+```{r}
+deck <- tibble(
+  card = rep(
+    c("ace",
+      "deuce",
+      "three",
+      "four",
+      "five",
+      "six",
+      "seven",
+      "eight",
+      "nine",
+      "ten",
+      "jack",
+      "queen",
+      "king"
+    ),4),
+  suit =
+    rep(c(
+      "diamonds", 
+      "hearts", 
+      "clubs", 
+      "spades"),
+        each = 13),
+  color = rep(c("red", 
+                "black"),
+              each = 26)) #dataframe of deck of cards
+```
+Next I viewed the deck of cards using glimpse.
+```{r}
+glimpse(deck) #deck has 52 cards and 3 variables.
+```
+## Question 1
+
+What is the probability of getting one black card first and then one red card in two draws with replacement? 
+First I found the probability of drawing a black card. 
+```{r}
+pr_black <- deck |> filter(color == "black") |> nrow()/nrow(deck)
+```
+Then I found the probability of drawing a red card. 
+```{r}
+pr_red <-  deck |> filter(color == "red") |> nrow()/nrow(deck)
+```
+Then I multiplied the probabilities of each individual event. 
+```{r}
+pr_black * pr_red
+```
+The probabily of getting a black card and then a red card with replacement is 0.25. 
+
+### Question 2
+For question 2, I first used ?sample_n in the console to understand the syntax for sample_n(). Then I repeated the chunk 5 times to generate 5 randomly sampled hands of 5 cards. 
+```{r}
+sample_n(deck, 5, replace = FALSE) #sample 5 rows of the deck without replacement
+```
+```{r}
+sample_n(deck, 5, replace = FALSE) #2nd random hand 
+```
+```{r}
+sample_n(deck, 5, replace = FALSE) #3rd random hand
+```
+```{r}
+sample_n(deck, 5, replace = FALSE) #4th random hand
+```
+```{r}
+sample_n(deck, 5, replace = FALSE) #fifth random hand
+```
+#### Question 2 part 2
+
+What is the total number of *different* hands you could draw in poker? This question is asking from 52 cards, how many groups of 5 can I form. I will use a combination function to solve this. 
+```{r}
+choose(52, 5) # this function performed 52C5 = (52!)/(5!(52-5)!)
+```
+### Question 3
+What is the probability that each suit is represented in one hand (5 cards) of poker?
+
+First I checked the deck and saw each of the four suits has 13 cards.I assume we're drawing cards to form a hand of 5 without replacement. 
+
+There are 4 wa
+
+
+
+0
