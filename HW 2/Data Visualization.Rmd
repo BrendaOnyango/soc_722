@@ -1,0 +1,25 @@
+---
+title: "Data Visualization"
+author: "Brenda Onyango"
+date: "9/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+### Preparing for plots.
+In this section I am loading packages needed for the exercises. 
+```{r}
+library(dplyr)
+library(ggplot2)
+library(readr)
+```
+```{r}
+library(usethis)
+use_git_config(user.name = "BrendaOnyango", user.email = "brenda.onyango12@gmail.com")
+```
+
+

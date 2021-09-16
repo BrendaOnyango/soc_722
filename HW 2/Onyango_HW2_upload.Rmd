@@ -1,0 +1,352 @@
+---
+title: "Onyango_HW2_9.4.21"
+author: "Brenda Onyango"
+date: "9/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Homework 2 
+## PS 02: Data Visualization
+
+Before beginning the exercises I confirmed installation of and loaded several packages. 
+```{r}
+library(dplyr)
+library(ggplot2)
+library(readr)
+```
+### Next I will load the dataset on births in NC. 
+```{r}
+nc <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTm2WZwNBoQdZhMgot7urbtu8eG7tzAq-60ZJsQ_nupykCAcW0OXebVpHksPWyR4x8xJTVQ8KAulAFS/pub?gid=202410847&single=true&output=csv")
+```
+I will use glimpse to view the file.
+```{r}
+glimpse(nc)
+```
+I will try to use the help feature to understand the meaning of the columns.
+```{r}
+?nc
+```
+This attempt to use the help function gave the output "No documentation for 'nc' in specified packages and libraries. I will return to troubleshoot this at another time.
+
+### Exercise 1
+Habit is a character variable and visits is a double value variable meaning I can expect decimals. 
+
+#### Preparing for Exercises 2-5
+For the next exercises I first set the data frame to nc.
+```{r}
+data = nc 
+```
+Then I use ggplot to create a scatterplot of weeks on x axis and weight on y axis to explore the relationship between pregnancy length and birth weight.
+```{r}
+ggplot(data = nc, aes(x=weeks, y = weight)) +
+  geom_point() +
+  labs( x = "Pregnancy Length (weeks)", y = "Birth Weight of Newborn (pounds)", title = "Relationship between Pregnancy Length and Birth Weight")
+```
+
+### Exercise 2
+
+There is a positive relationship between the length of pregnancy and newborns' birth weight. As pregnancy lengths increase, birth weights increase. 
+
+### Exercise 3
+
+For this exercise I will create and run a code to graph pregnancy length in weeks on the x-axis and weight gained by the pregnant person on the y-axis. 
+```{r}
+ggplot(data = nc, aes(x=weeks, y = gained)) +
+  geom_point() +
+  labs( x = "Pregnancy Length (weeks)", y = "Weight Gained in Pregnancy (pounds)", title = "Relationship between Pregnancy Length and Weight Gained During Pregnancy by Pregnant Persons")
+```
+
+### Exercise 4
+
+Next I will add a new argument in the above code to indicate values that correspond with a premature birth weight. 
+```{r}
+ggplot(data = nc, aes(x=weeks, y = gained, color = premie)) +
+  geom_point() +
+  labs( x = "Pregnancy Length (weeks)", y = "Weight Gained in Pregnancy (pounds)", title = "Pregnancy Length and Weight Gained During Pregnancy by Pregnant Persons")
+```
+
+A) The argument color = premie added colors to data points to distinguish between values with full term versus premature newborn birth weights. 
+
+B) Three variables are now displayed, which are premie, weeks, and gained. Premie can be thought of as a binary categorical variable.  
+
+C) 36 (and a quarter) weeks is the rough cutoff for when a baby is considered full term or premature. Greater than ~36 is considered full term; less than or equal to ~36 is premature.  
+
+### Exercise 5
+
+For this exercise I created a new scatterplot showing mage on the x-axis and birth weight on the y-axis. The plot also includes color based on the newborn's sex. 
+
+```{r}
+ggplot(data = nc, aes(x=mage, y = weight, color = gender)) +
+  geom_point() +
+  labs( x = "Pregnant Persons' Age (years)", y = "Birth Weight of Newborns (pounds)", title = "Pregnant Persons' Age, Newborn Sex, and Birth Weight of Newborns")
+```
+
+There is not a strong relationship between maternal age and birth weight. Babies that weigh over six pounds seem to have similar frequency between ages 20 and 40, which are also the ages people tend to have children. Below is a second plot showing maternal age, birt hweight of newborns, and premature status. 
+
+```{r}
+ggplot(data = nc, aes(x=mage, y = weight, color = premie)) +
+  geom_point() +
+  labs( x = "Pregnant Persons' Age (years)", y = "Birth Weight of Newborns (pounds)", title = "Pregnant Persons' Age, Premature Status, and Birth Weight of Newborns")
+```
+
+#### Preparing for Exercises 6 and 7. 
+
+In this section I am using histograms to explore distributions of single numerical values.
+I'll start with pregnancy duration.
+```{r}
+ggplot(data = nc, aes(x=weeks)) +
+  geom_histogram()
+```
+
+Next I will change bindwidth and colors on the graph. 
+
+```{r}
+ggplot(data = nc, aes(x = weeks)) +
+  geom_histogram(binwidth = 1, color = "white", fill = "steelblue")
+```
+
+### Exercise 6
+
+A) The value being counted is weeks pregnant across each person. So for example, about 130 people had a pregnancy length of 40 weeks. 
+B) The distribution seems symmetrical so the average length of pregnancy is around 38 or 39 weeks. 
+C) If binwidth were changed to 100 there would be 1 bin with all 800 observations.The histogram below demonstrates how as binwidth increases the distribution of observations becomes less clear and more observations are placed in fewer bins.  
+```{r}
+ggplot(data = nc, aes(x = weeks)) +
+  geom_histogram(binwidth = 25, color = "white", fill = "steelblue")
+```
+
+### Exercise 7 
+Below is a histogram of the birth weight of newborns. 
+
+```{r}
+ggplot(data = nc, aes(x = weight)) +
+  geom_histogram(binwidth = 2, color = "white", fill = "blue") + 
+  labs( x = "Birthweight of Newborns (pounds)", y = "Frequency of Newborns in Each Weight Group", title = "Birth Weight of Newborns in North Carolina")
+```
+Below is the histogram with shorter binwidth.
+
+```{r}
+ggplot(data = nc, aes(x = weight)) +
+  geom_histogram(binwidth = 1, color = "white", fill = "blue") + 
+  labs( x = "Birthweight of Newborns (pounds)", y = "Frequency of Newborns in Each Weight Group", title = "Birth Weight of Newborns in North Carolina")
+```
+#### Preparing for Exercise 8
+
+The below histograms will show the distribution of newborns' birth weights and maturity status of moms. 
+
+```{r}
+ggplot (data = nc, aes(x = weeks)) +
+  geom_histogram(binwidth = 1, color = "white", fill = "steelblue") + facet_wrap(~ mature, ncol = 1) + 
+  labs(title = "Frequency of Newborn Birth Weights among Mature and Younger Moms")
+```
+
+### Exercise 8 
+
+The next histogram will show newborn birth weight split by the newborns' sex. 
+
+```{r}
+ggplot (data = nc, aes(x = weight)) +
+  geom_histogram(binwidth = 0.5, color = "white", fill = "steelblue") + facet_wrap(~ gender, ncol = 1) + 
+  labs(title = "Frequency of Newborn Birth Weights among Male and Female Newborns")
+```
+
+Females seem to have a slightly larger average birth weight. 
+
+#### Preparing for exercise 9 and 10. 
+
+```{r}
+ggplot(data = nc, aes(x = gender, y = gained)) +
+  geom_boxplot(fill = "springgreen")
+```
+
+### Exercise 9 
+The following boxplot shows weight gained during pregnnacy split by the maturity status of mothers. 
+
+```{r}
+ggplot(data = nc, aes(x = mature, y = gained)) +
+  geom_boxplot(fill = "royalblue3") + 
+  labs(x = "Maturity", y = "Weight Gained (pounds)", title = "Distribution of Weight Gained During Pregnancy among Mature and Younger Moms")
+```
+
+The median of weight gain during pregnancy is higher among younger moms than mature moms. 
+
+### Exercise 10
+
+The below boxplot shows pregnancy duration in weeks grouped by smoking habit. 
+```{r}
+ggplot(data = nc, aes(x = habit, y = weeks)) +
+  geom_boxplot(fill = "green") + 
+  labs(x = "Smoking Status", y = "Pregnancy Duration (weeks)", title = "Distribution of Pregnancy Duration among Nonsmokers and Smokers")
+```
+
+Smokers have more variability than nonsmokers. Their IQR is larger and the tail above the 75th quartile is longer. 
+
+### Exercise 11
+I will use a histogram to assess if father's age has a skew. 
+
+```{r}
+ggplot(data = nc, aes(x = fage)) +
+  geom_histogram(binwidth = 3, color = "white", fill = "steelblue") + 
+  labs( x = "Fathers' Age (years)", y = "Frequency of Fathers' Age", title = "Frequency of Fathers' Age in NC")
+```
+
+The graph is slightly skewed to the right (most data is on the left; in other words fathers tend to be ~35 and younger).  
+
+### Exercise 12
+
+I will use a boxplot to compare median birth weights of white and non-white mothers. 
+
+```{r}
+ggplot(data = nc, aes(x = whitemom, y = weight)) +
+  geom_boxplot(fill = "steelblue") + 
+  labs(x = "Mother's Race", y = "Weight of Newborns (pounds)", title = "Distribution of Newborn Weight among Non-white and White Mothers")
+```
+
+The median birth weight of newborns is greater among white mothers than non-white mothers. 
+
+### Exercise 13
+
+I will use a scatterplot to assess if maternal age and duration of pregnancy have a relationship. 
+
+```{r}
+ggplot(data = nc, aes(x=mage, y = weeks)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  labs( x = "Pregnant Persons' Age (years)", y = "Pregnancy Duration (weeks)", title = "Pregnant Persons' Age and Pregnancy Duration")
+```
+
+The scatterplot shows a slightly negative relationship between a person's age and pregnancy duration. As age increases the duration of pregnancy decreases slightly. The slope of the line is not a large magnitude and many points fall above and below so it is a very week  association based on this plot. 
+
+## PS 03: Data Wrangling
+
+To prepare for the data wrangling exercises I loaded the Texas housing data.
+```{r}
+data(txhousing)
+glimpse(txhousing)
+```
+
+#### Question 1
+I viewed the data using View in the console.  
+The last city listed in the data set is Wichita Falls. 
+
+#### Question 2
+I used the help function to view descriptions of the variables. 
+
+```{r}
+?txhousing
+```
+
+"Listings" describes total active listings.
+
+#### Question 3 
+I will write a chunk to remove the inventory variable and save the results in a dataframe called txhousing.
+
+```{r}
+txhousing <- txhousing |> select(-inventory)
+```
+
+There are now 8 variables instead of 9. 
+
+#### Question 4
+I will now make a data set called dallas_sub with only data from 2012 and 2013. 
+
+```{r}
+dallas_sub <- txhousing |> filter(year == 2012 | year == 2013, city == "Dallas")
+```
+
+There are 24 observations across 8 variables for Dallas in years 2012 and 2013 (remember that the inventory variable was removed in an earlier chunk).
+
+#### Question 5
+
+I will add a column to the dallas_sub data with a new variable for percentage of listings that were sold. 
+
+```{r}
+dallas_sub <- dallas_sub |> mutate(prct_sold = sales/listings * 100)
+```
+
+There are now 9 variables in the Dallas data set.
+
+#### Question 6 
+Now I will calculate the average percent of listings sold in Dallas grouped by month and save the results in a data frame called dallas_summary. 
+
+```{r}
+dallas_summary <- dallas_sub |> group_by(month) |> summarize(prct_sold = mean(prct_sold))
+```
+
+#### Question 7 
+I will arrange the data in dallas_summary in descending order. 
+
+```{r}
+dallas_summary |> arrange(desc(prct_sold))
+```
+
+This arrangement shows that August had the greatest average of percentage of listings sold. 
+#### Question 8 
+I will run and explain the following code. 
+```{r}
+txhousing |>  
+  filter(year == 2012 | year == 2013, city == "Dallas") |> 
+  mutate(prct_sold = sales/listings *100) |> 
+  group_by(month) |> 
+  summarize(mean_prct_sold = mean(prct_sold)) |> 
+  arrange(desc(mean_prct_sold))
+```
+
+This code first filtered the Texas housing data by years to include only 2012 and 2013. It also filtered by city to include only data from Dallas. It created a variable called prct_sold and grouped averages of this new variable by month for 2012 and 2013. It arranged the summary data of this new variable in descending order. It is essentially one chunk that contains all the prior steps from questions 4-7. 
+
+#### Question 9 
+
+I will wrote a chunk to rank listings in ascending order by city in January 2015. 
+
+```{r}
+txhousing |> filter(year == 2015, month == 1) |> arrange(listings)
+```
+The tibble shows that San Marcos at 85 listings had the fewest in January 2015. 
+
+#### Question 10 
+
+I will now write a chunk to display houses sold in descending order in Texas in 2012.
+
+```{r}
+txhousing |> filter(year == 2012) |> arrange(desc(sales))
+```
+In 2012, the month with the most sales in Texas was August. 
+
+#### Question 11
+
+I will create a table that shows total number of houses sold in Austin in 2000 and 2001, and the total number of houses sold in Dallas in 2000 and 2001. 
+
+```{r}
+austin <- txhousing |> filter(city == "Austin") #creating austin set
+austin |> filter (year == 2000 | year == 2001) #filtering austin set by relevant years
+
+```
+Now I will create an object that is the sum of Austin's sales for 2001-2002. 
+```{r}
+ austin |> mutate(austin_sum = sum(austin$sales))
+
+austin_sum <- sum(austin$sales) #Making sure austin_sum is added as a column. 
+```
+Next I will repeat the steps above for Dallas. 
+```{r}
+dallas <- txhousing |> filter(city == "Dallas") #creating Dallas set
+dallas |> filter (year == 2000 | year == 2001) 
+```
+Generating dallas_sum 
+
+```{r}
+dallas |> mutate(dallas_sum = sum(dallas$sales))
+
+dallas_sum <- sum(dallas$sales) #Making sure dallas_sum is added as a column. 
+```
+Creating the table. 
+```{r}
+SalesSum <- matrix(c(austin_sum, dallas_sum), ncol=2)
+colnames(SalesSum) <- c("Austin", "Dallas")
+SalesSum.table <- as.table(SalesSum)
+```
+
