@@ -1,0 +1,365 @@
+---
+title: "HW4: Probability Workshop_Onyango_Brenda"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Practicing Notation
+
+Probability of A given B
+$$ P(A | B) $$
+Probability of speaking Spanish
+$$ P(\text{Spanish}) $$
+
+##  Question 1
+
+a) Write the probability that a person speaks Spanish given that they are from South America.
+$$ P(\text{Spanish} | \text{South America}) $$
+b) Probability that a person is from South America given they speak Spanish. 
+ $$ P(\text{South America} | \text{Spanish}) $$
+ 
+ c) I think the probability that one speaks Spanish given that they are from South America is higher than the probability that one is from South America given that they speak Spanish. My reasoning is that save for Brazil, most countries in South America have Spanish as a widely spoken or official language. However, Spanish is spoken in central America, North America, Europe, and Africa (Equatorial Guinea has Spanish as one of its official languages). It seems harder to predict geographic origin given Spanish speaking than picking language given origin of South America.
+ 
+ d) Full conditional probability that someone speaks Spanish given that they are from South America. 
+
+$$ P(\text{Spanish} | \text{South America}) $$ = 
+$\frac{P(\text{Spanish} \cap \text{South America}) }{P(\text{South America})}$
+
+## Question 2 
+
+For question 2 I loaded the tidyverse and DiagrammeR packages.
+```{r}
+library("tidyverse")
+library("DiagrammeR")
+```
+
+Then I entered this code. 
+
+```{r}
+tree <-
+    create_graph() %>%  # creating tree graph
+    add_n_nodes( #adding nodes on tree
+      n = 7, 
+      type = "path",
+      label = c("START", "B", "G", "B", "G", "B", "G"), # Labelling nodes
+      node_aes = node_aes(
+        shape = "circle",
+        height = 1,
+        width = 1,
+        x = c(0, 3, 3, 6, 6, 6, 6), # specifying height of nodes
+        y = c(0, 2, -2, 3, 1, -3, -1), 
+        fill = c("white", "blue", "green", "blue", "blue", "blue", "blue"))) %>% #coloring nodes 
+    add_edge(
+      from = 1,
+      to = 2,
+      edge_aes = edge_aes(
+        label = "0.5" #giving probability 
+      )) %>% 
+  add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        label = "0.5", 
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 4,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 5,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 6,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 7,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) 
+render_graph(tree)
+```
+
+a) Modify the code above to represent this conditional probability: $$ P(\text{both girls} | \text{at least one girl}) $$
+
+```{r}
+tree <-
+    create_graph() %>%  # creating tree graph
+    add_n_nodes( #adding nodes on tree
+      n = 7, 
+      type = "path",
+      label = c("START", "B", "G", "B", "G", "B", "G"), # Labelling nodes
+      node_aes = node_aes(
+        shape = "circle",
+        height = 1,
+        width = 1,
+        x = c(0, 3, 3, 6, 6, 6, 6), # specifying height of nodes
+        y = c(0, 2, -2, 3, 1, -3, -1), 
+        fill = c("white", "blue", "green", "blue", "blue", "blue", "green"))) %>% #changed node 7 to green to mark branch with 2 girls 
+    add_edge(
+      from = 1,
+      to = 2,
+      edge_aes = edge_aes(
+        label = "0.5", #giving probability 
+        color = "red" #adding color to edge from 1 to 2
+      )) %>% 
+  add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        label = "0.5", 
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 4,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 5,
+      edge_aes = edge_aes(
+        label = "0.5",
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 6,
+      edge_aes = edge_aes(
+        label = "0.5",
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 7,
+      edge_aes = edge_aes(
+        label = "0.5",
+        color = "red"
+      )) 
+render_graph(tree)
+```
+
+$$ P(\text{both girls} | \text{at least one girl}) $$ is $\frac{1}{3}$ 
+
+This matches the the result on p. 45. There are three ways that there are at least one girl and given that only 1 way for both to be girls. 
+
+b) Diagram $$ P(\text{both girls} | \text{elder is a girl}) $$
+```{r}
+tree <-
+    create_graph() %>%  # creating tree graph
+    add_n_nodes( #adding nodes on tree
+      n = 7, 
+      type = "path",
+      label = c("START", "B", "G", "B", "G", "B", "G"), # Labelling nodes
+      node_aes = node_aes(
+        shape = "circle",
+        height = 1,
+        width = 1,
+        x = c(0, 3, 3, 6, 6, 6, 6), # specifying height of nodes
+        y = c(0, 2, -2, 3, 1, -3, -1), 
+        fill = c("white", "blue", "green", "blue", "blue", "blue", "green"))) %>% #left color of nodes the same  
+    add_edge(
+      from = 1,
+      to = 2,
+      edge_aes = edge_aes(
+        label = "0.5" #giving probability 
+      )) %>% 
+  add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        label = "0.5", 
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 4,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 5,
+      edge_aes = edge_aes(
+        label = "0.5" #removed red color from path
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 6,
+      edge_aes = edge_aes(
+        label = "0.5",
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 7,
+      edge_aes = edge_aes(
+        label = "0.5",
+        color = "red"
+      )) 
+render_graph(tree)
+```
+
+There are only two ways for the elder to be a girl; given that, the probabilty that both are girls is 1/2. $$ P(\text{both girls} | \text{elder is a girl}) $$ is $\frac{1}{2}$ 
+
+## Question 3
+
+The first part of the odds form of Bayes' theorem is the odds of A|B, which is P(A|B) divided by the probability that A *doesn't* happen given B. This first term is the posterior odds, meaning the odds of the event we want to find and the event that occurs after a condition. The second term is the likelihood ratio; a ratio of the probability of the event happening given A, and the event not happening given A^c. The third term is the prior odds; these are the odds that must happen before B|A. Multiplying prior odds by the likelihood ratio gives posterior probability. 
+
+## Question 4 
+
+First I reproduced code for example 2.3.7 in the book to find p(fair-coin) given observation of three heads in a row. 
+
+```{r}
+fair_coin <- .5 #probability of heads when flipping a fair coin
+biased_coin <- .75 #probabilty of heads when flipping biased coin
+heads <- 3 #landed on heads 3 times = event
+```
+
+Then I used law the of total probability and Bayes' theorem. $$ P(B) = \sum_{i=1}^n P(B|A_i)P(A_i) $$
+
+
+
+where P(fair_coin) = P(B) and P(A) is the probability of the event (landing heads 3 times). P(B|A) is the probability of (fair_coin|heads)
+```{r}
+fair_coin^heads * .5 / (fair_coin^3 * .5 + biased_coin^heads * .5) # P(heads|fair_coin) * P(fair_coin) / (P(heads|fair_coin)^3 * P(fair_coin) + P(heads|biased_coin)^3 * P(biased_coin))
+```
+
+a & b) Find how many heads in a row when probability we are flipping a fair coin reduces to .10. We are solving for x in $$ .1 = P(faircoin) / (P(heads|faircoin)^x * P(faircoin) + P(heads|biasedcoin)^x * P(biasedcoin)) $$
+
+
+First I will create an object of the event of 9 heads in a row to experiment. If 3 heads in a row give P(fair_coin|heads) = .23 then let's see what 9 heads in a row indicates.  
+
+```{r}
+nineheads <- 9
+
+fair_coin^nineheads * .5 / (fair_coin^9 * .5 + biased_coin^nineheads * .5) 
+```
+With 9 flips we get P(fair_coin|heads) below 5% so we know the minimum number of heads is >3 and <9. 
+I will create objects for 4,5,6,7, and eight heads to test the values. 
+```{r}
+eightheads <- 8
+sevenheads <- 7
+sixheads <- 6
+fiveheads <- 5
+fourheads <- 4
+
+
+```
+Then I will test each one. 
+```{r}
+fair_coin^eightheads * .5 / (fair_coin^8 * .5 + biased_coin^eightheads * .5) 
+fair_coin^sevenheads * .5 / (fair_coin^7 * .5 + biased_coin^sevenheads * .5)
+fair_coin^sixheads * .5 / (fair_coin^6 * .5 + biased_coin^sixheads * .5)
+fair_coin^fiveheads * .5 / (fair_coin^5 * .5 + biased_coin^fiveheads * .5) 
+fair_coin^fourheads * .5 / (fair_coin^4 * .5 + biased_coin^fourheads * .5) 
+```
+I found that six heads in a row are necessary for the probability that we are flipping a fair coin to dip below 10%. For below 5%, eight heads in a row are necessary.
+
+c) This question asks us about the probability of a fair coin if we see three tails in a row rather than three heads or P(fair_coin|TTT).  In thinking through this I will first find the P(biased_coin|TTT) where P(A) = biased_coin and B = TTT so I solve for P(A|B). For the biased coin the probability of noheads is .25 on 1 flip or 1-.75. 
+```{r}
+noheads <- .25
+
+prob_biased <- .5*(1/64)/(.5*noheads^3 + .5*(1/8))  #numerator is probability of TTT given an unfair coin which is .25^3 (cubed for 3 flips) times the probability of having an unfair coin. The denominator is probability of an unfair coin times probability of TTT plus probability of not having unfair coin (having fair coin) times probability of TTT with fair coin
+
+```
+
+Then the probability that we are flipping the fair coin is the complement or .887. 
+
+```{r}
+1 - prob_biased 
+```
+
+## Question 5
+
+a) The specificity of a test is how well a test can identify a true negatives. Specificity is a ratio of true negatives out of  all people who don't have the condition (true negatives + false positives). It's known as the true negative rate. 
+
+b)The sensitivity of a test measures how well a test identifies true positives. Sensitivity is a ratio of true positives out of those who have the condition (true positives + false negatives). It's assoicated with true positive rate. 
+
+c) We are given prevalence of .01 which is the prior probability and asked to solve for P(disease|positive test). We are also given .90 for both the sensitivity and specificity. We can use Bayes' rule and the law of total probability to solve.
+
+```{r}
+truegivendisease <- .90
+falsegivennodisease <- .90
+pdisease <- .01
+
+truegivendisease*pdisease/(truegivendisease*pdisease + .10 * .99) #.10 is probability of testing positive when there's no disease and .99 is probability of not having the disease 
+```
+
+d) In this case the disease has higher prevalence (prior probability). We modify the above to the below. 
+```{r}
+pdiseasetwo <- .05
+
+.95*pdiseasetwo/(.95*pdiseasetwo + .05 * .95) #.05 is probability of testing positive when there's no disease and the second .95 is probability of not having the disease or 1 - P(disease)
+
+```
+
+e) For this question, I completed the tree for conditionitis B which has .95 specificity, .95 sensitivity, and .05 prevalence. 
+```{r}
+tree <-
+    create_graph() %>% # initiate graph
+    add_n_nodes(
+      n = 7, 
+      type = "path",
+      label = c("10000 People", "9500 People", "500 People", "9025", "475", "475", "25"), # Labels for each node
+      node_aes = node_aes(
+        shape = "circle",
+        height = 1,
+        width = 1,
+        x = c(0, 3, 3, 6, 6, 6, 6), # Just the heights of each node (so it looks like a tree)
+        y = c(0, 2, -2, 3, 1, -3, -1))) %>% 
+    add_edge(
+      from = 1,
+      to = 2,
+      edge_aes = edge_aes(
+        label = "healthy"
+      )) %>% 
+  add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        label = "diseased"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 4,
+      edge_aes = edge_aes(
+        label = "test negative"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 5,
+      edge_aes = edge_aes(
+        label = "test positive"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 6,
+      edge_aes = edge_aes(
+        label = "test positive"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 7,
+      edge_aes = edge_aes(
+        label = "test negative"
+      )) 
+render_graph(tree)
+```
+
+## Question 6 
+
+Another example of the prosecutor's fallacy is how people think about weight and health. P(healthy|low BMI) and P(low BMI|healthy). Health at every size literature is challenging how medical practitioners overestimate  P(healthy|low BMI) which means they miss conditions in thinner people or people in active weight loss because they associate low weight with health. 
