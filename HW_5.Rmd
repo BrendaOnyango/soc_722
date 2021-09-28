@@ -1,0 +1,621 @@
+---
+title: "HW_5: Bayes' Rule"
+author: "Brenda Onyango"
+date: "9/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+## Chapter 1 Exercises 
+
+### 1.1
+
+a) Prior information for Leslie's story includes that cows produce milk and cows come in different colors. 
+
+b) Leslie weighed data on the color of milk and cows, and on where chocolate flavors can come from against the incoming information about chocolate syrup.
+
+c) The updated conclusion is that all cows, regardless of hide color produce white milk, and chocolate syrup is added to create chocolate flavored milk.
+
+### 1.2
+a) I thought preparing Thanksgiving dinner was easy until I tried it one year. #Bayesiantweet
+
+b) Nine times out of ten to going to the DMV is a terrible experience. #Bayesiantweet
+
+### 1.3
+
+```{r}
+library("tidyverse") #loading packages needed to create diagram
+library("DiagrammeR")
+library("dplyr")
+```
+
+I changed my mind on the relative safety of Tesla to other car brands. Below is a diagram about this change. 
+
+#### Diagram code 
+```{r}
+tree <-
+    create_graph() |>  # initiate graph
+    add_n_nodes(
+      n = 3, 
+      type = "path",
+      label = c("Incoming info: Marketing from Tesla that car is safe", "Data: Tesla combustion events", "Posterior: Tesla cars not as safe as other brands"), # Labels for each node
+      node_aes = node_aes(
+        shape = "rectangle", #changed shape to rectangle 
+        height = 2,
+        width = 2,
+        x = c(0, 3, 3), 
+        y = c(0, 2, -2))) |> 
+    add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        color = "blue"
+      )) |>  
+  add_edge(
+      from = 2,
+      to = 3,
+      edge_aes = edge_aes(color = "green")
+      )
+render_graph(tree)
+```
+
+### 1.4
+
+I convinced a friend to try a restaurant specializing in salads. 
+
+```{r}
+tree <-
+    create_graph() |>  # initiate graph
+    add_n_nodes(
+      n = 3, 
+      type = "path",
+      label = c("Friend prior info:Salads are not filling", "Data: Me sharing about restaurant experience", "Posterior: Friend agrees salads can be filling"), # Labels for each node
+      node_aes = node_aes(
+        shape = "rectangle", #changed shape to rectangle 
+        height = 2,
+        width = 2,
+        x = c(0, 3, 3), 
+        y = c(0, 2, -2))) |> 
+    add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        color = "blue"
+      )) |>  
+  add_edge(
+      from = 2,
+      to = 3,
+      edge_aes = edge_aes(color = "green")
+      )
+render_graph(tree)
+```
+
+### Exercise 1.5
+
+Draw diagram about author's changing views on Bayes. 
+
+```{r}
+tree <-
+    create_graph() |>  # initiate graph
+    add_n_nodes(
+      n = 7, 
+      type = "path",
+      label = c("incoming: no thoughts on Bayes", "data:Bayes for diagnostics", "Bayes is interest", "data: ant egg exercise", "Bayes disinterest", "data: great PhD prof", "updated: Bayes is interest"), # Labels for each node
+      node_aes = node_aes(
+        shape = "oval",
+        height = 1,
+        width = 1,
+        x = c(0, 2, 3, 5, 4, 6, 5), # adjusted node positions
+        y = c(6, 6, 5, 5, 4, 4, 3))) %>% 
+    add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        color = "black"
+      )) |> 
+  add_edge(
+      from = 2,
+      to = 3,
+      edge_aes = edge_aes(
+        color = "black"
+      )) |> 
+  add_edge(
+      from = 3,
+      to = 5,
+      edge_aes = edge_aes(
+        color = "black"
+      )) |>  
+  add_edge(
+      from = 4,
+      to = 5,
+      edge_aes = edge_aes(
+        color = "black"
+      )) |> 
+  add_edge(
+      from = 5,
+      to = 7,
+      edge_aes = edge_aes(
+        color = "black"
+      )) |>  
+  add_edge(
+      from = 6,
+      to = 7,
+      edge_aes = edge_aes(
+        color = "black"
+      )) 
+render_graph(tree)
+```
+### Exercise 1.6 
+
+a) A frequentist would ask/answer what is the probability that I'm qualified if I get the job. 
+
+b) A Bayesian would ask/answer what is the probability that I'll get the job given that I'm qualified. 
+
+c) I fall somewhere in the middle on preference. The Bayesian thinking is useful for thinking about the near term of this situation. Frequentist thinking could help decide if I should increase my qualifications for long term job prospects. 
+
+### Exercise 7
+
+a) I already know about health policy.
+
+b) Some people hypothesize that healthcare utilization is based on medical needs. 
+
+c) Because of knowledge in this area I know that when insured people have lower cost sharing, they increase healthcare utilization. I also know that people without insurance forego needed healthcare because the cost is prohibitive. Therefore, healthcare utilization in the US is not based just on immmediate medical needs but is heavily moderated by insurance status and cost sharing. 
+
+d) I employed Bayesian thinking (adding data to an priori assumption that people seek care when they need it). 
+
+### 1.8
+
+a) Bayesian statistics is useful for updating what we know about probabilities for events of interest when new or additional information is added. It is an application of conditional probability. 
+
+b) Bayesian and frequentist thinkers both want to use data to generate knowledge about the world. Both test hypotheses, create models, and make predictions. 
+
+## Chapter 2 Exercises 
+
+### Exercise 2.1
+
+a) P(B|A) > P(B) In this example the probability that I will enjoy Benn's newest novel given that I've read the first novel and enjoyed it is greater than the probability that I will enjoy the new novel without any information about the author. 
+
+b) P(B|A) < P(B) The probability that it will be 60 degrees tomorrow given that it's 0 degrees Fahrenheit in Minnesota in January is less than the probability that it will be 60 degrees tomorrow. I know that seasonal weather patterns don't usually mean 60 degree differences in the weather from day to day which makes the conditional probability less likely. 
+
+c) P(B|A) > P(B) The probability that the authors make several typos in their writing today given they only got 3 hours of sleep is greater than the probability the authors make several typos. The information I'm adding is I know sleepiness affects accuracy. 
+
+d) P(B|A) > P(B) The probability that the tweets get retweeted given that my friend uses three hashtags is greater than the probability that the tweet gets retweeted. I know adding hashtags increases the chance of getting retweeted. 
+
+### Exercise 2.2
+
+a) P(B|A) probability of getting a speeding ticket given driving 10 mph above the speed limit. It's conditional.
+
+b) P(A) = .20. This is the probability of residents that drive 10 mph above the speed limit. It's marginal. 
+
+c) P(D) = .15. This is the probability that a resident has used R. This is marginal.
+
+d) P(D|C) Probability of using R given that you've taken statistics at local college. This is conditional. 
+
+e) P$(F \cap E)$ This is joint probability of being a Minnesotan and liking Prince. 
+
+d) P(E|F). This conditional probability is that of liking Prince's music given that you're a Minnesotan. 
+
+### Exercise 2.3 
+
+To use a binomial model several conditions need to be met: the outcome of on trial does not influence another, and the probability of success on each trial is pi, know the number of trials 
+
+a) NOT binomial. We don't know the probability for an individual event of a child being born and given variance in pregnant people's health and that of their fetuses the chance of being born is also variable among those in labor. 
+
+b) Binomial. 	$Y|\pi \sim {\sf Binom}(27, .90)$
+
+c) NOT binomial. We have \pi of .17 but we don't have the number of trials. 
+
+d) NOT binomial. We don't have the number of trials that Henry is late or on time and we don't have a \pi. 
+
+e) NOT binomial. We don't have a value for Y and we don't have a number of trials of a party being thrown. 
+
+f) Binomial. $Y|\pi \sim {\sf Binom}(60, .8)$
+
+### Exercise 2.5.2
+
+2.4) Let A = sparkles like diamond and B = vampires exist.
+We are given P(B) = 0.05, P(A|B) = 0.70 and P(A|B^c) = .03.
+
+```{r}
+pB <- 0.05
+pAgivenB <- 0.70
+pAgivenNOTB <- 0.03
+pNOTB <- 0.95 #we know this because of complement or 1-.95
+```
+
+I found P(A) or P(sparkles like diamond) using the properties of  total probablility 
+
+```{r}
+(0.70*0.05) + (0.03*0.95) #P(A|B)P(B) +P(A|B^c)(P(B^c)
+```
+
+```{r}
+pA <- 0.0635 #setting P(A) to value found in last chunk
+```
+
+Now solving using 
+P(B|A) = P(A|B) P(B) / P(A) 
+```{r}
+pAgivenB*pB/pA
+```
+
+2.5) 
+a) The prior probability of a tree having mold is 0.18.
+
+b) We are given the following where M means mold infection and asked to find p(maple):
+
+```{r}
+pM <- 0.18
+pNOTM <- 0.82 #found using 1-.18
+pelmgivenM <- .15
+pmaplegivenM <- 0.80
+pothergivenM <- .05
+pelmNOTM <- 0.20
+pmapleNOTM <- .10
+potherNOTM <- .70 
+
+```
+
+b) To find p(maple) I used law of total probability.
+
+```{r}
+(pmaplegivenM*pM) + (pmapleNOTM*pNOTM)
+```
+c) To find posterior that a maple tree has mold I will use P(B|A) = P(A|B) P(B) / P(A) 
+
+```{r}
+pmaplegivenM*pM/0.226
+```
+
+d) p(mold) < p(mold|maple) meaning that knowing the tree is a maple increased the probability there is mold. Most of the trees in the sample are maple and across all trees p(mold) = .18 so we might want to explore why p(mold|maple) is high besides being overrepresented in the arboretum. 
+
+### Exercise 2.6 
+
+We need to know among the restaurants she does not like what's the probability of four stars or less p(4stars|not like). 
+
+### Exercise 2.7
+
+We're given:
+
+```{r}
+pswipe <- 0.08
+pNOTswipe <- 0.92
+pmengivenswipe <- 0.40
+pwomengivenswipe <- 0.30
+pnbgivenswipe <- 0.20
+pothergivenswipe <- .10
+pmenNOTswipe <- .45
+pwomenNOTswipe <- .40
+pnbNOTswipe <- 0.10
+potherNOTswipe <- 0.05
+```
+
+a) find p(nonbinary). I will use total probability to find this. 
+
+```{r}
+(pnbgivenswipe*pswipe) + (pnbNOTswipe*pNOTswipe)
+```
+
+B) find p(swipe|nonbinary). For this I will use P(B|A) = P(A|B) P(B) / P(A) where A is nonbinary and B is swipe.
+
+```{r}
+pnbgivenswipe*pswipe/0.108
+```
+
+### Exercise 2.8
+
+We're given
+```{r}
+pmorn <- 0.30
+pdelay <- 0.15
+pNOTdelay <- 0.85
+pmorngivendelay <- 0.40
+```
+
+a) find P(delay|morning). I will use P(B|A) = P(A|B) P(B) / P(A) where A is morning and B is delay. 
+
+```{r}
+pmorngivendelay*pdelay/pmorn
+```
+The probability Mine's flight is delayed =0.20.
+
+b) find p(morning|NOTdelay). For this I'll use total probability and Bayes. First I find p$(morning \cap NOTdelay)$ using pmorn - (pmorngivendelay*pdelay)
+```{r}
+pmorn - (pmorngivendelay*pdelay)
+```
+Then I can do p(norning|NOTdelay) = p$(morning \cap NOTdelay)$ / pNOTdelay 
+
+```{r}
+0.24/ pNOTdelay 
+```
+The probability Alicia is on a morning flight =.282.
+
+### Exercise 2.9 
+
+a) I will fill in the table using code written with help from Braulio. 
+
+```{r}
+library("tibble")
+goodmood <- c(0.05, 0.84, 0.11)
+badmood <- c(0.13, 0.86, 0.01)
+
+table_r <- tibble(good = goodmood*0.40,
+                  bad = badmood*0.60) #0.40 is prior probability of good mood and 0.60 is prior probability of bad mood found from 1-0.40 because of total probability. Multiplying conditional probability by prior gives us the joint probabilities for the table.  
+table_r
+```
+
+b) Without any information about texts the prior probability is 0.40 that the roommate is in a good mood. 
+
+c) We're asked for p(hightexts|goodmood) where hightexts is receiving 46+ texts. This is liklihood and it was given as 0.11. 
+
+d) Find (goodmood|hightexts) which is posterior probability. We need to find p(hightexts) using law of total probability 
+```{r}
+(0.11*0.40) + (0.01*0.60)
+```
+
+
+```{r}
+0.40 * 0.11/.05 #0.05 is p(hightexts)
+```
+
+### Exercise 2.10
+
+Find pLGBTQ given:
+```{r}
+prural <- 0.085
+purban <- 0.915
+pqueergivenrural <- 0.100
+pqueergivenurban <- 0.105
+```
+
+a) use total probability.
+```{r}
+pqueergivenrural*prural + pqueergivenurban*purban
+```
+
+b) find P(rural|LGBT) 
+```{r}
+pqueergivenrural*prural/0.104575 #Bayestheorem
+```
+
+c) p(rural|notLGBT)
+```{r}
+1-0.104575 #complement
+```
+Setting notLGBT 
+```{r}
+notqueer <- 0.895425
+```
+Use Bayes theorem.
+
+```{r}
+prural*0.90/notqueer #0.90 is p notqueergivenrural and is found from 1-pqueergivenrural 
+```
+
+## Exercise 2.5.3
+
+a) $Y|\pi \sim {\sf Binom}(6, \pi)$ and conditional pmf is
+
+ f(y|$\pi$) = C(6,y) $\pi$^y * (1- $\pi$)^(6-y) for $ y\in $ {0, 1, 2, 3, 4, 5, 6} 
+ 
+b)  using dbinom function and given successes = 4 and \pi = .3 we can find how likely this is. 
+ 
+```{r}
+dbinom(4,6,.3) #where 4 is number of successes, 6 is trials and pi is .3
+```
+
+ c) For this I will first find the liklihood of winning 4 out of 6 games (6choose4) for each pi. 
+```{r}
+pi <- c(0.30, 0.40, 0.50) #given pi 
+priors <- c(0.25, 0.60, 0.15) #given priors 
+lklhd <- dbinom(4,6, pi)
+```
+ 
+ For each value of pi, we got a liklihood of 0.0595, 0.1382, and 0.2344 respectively. 
+ 
+ To find the normalizing constant we will use f(y=4) = sumL(pi|y=4)f(pi)
+```{r}
+pi*lklhd #using law of total probability across the vectors
+```
+```{r}
+nc <- 0.0178605 + 0.0552960 + 0.1171875 #normalizing constant
+```
+ Now to find the posterior probability we can do posterior = prior * liklihood/normalizing constant. 
+ 
+```{r}
+numerator <- c(priors * lklhd) #getting numerator for the above equation using a vector 
+posterior <- numerator/nc 
+
+```
+ posterior = 0.0782, 0.4358, 0.1847
+ 
+### Exercise 2.12
+ 
+ a) $Y|\pi \sim {\sf Binom}(7, \pi)$ and conditional pmf is f(y|$\pi$) = C(7,y) $\pi$^y * (1- $\pi$)^(7-y) for $ y\in $ {0, 1, 2, 3, 4, 5, 6,7} 
+ 
+b) Miles pulls 7 handles and only 1 is good for a mug. What is pmf of pi and f(pi|y=1). First I'll find liklihood. 
+
+```{r}
+pi <- c(0.10, 0.25, 0.40)
+prir <- c(0.20, 0.45, 0.35) #prior 
+lklhod <- dbinom(1,7,pi)
+```
+Then I'll find the normalizing constant.
+```{r}
+normc <- sum(lklhod*pi)
+```
+Then I'll find posterior using prior*liklihood/normc.
+```{r}
+post <- prir*lklhod/normc
+```
+posterior = 0.445, 0.838, 0.273
+
+c) The prior model < posterior for the first two probabilities. For the last probability the posterior > prior. 
+ 
+d) I'll repeat the steps above for Kris. 
+```{r}
+piK <- c(0.10, 0.25, 0.40)
+prirK <- c(0.15, 0.15, 0.70)
+likhood <- dbinom(1,7,piK)
+```
+Then find normalizing constant. 
+```{r}
+normcc <- sum(likhood*piK)
+```
+Then I'll find the posterior. 
+```{r}
+postK <- prirK*likhood/normcc #posterior for Kris. 
+```
+
+Kris's posterior is 0.333, 0.279, 0.547. This seems off since Kris is Miles instructor so these should be higher. 
+ 
+### Exercise 2.13
+
+a) Without any calculations I would say that the posterior probability is high given that over half of the random sample is lactose intolerant. 
+
+b) Calculate posterior model. 
+```{r}
+pilac <- c(0.40, 0.50, 0.60, 0.70) #pi of lactose intoerance 
+priorlac <- c(0.10, 0.20, 0.44, 0.26) 
+likllac <- dbinom(47, 80, pilac)
+
+nclac <- sum(likllac*pilac) #finding normalizing constant
+
+postlac <- priorlac*likllac/nclac
+```
+
+I got 0.000415, 0.07262, and 0.5333. Only the third one seems plausible so there may be a miscalculation. 
+
+c) If the sample were changed to:
+```{r}
+dbinom(470, 800, pilac) #change to more data but same proportion
+dbinom(47, 80, pilac) #original 
+```
+The liklihood decreased when there was a larger sample meaning posterior probabilities will also decrease. 
+
+### Exercise 2.14
+
+a) Create prior probability model. 
+
+```{r}
+ pib <- c(0.15, 0.25, 0.50, 0.75, 0.85) #probabilities bus will be late 
+fpi <- c(0.15, 0.15, 0.40, 0.15, 0.15)
+
+table_r <- tibble(priorpi = pib,
+                  fpi = fpi) 
+table_r
+```
+
+b) Find the posterior of f(pi|y=3). 
+
+```{r}
+
+liklate <- dbinom(3, 13, pib)
+
+ncbus <- sum(liklate*pib) #finding normalizing constant of bus being late
+
+postbus <- pib*liklate/ncbus
+```
+
+ Postbus were small values based on the above calculation. Li learned that the bus has a low liklihood of being late. 
+ 
+### Exercise 2.15
+ 
+a) If the researcher had been more sure that a hatchling would survive the prior probability model would have higher f(pi) where pi = 0.70 and 0.75. As it reads now, the researcher thought only 10% of birds have a .75 change of survival. 
+
+b) If the researcher had been less sure they could reduce f(pi) as we read from left to right. 
+
+c) f(pi|15=10) meaning Lisa studied 15 and 10 survived. 
+```{r}
+pisurvive <- c(0.60, 0.65, 0.70, 0.75)
+priorsurv <- c(0.30, 0.40, 0.20, 0.10)
+liksurv <- dbinom (10, 15, pisurvive)
+
+ncsurv <- sum(liksurv*pisurvive) #finding normalizing constant 
+
+postsurv <- pisurvive*liksurv/ncsurv #solving for posterior
+```
+ 
+ The posterior model for pi is is 0.215, 0.267, 0.279, and 0.239. 
+ 
+ d) The posterior model shows that the most likely scenario is the third one with posterior pi = 0.279. This means that the most likely situation is that 20% of the birds have a 70% chance of survival. 
+ 
+### Exercise 2.16 
+
+a) Based on the article my prior model is: 
+```{r}
+ pifake <- c(0.20, 0.40, 0.50, 0.70) #probabilities art is  fake or forged as told by different experts
+fpii <- c(0.25, 0.25, 0.25, 0.25) #percent of experts
+
+table_r <- tibble(pi = pifake,
+                  fpi = fpii) 
+table_r
+```
+
+Experts gave varying percentages of how many works of art are not original works of the attributed author. It was unclear where the art world is between the range of 20% to 99% so I gave fpi equal values. 
+
+b) What's different is I used 4 values whereas this used 3; my model has more variance. Bot this model and mine have the same values of f(pi) for pi=0.25. 
+
+c) Find f(pi = 0.60|Y=y) > 0.40 
+
+I will use Steve's code from class to find number of artworks needed. 
+```{r}
+#modified Steve's code from class for this scenario
+successes <- 0:10
+prob <- dbinom(successes, size = 10, prob = .4)
+plot(successes, prob)
+```
+Based on the above in order to get 0.40 we need 4 successes so >4 are needed. 
+
+### Exercise 2.17
+
+#### Sick trees redux 
+
+A) I will simulate an approximation of the posterior probability of lactose intolerance for 10,000 trees. 
+```{r}
+
+#defining data 
+
+lintolerance <- data.frame(pi = c(0.40, 0.50, 0.60, 0.70))
+
+#defining prior model
+prior <- c(0.10, 0.20, 0.44, 0.26)
+
+
+```
+```{r}
+set.seed(10000)
+lactose_sim <- sample_n(lintolerance, size = 10000, 
+                        weight = prior, replace = TRUE) #altered code from the chapter 
+
+ggplot(lactose_sim, aes(x=pi)) + geom_bar()
+```
+
+
+B) I will simulate the cuckoo birds question using 10,000 birds. 
+```{r}
+#defining data 
+
+cuckcoo <- data.frame(pi = c(0.60, 0.65, 0.70, 0.75))
+
+#defining prior model
+prior <- c(0.30, 0.40, 0.20, 0.10)
+
+#create graph 
+set.seed(10000)
+cuckoo_sim <- sample_n(cuckcoo, size = 10000, 
+                        weight = prior, replace = TRUE) #altered code from the chapter 
+
+ggplot(cuckoo_sim, aes(x=pi)) + geom_bar()
+
+```
+
+
+
+
+
