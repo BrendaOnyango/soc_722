@@ -19,59 +19,127 @@ library(bayesrules)
 a)  A friend puts their chance of getting a job between .2 and .6. To tune we need to think about the average. We know that E($\pi$) = $\alpha$/($\alpha$ + $\beta$)
 
 ```{r}
-averagejob <- (.2+.6)/2 #we'll use this as our prior 
+averagejob <- (.2+.6)/2 #we'll use this as our prior average 
 
 ```
-
-Rearranging E($\pi$) = $\alpha$/($\alpha$ + $\beta$) with our value pi which equals averagejob gives $\alpha$ is appromiately averagejob*$\beta$
-
-Now I will do trial and error to find Beta models that meet $\alpha$ = .4$\beta$
-
+We also need a variance. If we assume a uniform distribution between 0.2 and 0.6 then variance can be found with var(pi) = 1/12(b-a)^2
 ```{r}
-plot_beta(4, 6) #this Beta shows I think he's more likely to not get the job 
+varpi <- (1/12) * (.6-.2)^2
+```
+Now with varpi of 0.0133 and average of 0.4 we can rearrange E(pi) and var(pi) to solve for alpha and beta. 
+
+.4 = alpha/alpha + beta
+.4(alpha +beta) = alpha
+.4beta = .6alpha
+(2/3) beta = alpha
+
+plugging 2/3beta into the variance equation gives.
+(2/3)beta^2/(25/9)beta^2 * (5/3Beta + 1)
+
+solving for beta gives beta = 10.5
+
+Plugging 10.5 in the mean formula gives alpha 7.
+```{r}
+plot_beta(7, 10.5) #this Beta shows I think he's more likely to not get the job 
 ```
 
 b) A test is accurate .8 of the time with a variance of 0.05. We remember that variance = $\alpha$ * $\beta$/($\alpha$ + $\beta$)^2 * ($\alpha$ + $\beta$ +1)
-and we will treat .8 as the mode.
+and we will treat .8 as the mean. 
 
-Therefore, .8 or 4/5 is equal to alpha - 1/ alpha + beta -2. This gives alpha of 9 and beta = 3. 
+.8 = alpha/alpha + beta
+.8(alpha + beta) = alpha
+.8beta = .2alpha
+
+4beta = alpha 
+variance = alpha*beta/(alpha + beta)^2 * (alpha + beta + 1)
+replace alpha with 4beta and solve for beta with variance equal to 0.05 
+
+0.05 = 4beta^2/(4beta + beta)^2 * (4beta + beta + 1)
+0.05 = 4beta^2/(5beta)^2 * (4beta + beta + 1)
+
+0.05 = 4/25 *(5beta + 1)
+
+
+solving for beta gives .44 and using this in 4beta = alpha gives alpha of 1.76
+
+
 ```{r}
-plot_beta(9,3) #gives left skewed Beta model. Variance here is not equal to .05
+plot_beta(1.75,.44) #gives left skewed Beta model.
 ```
 
 
 
 c) Aunt Jo has finds mushrooms between .85 and .1 of the time. For this problem I'm going to find the average of .85 and 1 to use as the prior to estimate $\alpha$ and $\beta$ using the E($\pi$) formula. The average is .925 ot 37/40 so .925 = alpha/(alpha + beta). 
 
+0.925 = alpha/alpha + beta
+.925alpha + 0.925 beta = alpha
+
+(37/3)beta = alpha 
+
+Setting beta to 3 gives alpha of 37.
+
 ```{r}
-plot_beta(37, 3) #plot is left skewed so it shows that Aunt Jo has a high probability of fidning mushrooms 
+plot_beta(37,3) #plot is left skewed so it shows that Aunt Jo has a high probability of finding mushrooms 
 ```
 
 d) Sal has either done really well or completely bombed the interview so I interpret this as .5 probabilities for both outcomes. 
 ```{r}
-plot_beta(5,5)
+plot_beta(0.5,0.5) #Plot shows f(pi) being high near 0 and 1 but low in the middle which matches Sal's description of either doing really well or terribly. 
 ```
 
 ## Exercise 3.2 
 
 a) I'll take an average of .7 and .9 to use .8 as the average. .8 = alpha/(alpha + beta).
+.8alpha + .8beta = alpha
+4beta = alpha 
+So if I set beta to 4 alpha = 16
 ```{r}
-plot_beta(8,2)
+plot_beta(16,4) #most likkely pi is between 0.7 and .90 
 ```
 
-b) setting alpha - 1/alpha + beta - 2 equal to 9/10 and solving for alpha and beta gives alpha = 10 and beta = 2 
+b) We're given variance = .08 and mean = .90 
+
+.90 = alpha/alpha + beta
+.90alpha +.90 beta = alpha
+9beta = alpha 
+
+Plugging this value for alpha in the variance equation we get 
+9beta*beta/(9beta + beta)^2 * (9beta + beta + 1 )= .08
+
+9beta^2/100beta^2 * (10beta + 1) = 0.08 
+
+9/100 * (10beta + 1) = 0.08
+9= 80beta + 8
+1= 80beta
+beta = 1/80 = 0.0125
+
+9beta = alpha = .1125
 
 ```{r}
-plot_beta(10,2) #gives a left skewed beta model but variance does not equal .08 
-```
-c) The friend says the most likley pi =.85 so I will use this and the average formula to find a beta model. .85 = alpha / aplpha + beta. 
-```{r}
-plot_beta(85, 15)
+plot_beta(.1125,0.0125) #gives a model with variance = 0.08 and mean of .90
+summarize_beta(.1125,0.0125)
 ```
 
-d) Ben thinks pi of running out of croissants is .3 but isn't confident about this so there will be a wide "band" around .3. Using 3/10 = alpha/alpha + beta gives alpha of 3 and beta of 7. 
+c) The friend says the most likley pi =.85 so I will use this and the average formula to find a beta model. .85 = alpha / aplpha + beta.
+
+.85alpha + .85beta = alpha 
+(17/3)beta = alpha 
+
+If I set beta = 3 alpha = 17. 
 ```{r}
-plot_beta(3,7) #This plot has a large space around .3 
+plot_beta(17, 3)
+```
+
+d) Ben thinks pi of running out of croissants is .3 but isn't confident about this so there will be a wide "band" around .3. Using 3/10 = alpha/alpha + beta
+
+.3alpha + .3beta = alpha 
+(3/7)beta = alpha 
+
+If I set beta to 7, alpha = 3 
+```{r}
+plot_beta(3,7) #This plot has a large band around .3 that indicates his uncertainty
+
+summarize_beta(3,7)
 ```
 
 ## Exercise 3.3 
@@ -126,7 +194,7 @@ Plotting this gives the below.
 plot_beta(.5, .5)
 ```
 
-Noted that if alpha and beta are equal, as alpha and beta increase SD decreases and as they decrease sd decreases. Plots have different concavities that reflect this. 
+Noted that if alpha and beta are equal, as alpha and beta increase SD decreases and as they decrease sd decreases. Plots have different concavities that reflect when alpha or beta are greater or lesser than 1. 
 
 ## Exercise 3.4 
 
@@ -144,7 +212,7 @@ f) f = Beta(6,6) This is also symmetrical like b, but has a higher beta and alph
 
 ## Exercise 3.5
 
-a) a = Beta(1, 0.3) Here alpha > beta so it's left-skewed.
+a) a = Beta(1, 0.3) Here alpha > beta and the way the plot increases indicates beta is less than 1.
 
 b) b = Beta(3,3) This is symmetrical so alpha = beta.
 
@@ -162,8 +230,9 @@ a) Which beta models in 3.4 had the smallest and largest mean?
 
 E(pi) = alpha/alpha + beta. E(pi) is smallest when the numerator is much smaller than the denominator (small/big = small number). Therefore Beta(0.5,6) has the smallest mean and equals 0.0769.
 
+
 ```{r}
-plot_beta(0.5,6) #ask how to add mean line and if it's ok for alpha to be <1
+plot_beta(0.5,6) #during in class review ask how to add mean line 
 
 
 ```
@@ -171,7 +240,7 @@ plot_beta(0.5,6) #ask how to add mean line and if it's ok for alpha to be <1
 
 The largest mean is when the numerator is much larger than the denominator (big/small = big number). The largest mean is for Beta(6,2) and equals 0.75. 
 ```{r}
-plot_beta(6,2) #add mean line
+plot_beta(6,2) 
 ```
 
 b) Which models have the smallest and biggest mode? 
@@ -221,12 +290,226 @@ plot_beta(6,6)
 summarize_beta(6,6)
 ```
 
-## Exercise 3.8
-
-Not sure what's being asked.
 
 ## Exercise 3.9 
 
-a) Calculate prior mean, mode, and standard deviation of pi for North Dakota salesmen.
+a) Calculate prior mean, mode, and standard deviation of pi for the North Dakota and Louisiana salesmen.
+```{r}
+alphad <- c(8,1) #alpha of drink 
+betad <- c(2,20)
+meandrink <- alphad/(alphad+betad)
+modedrink <- (alphad-1)/(alphad + betad - 2)
+sddrink <- sqrt(alphad*betad/((alphad+betad)^2 * (alphad + betad + 1)))
+```
 
-Calculate prior mean, mode, and standard deviation for Louisiana salesmen. 
+Prior mean, mode, and sd for the North Dakota salesman is 0.8, 0.875, and 0.1206 respectively. For the Louisiana salesmen it is 0.0476, 0, and 0.0454.
+
+I could have also used summarize_beta.
+```{r}
+summarize_beta(8,2)
+summarize_beta(1,20)
+```
+
+ 
+b) plot prior pdfs for both salesmen. 
+```{r}
+plot_beta(8,2)
+plot_beta(1,20)
+```
+
+
+c) The salesman from North Dakota thought that pi for using pop is much higher than did the salesmen from Louisiana. The salesman from Louisiana is more uncertain about the use of pop than that of the one from North Dakota. 
+
+## Exercise 3.10 
+
+ a&b) Specify posterior model pi for North Dakota salesmen. Y|pi~Bin(50, pi) and pi~Beta(8,2) is the Beta posterior model.  I can find this using plot_beta_binomial.
+ 
+```{r}
+plot_beta_binomial(alpha = 8, beta = 2, y = 12, n = 50)
+```
+ 
+ Posterior for Louisiana salesmen.Y|pi~Bin(50, pi) and pi~Beta(1,20)  I can find this using plot_beta_binomial. 
+```{r}
+plot_beta_binomial(alpha = 1, beta = 20, y= 12, n= 50)
+
+```
+ 
+ c) We can use summmarize_beta_binomial to understand how the salemen' understandings changed. The Louisiana salesman had a better prior understanding than did the North Dakota salesman. His posterior has less variance. 
+```{r}
+summarize_beta_binomial(alpha = 8, beta = 2, y = 12, n = 50) #North Dakota
+
+summarize_beta_binomial(alpha = 1, beta = 20, y= 12, n= 50) #Louisiana 
+```
+ 
+ 
+## Exercise 3.11
+
+a) Mean is given as .25 and mode is 5/22. 
+```{r}
+meanstudent <- .25
+modestudent <- 5/22
+```
+I used these values to solve for alpha and beta by first finding what alpha equals using the mean and then plugging that into the formula for mode. 
+
+1) .25 = alpha/alpha + beta
+(alpha + beta)0.25 = alpha
+alpha + beta = 4alpha
+
+2) (5/22) = alpha-1/alpha + beta - 2 
+Using what we found in step 1 replace alpha + beta with 4 alpha.
+
+(5/22) = alpha - 1/(4alpha -2). At this stage we can sovle for alpha. 
+
+(5/22)(4alpha -2) = alpha - 1
+
+*distribute 5/22*
+
+(10/11)alpha - (5/11) = alpha - 1
+
+*get all alphas to 1 side)* 
+
+(10/11)alpha + (6/11) = alpha
+
+(6/11) = (1/11)alpha
+
+alpha = 6. Now with alpha equal to 6 we can find Beta using the rearranged formula for mean. beta = 4alpha - alpha 
+```{r}
+betastudent <- 4*6 - 6
+```
+
+ Now with alpha and beta we can use plot_beta to plot prior understanding. 
+```{r}
+plot_beta(6,18)
+```
+ 
+ b & c) What is the posterior model?
+ 
+```{r}
+summarize_beta_binomial(alpha = 6, beta = 18, y = 15, n = 50)
+plot_beta_binomial(alpha = 6, beta = 18, y = 15, n = 50)
+```
+ 
+d) The university now has a lot more confidence that slightly over 1 in 4 students would use a bike. The posterior model is Beta(21,53). The posterior reflects the liklihood. They have similar peaks and width.
+
+## Exercise 3.12
+
+a) The average of .1 and .25 is 0.175. We'll use this as the average to find alpha and beta. After some rearranging we have (7/33)beta = alpha. If we set Beta to 33 then alpha = 7. 
+
+```{r}
+plot_beta(7,33)
+
+```
+
+b &c) Update this prior with y =30 and n = 90.
+
+```{r}
+plot_beta_binomial(alpha = 7, beta = 33, y = 30, n = 90)
+summarize_beta_binomial(alpha = 7, beta = 33, y = 30, n = 50)
+```
+
+d) Does posterior model closely reflect the prior information or data?
+
+The posterio reflects the likelihood. The posterior has a much higher mean and mode than did the prior. 
+
+## Exercise 3.13
+
+a) We'll use the average of .35 and .6 to find an average for pi to find the ratio of beta to alpha. 
+```{r}
+(.35 + .6)/2
+```
+
+Setting .475 or 19/40 equal to alpha/alpha + beta gives alpha = 19 and beta of 21. 
+```{r}
+betatrans <- 40-19
+```
+Now I will plot Beta(19,21)
+```{r}
+plot_beta(19,21)
+```
+
+b&c) We're given y = 80 and n = 200 to use to update our prior. 
+
+```{r}
+plot_beta_binomial(alpha = 19, beta = 21, y = 80, n = 200)
+summarize_beta_binomial(alpha = 19, beta = 80, y = 80, n = 200)
+```
+
+d)  There is a lot of confidence that around .30 of people know someone who is trans in the posterior. In the prior the average is much lower. Based on the model I would say that about the same amount of people in the 2020s knows someone whos trans as did in the 2016 poll. 
+
+## Exercise 3.14 
+
+a) We're asked to write the input code for the output which is essentially asking us to solve for y and n. We know the prior is Beta (2,3). We can see that the posterior has an alpha that's less than beta and that the mean is about .30. The low variance tells us the posterior alpha and beta are lower numbers. Using guess and check I found that y = 9 and n = 30. 
+```{r}
+summarize_beta_binomial(alpha = 2, beta = 3, y = 9, n = 30)
+```
+I could have also been more precise by using pi|(Y=y)~Beta(alpha + y, B+ n- y) where alpha + y = 11 and beta + n - y = 24 and where alpha = 2 and beta = 3
+
+2 + y = 11 so y = 9 
+3 + n - y = 24 
+
+-8 + n = 24
+
+n = 30
+## Exercise 3.15
+
+a) The mean and mode are high and variance is low. The posterior alpha is much greater than the beta. Therefore we know that y will be closer to n in this simulation. Using this prior knowledge and guess and check I arrived at the below input code. 
+
+```{r}
+summarize_beta_binomial(alpha = 1, beta = 2, y = 99, n = 100)
+```
+I could have been more precise like the first one by using pi|(Y=y)~Beta(alpha + y, B+ n- y) where alpha + y = 100 and beta + n - y = 3 and where alpha = 1 and beta = 2
+
+1 + y = 100 so y = 99
+
+2+ n - 99 = 3 
+2+ n = 102
+n=100
+
+## Exercise 3.16
+
+a) The prior model is left-skewed which tells me alpha > beta; the shape also indicates that alpha is much greater than beta in the prior. The prior has no overlap with the likelihood.
+
+b) The posterior is symmetrical around 0.75 so pi is equally likely to be above or below 0.75. The posterior has a shape more similar to the likelihood so it more so agrees with the data than with the prior. The likelihood has a right skew and has more spread. 
+
+b)
+```{r}
+#Using educated guess and check to plot beta-binomial that looks similar to one shown in exercise 3.16 
+
+plot_beta_binomial(alpha = 64, beta = .8, y = 3, n = 25) #chose a beta less than 1 becuase the prior has an asymptote near 1 and chose double digit alpha to get density to have a scale of 30. Chose y = 3 and n = 25 to produce a posterior with a mean around .75.
+
+
+summarize_beta_binomial(alpha = 64, beta = .8, y = 3, n = 25) # This is similar in that liklihood is to the left of the posterior and posterior is to the left of the prior.  The prior has alpha > beta and is left-skewed. 
+```
+
+
+## Exercise 3.17 
+
+a) The prior and liklihood in this plot have a little overlap. Liklihood appears to be centered around .125 and prior is centered around 0.50. Likelihood is narrow around .125 so there is more certainty about this value than there is certainty in the prior around 0.5. The likelihood is left skewed so the posterior beta must be greater than alpha.The prior is symmetrical and is not the uniform distribution so we know alpha = beta and is greater than 1.  
+
+b) The posterior model includes fewer possible values for pi and appears to be centered around 0.125. The posterior more closely aligns with the data. 
+
+```{r} 
+#using guess and check to find similar beta binomial plot. 
+plot_beta_binomial(alpha = 3, beta = 3, y = 3, n = 40)
+summarize_beta_binomial(alpha = 3, beta = 3, y = 3, n = 40) #This is similar to the plot shown in the figure since the density and pi have the same scale and the shapes for the prior, likelihood, and posterior align. I knew I needed a larger sample than 3.16 because these peaks are narrower. 
+```
+
+
+## Exercise 3.18 
+
+a) 
+```{r}
+#Plotting and summarizing Patrick's analysis. 
+plot_beta_binomial(alpha = 3, beta = 3, y = 30, n = 40) #Beta(3,3) and 30/40 attending protest 
+summarize_beta_binomial(alpha = 3, beta = 3, y = 30, n = 40) 
+```
+
+b) 
+```{r}
+#Plotting and summarizing Harold's analysis.
+plot_beta_binomial(alpha = 3, beta = 3, y = 15, n = 20) #Beta(3,3) and 15/20 attending protest 
+summarize_beta_binomial(alpha = 3, beta = 3, y = 15, n = 20)
+
+```
+
+c) Patrick's and Harold's posterior models have a similar shape owing to their means being close. Patricks's shape is narrower around the mean given he has a larger sample than does Harold. 
