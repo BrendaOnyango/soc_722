@@ -1,0 +1,232 @@
+---
+title: 'HW 6: Beta binomial'
+author: "Brenda Onyango"
+date: "9/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Load packages needed for assignment. 
+```{r}
+library(tidyverse)
+library(bayesrules)
+```
+## Exercise 3.1: Tuning 
+
+a)  A friend puts their chance of getting a job between .2 and .6. To tune we need to think about the average. We know that E($\pi$) = $\alpha$/($\alpha$ + $\beta$)
+
+```{r}
+averagejob <- (.2+.6)/2 #we'll use this as our prior 
+
+```
+
+Rearranging E($\pi$) = $\alpha$/($\alpha$ + $\beta$) with our value pi which equals averagejob gives $\alpha$ is appromiately averagejob*$\beta$
+
+Now I will do trial and error to find Beta models that meet $\alpha$ = .4$\beta$
+
+```{r}
+plot_beta(4, 6) #this Beta shows I think he's more likely to not get the job 
+```
+
+b) A test is accurate .8 of the time with a variance of 0.05. We remember that variance = $\alpha$ * $\beta$/($\alpha$ + $\beta$)^2 * ($\alpha$ + $\beta$ +1)
+and we will treat .8 as the mode.
+
+Therefore, .8 or 4/5 is equal to alpha - 1/ alpha + beta -2. This gives alpha of 9 and beta = 3. 
+```{r}
+plot_beta(9,3) #gives left skewed Beta model. Variance here is not equal to .05
+```
+
+
+
+c) Aunt Jo has finds mushrooms between .85 and .1 of the time. For this problem I'm going to find the average of .85 and 1 to use as the prior to estimate $\alpha$ and $\beta$ using the E($\pi$) formula. The average is .925 ot 37/40 so .925 = alpha/(alpha + beta). 
+
+```{r}
+plot_beta(37, 3) #plot is left skewed so it shows that Aunt Jo has a high probability of fidning mushrooms 
+```
+
+d) Sal has either done really well or completely bombed the interview so I interpret this as .5 probabilities for both outcomes. 
+```{r}
+plot_beta(5,5)
+```
+
+## Exercise 3.2 
+
+a) I'll take an average of .7 and .9 to use .8 as the average. .8 = alpha/(alpha + beta).
+```{r}
+plot_beta(8,2)
+```
+
+b) setting alpha - 1/alpha + beta - 2 equal to 9/10 and solving for alpha and beta gives alpha = 10 and beta = 2 
+
+```{r}
+plot_beta(10,2) #gives a left skewed beta model but variance does not equal .08 
+```
+c) The friend says the most likley pi =.85 so I will use this and the average formula to find a beta model. .85 = alpha / aplpha + beta. 
+```{r}
+plot_beta(85, 15)
+```
+
+d) Ben thinks pi of running out of croissants is .3 but isn't confident about this so there will be a wide "band" around .3. Using 3/10 = alpha/alpha + beta gives alpha of 3 and beta of 7. 
+```{r}
+plot_beta(3,7) #This plot has a large space around .3 
+```
+
+## Exercise 3.3 
+
+a) I selected the uniform model which the text describes as being useful for when pi can plausibly be between 0 and 1. Beta(1,1).
+```{r}
+plot_beta(1,1)
+```
+
+b) Mean is found with alpha/(alpha + beta). 
+```{r}
+1/(1+1) #finding mean of the uniform model
+```
+This mean does align with having no clue because it means pi is just as likely as it is unlikely. 
+
+c) What is the standard deviation of the uniform model or Beta(1,1). Standard deviation is the square root of the variance. Variance equals alpha*beta/(alpha+beta)^2 * (alpha + beta + 1)
+```{r}
+a <- 1
+b <- 1 #setting alpha and beta to 1 prior to solving for variance 
+
+variance <- a*b/((a+b)^2 * (a+ b + 1))
+```
+
+Variance = .083 Now to find standard deviation we'll take the square root of the variance. 
+```{r}
+sd <- sqrt(variance) #finding standard deviation 
+```
+
+c)  Specify and plot an example of a Beta prior with a SD < 0.2886. I did guess and check to find a an alpha and beta that meets this criteria.
+```{r}
+A <- 2 #setting alpha and beta greater than 1
+B <- 2
+VAR <- A*B/((A+B)^2 * (A+ B +1)) #named alpha, beta, var, and sd with caps to distinguis from earlier
+SD <- sqrt(VAR)
+```
+Next I'll plot this. 
+```{r}
+plot_beta(2,2)
+```
+
+
+d) Specify and plot an example of a Beta prior with a SD > 0.2886. I did guess and check to find a an alpha and beta that meets this criteria.
+```{r}
+aa <- .5 #setting alpha and beta below 1 to see if sd is less than initial sd 
+bb <- .5
+var <- aa*bb/((aa + bb)^2 * (aa+ bb + 1))  #finding variance prior to sd 
+sdd <- sqrt(var) #finding sd. Named these variables as "aa" and "bb" to distinguish between part c
+```
+
+Plotting this gives the below. 
+```{r}
+plot_beta(.5, .5)
+```
+
+Noted that if alpha and beta are equal, as alpha and beta increase SD decreases and as they decrease sd decreases. Plots have different concavities that reflect this. 
+
+## Exercise 3.4 
+
+a) a = Beta(0.5, 0.50) I plotted this in the prior exercise.
+
+b) b = Beta(2,2) This plot has symmetry implying beta = alpha and the shape implies beta and alpha that are greater than 1. 
+
+c) c = Beta(6,2) pdfs are left-skewed when alpha>beta. 
+
+d) d = Beta(1,1) Uniform model.
+
+e) e = Beta(0.5,6) pdfs are right-skewed when alpha<beta.
+
+f) f = Beta(6,6) This is also symmetrical like b, but has a higher beta and alpha meaning more certainty around a pi. 
+
+## Exercise 3.5
+
+a) a = Beta(1, 0.3) Here alpha > beta so it's left-skewed.
+
+b) b = Beta(3,3) This is symmetrical so alpha = beta.
+
+c) c = Beta(4,2) This is left skewed with alpha > beta but not to the extreme of a. 
+
+d) d = Beta(2,1) alpha>beta and looks like an adjusted uniform model. 
+
+e) e = Beta(5,6) This is slightly right-skewed where beta>alpha.
+
+f) f = Beta(6,3) This is left-skewed and narrower than c where alpha > beta. 
+
+## Exercise 3.6
+
+a) Which beta models in 3.4 had the smallest and largest mean? 
+
+E(pi) = alpha/alpha + beta. E(pi) is smallest when the numerator is much smaller than the denominator (small/big = small number). Therefore Beta(0.5,6) has the smallest mean and equals 0.0769.
+
+```{r}
+plot_beta(0.5,6) #ask how to add mean line and if it's ok for alpha to be <1
+
+
+```
+
+
+The largest mean is when the numerator is much larger than the denominator (big/small = big number). The largest mean is for Beta(6,2) and equals 0.75. 
+```{r}
+plot_beta(6,2) #add mean line
+```
+
+b) Which models have the smallest and biggest mode? 
+
+mode(pi) = alpha-1/(alpha + beta - 2) *where alpha and beta are greater than 1*. Like before we are going to minimize the numerator and maximize the denominator to find the smallest mode.The smallest mode corresponds to Beta(6, 6) or Beta(2,2) and the largest is with Beta(6,2). Below are the values of these modes. 
+```{r}
+maxmode <- (6-1)/(6 + 2 -2)
+minmode <- (2-1)/(2+2-2)
+```
+
+```{r}
+plot_beta(6,2)
+plot_beta(6,6)
+
+```
+
+c) Which beta model has the smallest standard deviation. Standard deviation = sqrt of alpha*beta/(alpha + beta)^2 *(alpha + beta + 1) Let's write a chunk that will allow us to explore trends in standard deviation of all beta models in 3.4. 
+```{r}
+alpha <- c(0.5, 2, 6, 1, 0.5, 6)
+beta <- c(0.5, 2, 2, 1, 6, 6)
+result <- sqrt(alpha*beta/((alpha +beta)^2 *(alpha + beta + 1))) #taking square root of variance 
+view(result)
+```
+
+From the above result Beta(0.5,6) has the lowest standard deviation and Beta(0.5,0.5) has the highest.
+
+## Exercise 3.7
+
+a) use plot_beta and summarize_beta to plot and confirm 3.6.
+```{r}
+plot_beta(0.5, 0.5)
+summarize_beta(0.5,0.5)
+
+plot_beta(2,2)
+summarize_beta(2,2)
+
+plot_beta(6,2)
+summarize_beta(6,2)
+
+plot_beta(1,1)
+summarize_beta(1,1)
+
+plot_beta(0.5, 6)
+summarize_beta(0.5, 6)
+
+plot_beta(6,6)
+summarize_beta(6,6)
+```
+
+## Exercise 3.8
+
+Not sure what's being asked.
+
+## Exercise 3.9 
+
+a) Calculate prior mean, mode, and standard deviation of pi for North Dakota salesmen.
+
+Calculate prior mean, mode, and standard deviation for Louisiana salesmen. 
