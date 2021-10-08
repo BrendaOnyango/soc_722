@@ -1,0 +1,67 @@
+---
+title: "HW 7_Bayes Ruels Chapter 4"
+author: "Brenda Onyango"
+date: "10/7/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### loading packages needed for the assignment. 
+
+```{r}
+library(tidyverse)
+library(bayesrules)
+```
+
+
+## Exercise 4.1
+
+a) Beta(1.8, 1.8) centers $\pi$ on 0.5
+b) Beta(3,2) somewhat favors $\pi$ > 0.5 since alpha is slightly larger than beta
+c) Beta(1,10) strongly favors  $\pi$ < 0.5
+d) Beta(1,3) somewhat favors  $\pi$ < 0.5
+e) Beta(17,2) strongly favors  $\pi$ > 0.5
+
+## Exercise 4.2
+We can eliminate a and b because the prior is not symmetrical or centered around .5. The prior is right-tailed meaning beta > alpha so we can eliminate f. This leaves c,d, and e which have the same Beta distribution but different y and n. 
+The liklihood is symmetrical around pi of 0.50 so the correct choice is e where y is half of n. 
+Below I've plotted e to show it matches. 
+```{r}
+plot_beta_binomial(alpha = 3, beta = 8, y = 2, n = 4)
+```
+
+
+## Exercise 4.3
+
+a) Beta(3, 10) this gives a right-skewed distribution where pi is lower to indicate it's really unliklely. 
+b) Beta(1,1) this gives a uniform distribution where all pi values between 0 and 1 are equally likley.
+c)Beta(10,3) this gives a left-skewed distribution where pi is higher to indicate it's really likely. 
+d)Beta(5,4) gives a distribution that slightly favors pi > 0.50 to indicate Daryl being slightly unsure. 
+e)Beta(4,5) gives a distribution that slightly favors p < 0.50 to indicate Scott being slightly unsure. 
+
+## Exercise 4.4
+
+Kimya's prior indicates that she thinks there's a chance that the shop is closed but she is unsure. 
+```{r}
+plot_beta(alpha = 1, beta = 2)
+```
+Fernando's prior. Fernando thinks that it is more liklely the shop is closed, but is unsure. He is more sure it's closed than Kimya. 
+```{r}
+plot_beta(0.5, 1)
+```
+Ciara's prior. Ciara is very sure the shop is *not* open. 
+```{r}
+plot_beta(alpha = 3, beta = 10)
+```
+
+Taylor's prior. Taylor is sure the shop is open. 
+```{r}
+plot_beta(alpha = 2, beta = 0.10)
+```
+
+## Exercise 4.4 
+
+We are given 7 = 3 and n = 7 and we will use this and  
