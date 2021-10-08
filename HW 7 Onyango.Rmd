@@ -64,4 +64,26 @@ plot_beta(alpha = 2, beta = 0.10)
 
 ## Exercise 4.4 
 
-We are given 7 = 3 and n = 7 and we will use this and  
+We are given y = 3 and n = 7 and we will use these values and  pi|(Y=y)~Beta(alpha + y, B+ n- y) to simulate the posterior for each of the above models. We'll set y equal to z and n equal to q to avoid confusion. 
+```{r}
+z <- 3
+q <- 7
+#Kimya's model
+plot_beta_binomial(alpha = 1, beta = 2, y = (1+z), n = (2 + q - z)) + geom_vline(xintercept = .5555556, color = "purple") 
+summarize_beta_binomial(alpha = 1, beta = 2, y = (1+z), n = (2 + q - z))
+
+#Fernando's model
+plot_beta_binomial(alpha = 0.50, beta = 1, y = (.5+z), n = (1 + q - z)) + geom_vline(xintercept = 0.6153846, color = "purple")
+summarize_beta_binomial(alpha = 0.50, beta = 1, y = (.5+z), n = (1 + q - z))
+
+#Ciara's model
+plot_beta_binomial(alpha = 3, beta = 10, y = (3+z), n = (10 + q - z)) + geom_vline(xintercept = 0.3333333, color = "purple")
+summarize_beta_binomial(alpha = 3, beta = 10, y = (3+z), n = (10 + q - z))
+
+#Taylor's model
+plot_beta_binomial(alpha = 2, beta = 0.10, y = (2+z), n = (.10 + q - z)) + geom_vline(xintercept = 1.129032, color = "purple")
+summarize_beta_binomial(alpha = 2, beta = 0.10, y = (2+z), n = (.10 + q - z))
+```
+```{r}
+hist(plot_beta(
+
