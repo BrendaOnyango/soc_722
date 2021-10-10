@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(bayesrules)
+library(janitor)
 ```
 
 
@@ -62,28 +63,492 @@ Taylor's prior. Taylor is sure the shop is open.
 plot_beta(alpha = 2, beta = 0.10)
 ```
 
-## Exercise 4.4 
+## Exercise 4.5: Simulation of posterior
 
-We are given y = 3 and n = 7 and we will use these values and  pi|(Y=y)~Beta(alpha + y, B+ n- y) to simulate the posterior for each of the above models. We'll set y equal to z and n equal to q to avoid confusion. 
 ```{r}
-z <- 3
-q <- 7
+#Kimya's simulation 
+set.seed(1000)
+kimya_sim <- data.frame(pi = rbeta(10000, 1, 2)) |> #simulate 10000 values of pi with beta(1,2)
+  mutate(y = rbinom(10000, size = 7, prob = pi)) #size 7 indicates 7 "trials"
+# Keep only the simulated pairs that match our data
+kimya_posterior <- kimya_sim |>  
+  filter(y == 3)
+# Plot the remaining pi values
+ggplot(kimya_posterior, aes(x = pi)) + 
+  geom_histogram()
+
+kimya_posterior |> 
+  summarize(mean(pi), sd(pi)) #estimating posterior mean and sd
+  
+#Fernando's simulation
+set.seed(2000)
+fernando_sim <- data.frame(pi = rbeta(10000, 0.50, 1)) |>  
+  mutate(y = rbinom(10000, size = 7, prob = pi))
+fernando_posterior <- fernando_sim |>  
+  filter(y == 3)
+# Plot the remaining pi values
+ggplot(fernando_posterior, aes(x = pi)) + 
+  geom_histogram()
+
+fernando_posterior |> 
+  summarize(mean(pi), sd(pi))
+
+#Ciara's simulation
+set.seed(3000)
+ciara_sim <- data.frame(pi = rbeta(10000, 3, 10)) |>  
+  mutate(y = rbinom(10000, size = 7, prob = pi))
+ciara_posterior <- ciara_sim |>  
+  filter(y == 3)
+# Plot the remaining pi values
+ggplot(ciara_posterior, aes(x = pi)) + 
+  geom_histogram()
+
+ciara_posterior |> 
+  summarize(mean(pi), sd(pi))
+  
+#Taylor's simulation 
+taylor_sim <- data.frame(pi = rbeta(10000, 2, 0.10)) |>  
+  mutate(y = rbinom(10000, size = 7, prob = pi))
+taylor_posterior <- taylor_sim |>  
+  filter(y == 3)
+# Plot the  pi values that match data
+ggplot(taylor_posterior, aes(x = pi)) + 
+  geom_histogram()
+
+taylor_posterior |> 
+  summarize(mean(pi), sd(pi))
+ 
+```
+
+## Exercise 4.6: Exact posterior
+
+We are given y = 3 and n = 7 and we will use these values to find the posterior for each of the above models. 
+
+The plots below show the posterior model and the mean of each posterior in purple. Summarize_beta_binomial shows the mean numerically.
+
+```{r}
+
 #Kimya's model
-plot_beta_binomial(alpha = 1, beta = 2, y = (1+z), n = (2 + q - z)) + geom_vline(xintercept = .5555556, color = "purple") 
-summarize_beta_binomial(alpha = 1, beta = 2, y = (1+z), n = (2 + q - z))
+plot_beta_binomial(alpha = 1, beta = 2, y = 3, n = 7) + geom_vline(xintercept = .40, color = "purple") 
+summarize_beta_binomial(alpha = 1, beta = 2, y = 3, n = 7)
 
 #Fernando's model
-plot_beta_binomial(alpha = 0.50, beta = 1, y = (.5+z), n = (1 + q - z)) + geom_vline(xintercept = 0.6153846, color = "purple")
-summarize_beta_binomial(alpha = 0.50, beta = 1, y = (.5+z), n = (1 + q - z))
+plot_beta_binomial(alpha = 0.50, beta = 1, y = 3, n = 7) + geom_vline(xintercept = 0.4117647, color = "purple")
+summarize_beta_binomial(alpha = 0.50, beta = 1, y = 3, n = 7)
 
 #Ciara's model
-plot_beta_binomial(alpha = 3, beta = 10, y = (3+z), n = (10 + q - z)) + geom_vline(xintercept = 0.3333333, color = "purple")
-summarize_beta_binomial(alpha = 3, beta = 10, y = (3+z), n = (10 + q - z))
+plot_beta_binomial(alpha = 3, beta = 10, y = 3, n = 7) + geom_vline(xintercept = 0.3000, color = "purple")
+summarize_beta_binomial(alpha = 3, beta = 10, y = 3, n = 7)
 
 #Taylor's model
-plot_beta_binomial(alpha = 2, beta = 0.10, y = (2+z), n = (.10 + q - z)) + geom_vline(xintercept = 1.129032, color = "purple")
-summarize_beta_binomial(alpha = 2, beta = 0.10, y = (2+z), n = (.10 + q - z))
+plot_beta_binomial(alpha = 2, beta = 0.10, y = 3, n = 7) + geom_vline(xintercept = 0.5494505, color = "purple")
+summarize_beta_binomial(alpha = 2, beta = 0.10, y = 3, n = 7)
 ```
-```{r}
-hist(plot_beta(
 
+ 
+Comparing the simulations to the actual posteriors shows that the actual posteriors are very close to the simulated posteriors; they are all within 1 standard deviation of the estimate. 
+
+## 4.7
+
+a) Alpha and beta values are low (meaning high variance) and right skewed; data shows a left skew (more successes than failure) and are greater values so data has more influence on the posterior. 
+b) Alpha is high indicating there'll be a sharp peak (less variance) and there is a low amount of data so prior has more influence on posterior.B
+c) Posterior is a compromise between prior and data. 
+d) Posterior is a compromise between prior and data given that beta indicates success is more unlikely and y and n indicate success is likely and both these sets of values are low. 
+e) Data has more influence on the posterior given n = 200, a high number of trials which increases certainty. 
+
+## 4.8 Plot models given in 4.7 
+
+```{r}
+
+#a
+plot_beta_binomial(alpha = 1, beta = 4, y = 8 , n = 10) #prior is to the left of the liklihood and posterior. Y and n indicate liklihood will be centered around .8
+
+#b
+plot_beta_binomial(alpha = 20, beta = 3, y = 0, n = 1) #Prior and posterior are to the right of liklihood which will be in the shape of a line give y and n. 
+
+#c
+plot_beta_binomial(alpha = 4, beta = 2, y = 1, n = 3) #Prior is slightly left skewed given alpah > beta. 
+
+#d
+plot_beta_binomial(alpha = 4, beta = 2, y = 10, n = 13) #Liklihood is left slightly left skewed and so is prior. Both are centered around 0.75.
+
+#e
+plot_beta_binomial(alpha = 20, beta = 2, y = 10, n=200) #Likelihood will have a sharp peak because of high n and is centered below 0.25. Prior will be left-skewed and is centered above 0.75.
+
+```
+
+
+## 4.9 
+
+a) Prior understanding represented by Beta(7,2) shows that plausible values of pi are around 0.77 (mean). The quantile function shows that 50% of pi values will be between 0.7000 and 0.885.
+```{r}
+plot_beta(7,2, mean = TRUE, mode = TRUE)
+summarize_beta(7,2)
+quantile(rbeta(1000, 7,2))
+
+```
+
+b) Below is a plot of with survey data of y =19 and n = 20. 
+```{r}
+plot_beta_binomial(alpha = 7, beta = 2, y = 19, n = 20)
+summarize_beta_binomial(alpha = 7, beta = 2, y = 19, n = 20)
+```
+With this data, my understanding of pi changed by increasing to  0.896 from 0.777. My certainty of pi has also increased since the liklihood will be narrower based on the data. 
+
+c) If less people preferred dogs in the data then my mean would decrease. 
+```{r}
+plot_beta_binomial(alpha = 7, beta = 2, y = 1, n = 20)
+summarize_beta_binomial(alpha = 7, beta = 2, y = 1, n = 20)
+```
+
+The posterior mean decreased to 0.275. 
+
+d) If people equally prefer cats and dogs, my posterior mean would decrease, but not in the same magnitude as when much fewer people prefer dogs as in c. 
+```{r}
+plot_beta_binomial(alpha = 7, beta = 2, y = 10, n = 20)
+summarize_beta_binomial(alpha = 7, beta = 2, y = 10, n = 20)
+```
+
+## Exercise 4.10
+
+a) In this exercise we'll use the given prior and pi|(Y=y)~Beta(alpha + y, B+ n- y) to find n and y. 
+
+We know alpha + y = 8.5 so we'll solve for y which is y = 8.5 - alpha = 8
+For  n we know .5 + n - y = 2.5 or .5 + n - 8.5 = 2.5 so n = 10 
+```{r}
+summarize_beta_binomial(alpha = .5, beta = .5, y = 8, n = 10)
+plot_beta_binomial(alpha = .5, beta = .5, y = 8, n = 10)
+```
+
+We will use the above process to find the rest of y and n using vectors. 
+
+```{r}
+#finding y for b-f
+alpha <- c(0.5, 10, 8, 2, 1)
+posta <- c(3.5, 12, 15, 5, 30)
+
+y = posta - alpha 
+
+#finding n for b-f 
+beta <- c(0.5, 1, 3, 2, 1)
+postb <- c(10.5, 15, 6, 5, 3)
+n = postb - beta + y 
+```
+
+Next I'll plot these models. 
+```{r}
+#plotting beta binomial 
+#b
+plot_beta_binomial(alpha = .5, beta = .5, y = 3 , n = 13)
+summarize_beta_binomial(alpha = .5, beta = .5, y = 3 , n = 13)
+
+#c
+plot_beta_binomial(alpha = 10, beta = 1, y = 2, n = 16)
+summarize_beta_binomial(alpha = 10, beta = 1, y = 2, n = 16)
+
+#d
+plot_beta_binomial(alpha = 8, beta = 3, y = 7, n = 10)
+summarize_beta_binomial(alpha = 8, beta = 3, y = 7, n = 10)
+
+#e
+plot_beta_binomial(alpha = 2, beta = 2, y = 3, n = 6)
+summarize_beta_binomial(alpha = 2, beta = 2, y = 3, n = 6)
+
+#f
+plot_beta_binomial(alpha = 1, beta = 1, y = 29, n = 31)
+summarize_beta_binomial(alpha = 1, beta = 1, y = 29, n = 31)
+```
+
+## 4.11
+
+```{r}
+
+#a
+summarize_beta_binomial(alpha = 1, beta = 1, y = 10, n = 13)
+plot_beta_binomial(alpha = 1, beta = 1, y = 10, n = 13) #posterior is Beta(11,4)
+
+#b
+summarize_beta_binomial(alpha = 1, beta = 1, y = 0, n = 1)
+plot_beta_binomial(alpha = 1, beta = 1, y = 0, n = 1) #posterior is Beta(1,2)
+
+#c
+summarize_beta_binomial(alpha = 1, beta = 1, y = 100, n = 130)
+plot_beta_binomial(alpha = 1, beta = 1, y = 100, n = 130) #posterior is Beta(101, 31)
+
+#d
+summarize_beta_binomial(alpha = 1, beta = 1, y = 20, n = 120)
+plot_beta_binomial(alpha = 1, beta = 1, y = 20, n = 120) #posterior is Beta(21, 101)
+
+#e
+summarize_beta_binomial(alpha = 1, beta = 1, y = 234, n = 468)
+plot_beta_binomial(alpha = 1, beta = 1, y = 234, n = 468) #posterior is Beta(235,235)
+
+```
+
+
+## Exercise 4.12 Repeating 4.11 with prior pi~Beta(10,2)
+
+```{r}
+#a
+summarize_beta_binomial(alpha = 10, beta = 2, y = 10, n = 13)
+plot_beta_binomial(alpha = 10, beta = 2, y = 10, n = 13) #posterior is Beta(20,5)
+
+#b
+summarize_beta_binomial(alpha = 10, beta = 2, y = 0, n = 1)
+plot_beta_binomial(alpha = 10, beta = 2, y = 0, n = 1) #posterior is Beta(10,3)
+
+#c
+summarize_beta_binomial(alpha = 10, beta = 2, y = 100, n = 130)
+plot_beta_binomial(alpha = 10, beta = 2, y = 100, n = 130) #posterior is Beta(110, 32)
+
+#d
+summarize_beta_binomial(alpha = 10, beta = 2, y = 20, n = 120)
+plot_beta_binomial(alpha = 10, beta = 2, y = 20, n = 120) #posterior is Beta(30, 102)
+
+#e
+summarize_beta_binomial(alpha = 10, beta = 2, y = 234, n = 468)
+plot_beta_binomial(alpha = 10, beta = 2, y = 234, n = 468) #posterior is Beta(244,236)
+
+```
+
+
+## Exercise 4.13
+
+a) The politician's prior understanding can be represented by Unif(0.5,1).
+```{r}
+
+#plotting uniform distribution with code modified from https://www.statology.org/plot-uniform-distribution-in-r/
+
+#define x-axis
+x <- seq(0.0, 1.5, length=50)
+
+#calculate uniform distribution probabilities
+y <- dunif(x, min = 0.50, max = 1)
+
+#plot uniform distribution
+plot(x, y, type = 'l')
+
+
+```
+
+b) The politician thinks that that his approval rating being any value between 50% is and 100% is equally likely. 
+
+c) construct a formula and sketch posterior understanding if y = 0 and n = 100. We'll use pi|(Y=y)~Beta(alpha + y, B+ n- y)
+
+posterior alpha = 0.5 + 0, posterior beta = 1 + 100 - 0 so posterior is Beta(0.50, 101)
+```{r}
+plot_beta(0.50, 101)
+summarize_beta(0.50, 101)
+```
+
+d) The posterior model above shows a mean that approaches 0. The exact posterior mean is 0.004926108 and we can see in the model that all f(pi) between 0.50 > pi < 1 are close to this mean. This is telling us that based on the data and our limitation of the posterior being on the same scale of the prior, that his support is very low, but we don't see much variation. The politician's prior is too limited on it's x axis to account for all possible values of his approval rating. A uniform prior of Beta(1,1) would have even given a more useful posterior than the current one. Ideally, the prior would allow for a larger x axis for to allow for more possibilities even if it favors the politician having high ratings. The difference priors of Beta(1,1) and Beta (4,2) make for the posterior plot are shown below.
+
+```{r}
+plot_beta_binomial(alpha = 1, beta = 1, y = 0, n = 100) #uniform distribution that allows for all values 0>pi<1
+
+plot_beta_binomial(alpha = 20, beta = 10, y = 0, n = 100) #beta prior that shows support for politician may be high
+```
+
+
+
+## Exercise 4.15 
+
+```{r}
+
+#a
+plot_beta_binomial(alpha = 2, beta = 3, y = 1, n = 1) #Updating after first observation is a success 
+summarize_beta_binomial(alpha = 2, beta = 3, y = 1, n = 1) #posterior Beta(3,3)
+
+#b
+plot_beta_binomial(alpha = 3, beta = 3, y = 2, n = 2) #updating after second success and using first posterior as updated prior 
+summarize_beta_binomial(alpha = 3, beta = 3, y =2, n = 2) #Posterior is Beta(5,3)
+
+#c
+plot_beta_binomial(alpha = 5, beta = 3, y = 2, n = 3) #update after failure and with a new prior 
+summarize_beta_binomial(alpha = 5, beta = 3, y = 2, n = 3)#posterior is Beta(7,4)
+
+#d
+plot_beta_binomial(alpha = 7, beta = 4, y = 3, n = 4) #update after 4th trial is success
+summarize_beta_binomial(alpha = 7, beta = 4, y = 3, n = 4) #final posterior is Beta(10, 5)
+
+
+```
+
+## Exercise 4.16
+
+```{r}
+
+#a
+plot_beta_binomial(alpha = 2, beta = 3, y = 3, n = 5) #Updating after first observation is 3 out 5 successes
+summarize_beta_binomial(alpha = 2, beta = 3, y = 3, n = 5) #posterior is Beta(5,5)
+
+#b
+plot_beta_binomial(alpha = 5, beta = 5, y = 4, n = 10) #updating after second set of observations is 1 out of 5 for a total of 4 out 10 successes
+summarize_beta_binomial(alpha = 5, beta = 5, y = 4, n = 10) #posterior is Beta(9,11)
+
+#c
+plot_beta_binomial(alpha = 9, beta = 11, y = 5, n = 15) #update after 3rd round of observations with 1 success out of 5 for a total of 5 out of 15 successes
+summarize_beta_binomial(alpha = 9, beta = 11, y = 5, n = 15) #posterior is Beta(9,16)
+
+#d
+plot_beta_binomial(alpha = 9, beta = 16, y = 7, n = 20) #update after 4th trial has 2 out 5 successes for a total of 7 out of 20 successes 
+summarize_beta_binomial(alpha = 9, beta = 16, y = 7, n = 20) #final posterior is Beta(16, 29)
+```
+
+## 4.17
+
+a) Employee's prior pdfs. 
+
+```{r}
+
+plot_beta(4,3, mean = TRUE, mode = TRUE)
+quantile(rbeta(1000, 4,3))
+summarize_beta(4,3)
+
+#The employees' prior understanding shows they think it's more likely that visitors will click on the site (there's a left-skew). The quantile function shows that f(pi) is centered around 0.577; the mean is 0.5714286. 
+```
+
+b) Using  given prior, Beta(4,3) and pi|(Y=y)~Beta(alpha + y, B+ n - y) we can find the posteriors "from scratch). For example the first employee, with y = 0 and n =1, will have posterior alpha of 4 + 0 = 4 and posterior beta of 3 + 1 - 0 = 4 so a posterior of Beta(4,4). plot_beta_binomial() confirms this. We can automate a bit using vectors.  
+
+```{r}
+a <- 4
+b <- 3
+yclicks <- c(0, 3, 20)
+nsamp <- c(1, 10, 100) #employee's sample sizes 
+postalpha <- a + yclicks
+postbeta <- b + nsamp - yclicks
+```
+
+The posterior models are Beta(4,4), Beta(7,10), and Beta(24,20).
+
+c&d) 
+
+```{r}
+
+#employee 1
+plot_beta_binomial(alpha = 4, beta = 3, y = 0, n = 1)
+summarize_beta_binomial(alpha = 4, beta = 3, y = 0, n = 1)
+
+#employee 2
+plot_beta_binomial(alpha = 4, beta = 3, y = 3, n = 10)
+summarize_beta_binomial(alpha = 4, beta = 3, y = 3, n = 10)
+
+#employee 3 
+plot_beta_binomial(alpha = 4, beta = 3, y = 20, n = 100)
+summarize_beta_binomial(alpha = 4, beta = 3, y = 20, n = 100)
+```
+
+The first employee had the worst dataset among the three so the prior really influenced the posterior. The second employee has the most balance between his prior and data among the three employees. The final employee has the strength of a dataset with high n so it has a posterior with the least variance among the three and that is heavily influenced by the data. I would rely on the third employee's model to make decisions about pulling or keeping the ad. 
+
+## Exercise 4.18 
+
+a) The posterior's at the end of the first day will be Beta(4,4) that we found in the last problem. 
+
+Day 2 will see the addition of 10 data points and  3 successes for a total of y2 = 3 n2 = 11. Using this and pi|(Y=y)~Beta(alpha + y, B + n - y) and our updated prior will give us day 2 posterior of Beta(7,12).
+
+Day 3 will have Beta(7,12) as our new prior. We add 100 data points and 20 successes for y3 = 23 and n3 = 111. alpha + y3 = 30; beta + n3 - y3 = 100 for Beta(30, 100).
+
+b)
+
+```{r}
+#day 1
+plot_beta_binomial(alpha = 4, beta = 3, y = 0, n = 1)
+summarize_beta_binomial(alpha = 4, beta = 3, y = 0, n = 1) #posterior is Beta(4,4)
+
+#day 2
+plot_beta_binomial(alpha = 4, beta = 4, y = 3, n = 11)
+summarize_beta_binomial(alpha = 4, beta = 4, y = 3, n = 11) #posterior is Beta(7,12)
+
+#day 3
+plot_beta_binomial(alpha = 7, beta = 12, y = 23, n = 111)
+summarize_beta_binomial(alpha = 7, beta = 12, y = 23, n = 111) #posterior is Beta(30, 100)
+
+#As they collected more data the fourth employee reduced variance in his posterior model. The fourth employee can be more certain of his pi. 
+```
+c) If I understand this question, suppose the fourth employee started with Beta(4,3) and went straight to y = 23 and n = 111 instead of going sequentially, the plot and summary would like the below. 
+
+```{r}
+plot_beta_binomial(alpha = 4, beta = 3, y = 23, n = 111)
+summarize_beta_binomial(alpha = 4, beta = 3, y = 23, n = 111) #posterior is Beta (27,91).
+
+#Comparing this to Beta(30, 100) from the sequential analysis, we notice that variance is slightly higher in the non-sequential analysis (0.00148284 versus 0.001355075) and that the meanshave a small difference. This demonstrates that more certainty in a posterior model can be achieved if we update our priors as we collect more information. 
+```
+
+## Exercise 4.19
+
+Import bechdel data. 
+```{r}
+data(bechdel, package = "bayesrules")
+```
+
+
+a) John analyzes movies from 1980. 
+
+```{r}
+
+bechdel |>  
+  filter(year == 1980) |>  
+  tabyl(binary) |> 
+  adorn_totals("row")
+
+ 
+```
+
+His first day's posterior can be modeled and summarized with the below.
+
+```{r}
+plot_beta_binomial(alpha = 1, beta = 1, y = 4, n = 14)
+summarize_beta_binomial(alpha = 1, beta = 1, y = 4, n = 14) #Posterior is Beta(5,11)
+```
+
+b) Day 2, John analyzes movies from the 1990s with updated prior from day 1. 
+
+```{r}
+
+bechdel |>  
+  filter(year == 1990) |>  
+  tabyl(binary) |> 
+  adorn_totals("row")
+```
+
+Day 2 model. 
+
+```{r}
+plot_beta_binomial(alpha = 5, beta = 11, y = 10, n = 29) #total passes so far equals 6 + 4 and updated n size is 14 + 15
+summarize_beta_binomial(alpha = 5, beta = 11, y = 10, n = 29) #Posterior is Beta(15,30)
+```
+
+c) Day 3 model.
+
+```{r}
+bechdel |>  
+  filter(year == 2000) |>  
+  tabyl(binary) |> 
+  adorn_totals("row")
+```
+
+Plot and summary with updated y an n and new prior from day 2. 
+
+```{r}
+plot_beta_binomial(alpha = 15, beta = 30, y = 39, n = 92) #total passes so far equals 6 + 4 + 29 and total n = 63 + 15 + 14
+summarize_beta_binomial(alpha = 15, beta = 30, y = 39, n = 92) #Posterior is Beta(54,83)
+```
+
+d) Jenna's non-sequential method. 
+
+```{r}
+bechdel |>  
+  filter(year %in% c("1980", "1990", "2000")) |>  #filtered by three years of relevance with code adapted from Moderndrive 
+  tabyl(binary) |> 
+  adorn_totals("row")
+```
+
+
+```{r}
+plot_beta_binomial(alpha = 1, beta = 1, y = 39, n = 92)
+summarize_beta_binomial(alpha = 1, beta = 1, y = 39, n = 92) #Posterior is Beta(40, 54)
+```
+
+## Exercise 4.20 
+
+Frequentists often begin their analyses with a null (and alternate) hypothesis which is different from how Bayesians begin by estimating the distribution of probabilities for a set of data. A similarity is that both Bayesians and frequentists allow for new data to change their prior or hypothesis, respectively. Both also have the same subjectivity issues that can come with data collection and management practices. 
