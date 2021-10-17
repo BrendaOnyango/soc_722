@@ -341,4 +341,189 @@ nn_sim <- stan(model_code = normal_model, data = d,
 
 ## Exercise 6.13
 
+a) Step 1 is defining the model given by prior pi~Beta(3,8) and n = 10 with Y = 2. 
+```{r}
+library(bayesrules)
+```
+
+
+```{r}
+bb_model <- "
+  data {
+    int<lower = 0, upper = 10> Y;
+  }
+  parameters {
+    real<lower = 0, upper = 1> pi;
+  }
+  model {
+    Y ~ binomial(10, pi);
+    pi ~ beta(3, 8); 
+  }
+"
+```
+
+Step 2 is simulating the posterior. 
+
+```{r}
+bb_sim <- stan(model_code = bb_model, data = list(Y = 2), 
+               chains = 3, iter = 12000*2, seed = 400) 
+```
+
+b) Produce a trace plot for each chain. 
+```{r}
+mcmc_trace(bb_sim, pars = "pi", size = 0.3)
+```
+
+c) The range of values on the x axis is 0-6000. It is not 12,000 because the first half of iterations for each chain aer thrown out by the iter argument. 
+
+d) Create density plot of values for 3 chains. 
+
+```{r}
+
+mcmc_dens(bb_sim, pars = "pi") + 
+  yaxis_text(TRUE) + 
+  ylab("density") 
+```
+
+d) Specify posterior model and compare to MCMC approximation. 
+
+```{r}
+summarize_beta_binomial(alpha = 3, beta = 8, y = 2, n = 10)
+plot_beta_binomial(alpha = 3, beta = 8, y = 2, n = 10)
+```
+
+The MCMC approximation is pretty good. It centers around 0.2 and the true posterior mean is 0.238. 
+
+## Exercise 6.14
+
+Repeat the above for Beta(4,3) and Y = 4, n = 12. 
+```{r}
+#step 1: define model
+
+bbb_model <- "
+  data {
+    int<lower = 0, upper = 12> Y;
+  }
+  parameters {
+    real<lower = 0, upper = 1> pi;
+  }
+  model {
+    Y ~ binomial(12, pi);
+    pi ~ beta(4, 3);  
+  }
+"
+#step 2: simulate the model 
+bbb_sim <- stan(model_code = bbb_model, data = list(Y = 4), #y = 4
+               chains = 3, iter = 12000*2, seed = 400) 
+
+#step 3: 
+mcmc_trace(bbb_sim, pars = "pi", size = 0.3)
+
+#density plot
+mcmc_dens(bbb_sim, pars = "pi") + 
+  yaxis_text(TRUE) + 
+  ylab("density") 
+
+#actual posterior 
+summarize_beta_binomial(alpha = 4, beta = 3, y = 4, n = 12)
+plot_beta_binomial(alpha = 4, beta = 3, y = 4, n = 12)
+```
+
+This is another good MCMC approximation that is centered around 0.4 while the true posterior mean is 0.42. 
+
+## Exercise 6.15
+
+a & b
+
+```{r}
+# Step 1: Define  the model
+gp_model <- "
+  data {
+    int<lower = 0> Y[3];
+  }
+  parameters {
+    real<lower = 0> lambda;
+  }
+  model {
+    Y ~ poisson(lambda);
+    lambda ~ gamma(20, 5);
+  }
+"
+
+# Step 2: simulate the posterior
+gp_sim <- stan(model_code = gp_model, data = list(Y = c(0,1,0)), 
+               chains = 4, iter = 10000*2, seed = 500)
+
+#trace and density plots 
+mcmc_trace(gp_sim, pars = "lambda", size = 0.3)
+
+mcmc_dens(gp_sim, pars = "lambda") + 
+  yaxis_text(TRUE) + 
+  ylab("density")
+
+```
+
+c) Fro the density plot the most possible posterior value of lambda is 2.5. 
+
+d) 
+```{r}
+summarize_gamma_poisson(shape = 20, rate = 5, sum_y = 1, n = 3)
+plot_gamma_poisson(shape = 20, rate = 5, sum_y = 1, n = 3)
+```
+
+This was a good MCMC estimation. The true posterior mean is 2.625 and the approximation centered around 2.5. 
+
+## Exercise 6.16
+
+```{r}
+# Step 1: Define  the model
+gpp_model <- "
+  data {
+    int<lower = 0> Y[3];
+  }
+  parameters {
+    real<lower = 0> lambda;
+  }
+  model {
+    Y ~ poisson(lambda);
+    lambda ~ gamma(5, 5);
+  }
+"
+
+# Step 2: simulate the posterior
+gpp_sim <- stan(model_code = gpp_model, data = list(Y = c(0,1,0)), 
+               chains = 4, iter = 10000*2, seed = 500)
+
+#trace and density plots 
+mcmc_trace(gpp_sim, pars = "lambda", size = 0.3)
+
+mcmc_dens(gpp_sim, pars = "lambda") + 
+  yaxis_text(TRUE) + 
+  ylab("density")
+
+#true posterior
+summarize_gamma_poisson(shape = 5, rate = 5, sum_y = 1, n = 3)
+plot_gamma_poisson(shape = 5, rate = 5, sum_y = 1, n = 3)
+
+```
+
+The approximation centers around 0.6 and the true posterior mean is 0.75; this MCMC was not as great as earlier ones. 
+
+## Exercise 6.17
+
+```{r}
+normal_model <- "
+data {
+    vector[4] Y; 
+} 
+parameters {
+    real mu;
+} 
+model {
+   Y ~ normal(mu, 1^2);
+   mu ~ normal(0, 10^2);
+}
+"
+```
+
 
