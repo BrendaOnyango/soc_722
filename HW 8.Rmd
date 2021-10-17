@@ -247,6 +247,98 @@ ggplot(grid_data, aes(x = mu_grid, y = posterior)) +
   geom_segment(aes(x = mu_grid, xend = mu_grid, y = 0, yend = posterior))
 ```
 
+## Exercise 6.8
+
+a) A high dimensional Bayesian model could be useful for analyzing how well a medication works over time across different patients. The dimensions are time/age of patient and symptoms; there will be different symptoms across patients and across time. 
+
+b) The issue with dimensionality is that even for 2 dimensions, there could be an enormous scale of approximations to make because approximations would need to be calculated for both the x and y axis. If we had 100 values for the x-dimension and 100 for the y-dimension that would be 10,000 approximations. This may be timely and is inefficient to run as dimensions and number of values increase. 
 
 ## Exercise 6.9
-a) The drawback of grid approximation is ineffiency for estimating large,scale 
+
+a) The drawback for both grid approximations and MCMC are that they are discretized approximations. We should remember this when using these methods for continuous data. 
+
+b) The advantage of both MCMC and grid approximation are that they allow for approximations for posteriors that are difficult to solve by-hand. 
+
+c) An advantage that grid has over MCMC is that the code seems generally easier to write and can be done in R (without using Rstan and associated C++ issues). 
+
+d) An advantage of MCMC over grid approximation is the ability to estimate posteriors for multiple dimensions. 
+
+## Exercise 6.10 
+
+For something to be a Markov chain, event i is dependent only on i-1. There is memorylessness and otherwise independence for the event for i-2, i-3, and so on. 
+
+a) This scenario is not an Markov chain if I assume that the first several nights in a row involved me going to a Thai restaurant. The prior frequency of Thai restaurants (on days i-2, i-3, etc.) may influence my choice on day i. 
+
+b) This is also not a Markov chain because there is complete independence from day to day for winning the lottery. Markov chains need i to be dependent on i-1. 
+
+c) This is not a Markov chain for similar reasons to a. There is memory about i-2, i-3, etc., i.e. an experienced chess player does remember the prior moves of other players. If the players are not good and can only remember the last game they played, then this could be a Markov chain. 
+
+## Exercise 6.11 
+
+Use information to write RStan syntax.
+
+a) 
+
+bb_model <- "
+  data {
+    int<lower = 0, upper = 12> Y;
+  }
+  parameters {
+    real<lower = 0, upper = 1> pi;
+  }
+  model {
+    Y ~ binomial(20, pi);
+    pi ~ beta(1, 1);
+  }
+  "
+
+b) 
+
+gp_model <- "
+  data {
+    int<lower = 0> Y[3];
+  }
+  parameters {
+    real<lower = 0> lambda;
+  }
+  model {
+    Y ~ poisson(lambda);
+    lambda ~ gamma(4, 2);
+  }
+"
+
+c)
+
+normal_model <- "
+data {
+    vector[4] Y; 
+} 
+parameters {
+    real mu;
+} 
+model {
+   Y ~ normal(mu, 1^2);
+   mu ~ normal(0, 10^2);
+}
+"
+
+## Exercise 6.12 
+
+Write the Rstan syntax for simulating the posterior. 
+
+a)
+bb_sim <- stan(model_code = bb_model, data = list(Y = 12), 
+               chains = 4, iter = 1000*2, seed = 100) #chose 1000 to reduce processing time
+
+b)
+gp_sim <- stan(model_code = gp_model, data = list(Y = c(3)), 
+               chains = 4, iter = 1000*2, seed = 200)
+
+c) 
+d <- list(Y = c(12.2))
+nn_sim <- stan(model_code = normal_model, data = d, 
+               chains = 4, iter = 1000*2, seed = 300)
+
+## Exercise 6.13
+
+
