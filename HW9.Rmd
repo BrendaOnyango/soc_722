@@ -1,0 +1,391 @@
+---
+title: "HW 9_Onyango"
+author: "Brenda Onyango"
+date: "10/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise 8.1
+
+The three common tasks in a posterior analysis: estimation, hypothesis testing, and prediction. 
+
+## Exercise 8.2
+
+a) When only reporting the central tendency we don't get a sense of the variability of possible values of pi. Depending on sample size the posterior credible interval could be narrow or wider (figure 8.2 in the chapter demonstrates this). Having both central tendency and variability allows us to compare different posterior models of the same prior model. 
+
+b) A 95% credible interval of (1, 3.4) means there's a 95% posterior probability that lambda is between 1 and 3.4 
+
+## Exercise 8.3 
+
+a) Yes this could be hypothesis tested. Ho is that 40% of dogs at the park do not have a license; Ha is that more than 40% of dogs at the park do not have a license. 
+
+b) As its written this could not be hypothesis tested.
+
+c) Yes. The null hypothesis is that 60% of people support a regulation; the alternative is that more than 60% of people support the legislation.
+
+d) ?
+
+## Exercise 8.4
+
+## Exercise 8.5
+
+## Exercise 8.6
+
+a) A 95% credible interval for π with π|y∼Beta(4,5)
+
+First load packages needed for this exercise. 
+```{r}
+library(tidyverse)
+library(bayesrules)
+library(rstan)
+library(bayesplot)
+library(broom.mixed)
+library(janitor)
+
+```
+
+Next find the 95% credible interval. 
+
+```{r}
+# 0.025th & 0.975th quantiles of the Beta(4,5) posterior
+qbeta(c(0.025, 0.975), 4, 5)
+```
+
+b)
+```{r}
+# 0.20th & 0.80th quantiles of the Beta(4,5) posterior
+qbeta(c(0.20, 0.8), 4, 5)
+```
+
+c)
+```{r}
+# 0.025th & 0.975th quantiles of the Gamma(1,8) posterior
+qgamma(c(0.025, 0.975), 1, 8)
+```
+
+## Exercise 8.7
+
+a) 
+```{r}
+# 0.005th & 0.995th quantiles of the Gamma(1,5) posterior
+qgamma(c(0.005, 0.995), 1, 5)
+
+```
+
+b) 
+```{r}
+# 0.025th & 0.975th quantiles of the Normal(10,2^2) posterior
+qnorm(c(0.025, 0.975), 10, 2)
+```
+
+c)
+```{r}
+# 0.20th & 0.80th quantiles of the Normal(-3, 1^2) posterior
+qnorm(c(0.20, 0.8), -3, 1)
+```
+
+## Exercise 8.8
+
+a)
+```{r}
+# finding density between 0 and .95.
+qgamma(c(0,.95), 1, 5)
+```
+
+
+Next I'll plot this to see density. 
+```{r}
+plot_gamma(1,5)
+```
+
+b
+```{r}
+# 0.025th & 0.975th quantiles of the Gamma(1,5) posterior with the middle approach 
+qgamma(c(0.025, 0.975), 1, 5)
+```
+
+c) The two intervals are not the same; the second interval has a range of about 0.732 and the first has a range of .59. They also differ in their upper limit. Based on the plot in part a the first apporach is more appropriate because f(lambda) decreases and approaches 0 rapidly after 0.50. The more likely values are between 0 and 0.5 which is why the highest posterior density approach is better in this case. 
+
+d) 
+
+```{r}
+# finding density between 0 and .95 for a normal dist.
+qnorm(c(0,.95), -13, 2)
+```
+```{r}
+plot_normal(-13,2)
+```
+
+e) Next the middle 95% approach.
+
+```{r}
+qnorm(c(0.025, 0.975), -13, 2)
+```
+
+f) For the normal distribution the middle approach is more appropriate. The highest poster density appraoch gave a credible interval that ranged from - infinity to -9.71. -infinity is more improbable than -16.919 (lower bound of the middle 95% approach. 
+
+
+
+## Exercise  8.9
+a) what is posterior probability for alternative pi > 0.4? 
+```{r}
+
+#find posterior probability that pi > 0.4
+
+post_proba <- pbeta(0.40, 4,3)
+plot_beta(4,3, mean = TRUE)
+#This can be interpreted as there's roughly 17.92% posterior chance that the probability is *below* 0.40. The alternative can be found by doing 1-.1792 which is 0.8208. Looking at the plot below confirms the density of f(pi) is higher after 0.40 so the 0.8208 value makes sense. 
+```
+
+b) Calculate the posterior odds and interpret. 
+```{r}
+post_prob <- 0.8208
+post_odds <- post_prob/(1-post_prob)
+```
+
+Post_odds = 4.58035 which means that pi is nearly 5 times more likely to be above 0.40 than to be below 0.40. 
+
+c) Calculate and interpret prior odds. 
+```{r}
+#prior probability that pi is < 0.40
+prior_proba <- pbeta(0.40, 1, 0.8)
+prior_prob <-  1 - prior_proba #prior probability that pi is greater than 0.40 
+prior_odds <- prior_prob/(1-prior_prob)
+```
+
+Prior odds are 1.9809 which means the odds of pi being above .4 are about twice that of pi being below 0.40. 
+
+d) Calculate and interpret Bayes factor. 
+```{r}
+BFa <- post_odds/prior_odds
+```
+
+The posterior odds of our alternate hypothesis are about 2 times higher than the prior odds which means our confidence in the alternate hypothesis increased. 
+
+e) The posterior probability (0.8208) and Bayes Factor (2.312) establish evidence in favor the the altnerate hypothesis that pi is greater than 0.40. 
+
+## Exercise 8.10 
+
+a) Find posterior probability that mu < 5.2 for N(5,3^2)
+```{r}
+post_probb <- pnorm(5.2, 5,3)
+```
+
+b) 
+```{r}
+post_oddb <- post_probb/(1-post_probb)
+```
+
+The post_odds of 1.112 means that mu is about 1 times more likely to be below 5.2 than to be above 5.2. 
+
+c) 
+```{r}
+prior_probb <- pnorm(5.2, 10, 10)
+prior_oddb <- prior_probb/(1-prior_probb)
+```
+
+Prior odds are 4.580 which means the odds of mu being below 5.2 are about five times that of mu being above 5.2.
+```{r}
+plot_normal(5,3)
+```
+
+d)
+
+```{r}
+#finding Bayes Factor 
+
+BFb <- post_oddb/prior_oddb
+```
+
+The Bayes Factor is 2.41188 which means posterior odds of our alternate hypothesis are about 2 times higher than the prior odds, therefore  our confidence in the alternate hypothesis (mu is less than 5.2) increased.
+
+e) The posterior probability (0.526576) and Bayes Factor (2.41188) establish evidence in favor the the altnerate hypothesis that mu is less than 5.2. 
+
+#Exercise 8.14
+
+a) The beta binomial is appropriate since we're interested in understanding pi 
+b) I'm assuming that more people do believe in climate change than those that do not with mid level confidence so my prior is Beta(3,7) indicating more failures than successes for Y. 
+
+c) Below are plots comparing my prior to that of the author's. 
+```{r}
+plot_beta(3,7, mean = TRUE)
+plot_beta(1,2, mean = TRUE)
+```
+
+We both agree that beta > alpha meaning more people believe in climate change than not but the author's distribution shows more variability than mine which means they're less sure. 
+
+d) First I'll take a look at the the data I'll use. 
+
+```{r}
+d <- pulse_of_the_nation
+view(pulse_of_the_nation)
+```
+
+Next I'll create a set with just climate responses. Then I'll identify how many people responded that climate change is "Not Real At All." 
+
+```{r}
+d_climate_change <- d |>
+  select(climate_change)  |> 
+  drop_na()
+view(d_climate_change)
+```
+
+```{r}
+sum(d_climate_change$climate_change == 'Not Real At All')
+```
+
+From this we see Y = 150 i.e. 150 respondents out of 1000 answered that climate change is "Not Real At All."
+
+e) 
+```{r}
+#finding posterior model of beta
+plot_beta_binomial(alpha = 1, beta = 2, y = 150, n = 1000)
+summarize_beta_binomial(alpha = 1, beta = 2, y =150, n = 1000)
+```
+
+Posterior is Beta(151, 852)
+
+```{r}
+#finding middle 95% posterior credible interval 
+# 0.025th & 0.975th quantiles of the Beta(151,852) posterior
+qbeta(c(0.025, 0.975), 151, 852)
+```
+
+There is a 95% posterior probability that somewhere between 12.91% and 17.33% of people don't believe in climate change. 
+
+## Exercise 8.15
+
+a) Based on the credible interval I would say that Ha: pi > 0.1 is more likely. 
+
+b)
+```{r}
+post_probc <- pbeta(0.10, 151,852) #post_probc of pi being less than 0.1
+post_probcc <- 1-post_probc #doing the complement to find prob of pi being greather than .1
+```
+This can be interpreted as there's roughly 99.99% posterior chance that the probability is *above* 0.10.
+
+c) Calculate and interpret bayes factor. 
+
+```{r}
+post_oddc <- post_probcc/(1-post_probcc) #finding posterior odds
+post_oddc
+```
+
+Next find prior odds 
+```{r}
+prior_prob <- pbeta(.1, 1, 2)
+prior_probc <- 1-prior_prob
+prior_probc
+```
+
+```{r}
+prior_oddc <- prior_probc/(1-prior_probc)
+prior_oddc
+```
+```{r}
+BFc <- post_oddc/prior_oddc
+BFc
+```
+
+d) The Bayes Factor is 750017.6 which means posterior odds of our alternate hypothesis are about 750017.6 times higher than the prior odds, therefore our confidence in the alternate hypothesis (pi is greater than .1) increased.
+
+## Exercise 8.16
+
+a) 
+```{r}
+# define the model
+climate_model <- "
+  data {
+    int<lower = 0, upper = 1000> Y;
+  }
+  parameters {
+    real<lower = 0, upper = 1> pi;
+  }
+  model {
+    Y ~ binomial(1000, pi);
+    pi ~ beta(1, 2);
+  }
+"
+
+# simulate the posterior
+climate_sim <- stan(model_code = climate_model, data = list(Y = 150), 
+                chains = 4, iter = 5000*2, seed = 80)
+```
+
+b) 
+Produce and discuss trace plots, overlaid desnity plots, and autocorrelation plots. 
+```{r}
+# Parallel trace plots & density plots
+mcmc_trace(climate_sim, pars = "pi", size = 0.5) + 
+  xlab("iteration")
+mcmc_dens_overlay(climate_sim, pars = "pi")
+
+# Autocorrelation plot
+mcmc_acf(climate_sim, pars = "pi")
+```
+The MCMC trace plot looks appropriate (like a fuzzy caterpillar so it is stable) and pi is between 12.5% and 17.5%.The density plot shows a peak somewhere between 0.14 and 0.16. The autocorrelation plots show agreement among the four chains. 
+
+c) 
+```{r}
+# Markov chain diagnostics
+rhat(climate_sim, pars = "pi")
+neff_ratio(climate_sim, pars = "pi")
+```
+
+Rhat of 1 means that the simulation is extremely stable. If we multiply the neff by 20000 we get 6475.052 so this simulation is as effective as 6475 independent samples. 
+```{r}
+  0.3237526*20000 #multiplying by 20000 because four Markov chains each with 5000 iterations 
+```
+
+
+## Exercise 8.17
+
+a) Use MCMC simulation to approximate a middle 95% posterior credible interval for pi using tidy. 
+
+```{r}
+
+# MCMC posterior approximation
+mcmc_dens(climate_sim, pars = "pi") + 
+  lims(x = c(0,0.175)) #used upper limit from Markov
+```
+
+```{r}
+tidy(climate_sim, conf.int = TRUE, conf.level = 0.95) # A tibble: 1 × 5
+```
+```{r}
+mcmc_areas(climate_sim, pars = "pi", prob = 0.95) #shade 95% a visual complement to the mcm estimate
+```
+
+b) approximate posterior that probability that pi > 0.10
+```{r}
+# store 4 chains in a data frame
+climate_chains_df <- as.data.frame(climate_sim, pars = "lp__", include = FALSE)
+dim(climate_chains_df)
+
+# posterior summaries of pi 
+climate_chains_df |> 
+  summarize(post_mean = mean(pi), 
+            post_median = median(pi),
+            post_mode = sample_mode(pi),
+            lower_95 = quantile(pi, 0.025),
+            upper_95 = quantile(pi, 0.975))
+```
+
+```{r}
+climate_chains_df |> 
+  mutate(above = pi > 0.10) |> #pi values that are above 0.10
+  tabyl(above)
+
+climate_chains_df |> 
+  mutate(exceed = pi < .10) |> 
+  tabyl(exceed)
+#interesting to see how tabyl returned the same percent of above and below .1
+```
+
+The approximations in part a and b shows a post mode and mean of about 0.15. The exact posterior mean found in 8.14 is about 0.15 so the approximation is very close to the actual. 
+
+## Exercise 8.18
