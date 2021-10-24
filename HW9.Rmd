@@ -27,11 +27,23 @@ b) As its written this could not be hypothesis tested.
 
 c) Yes. The null hypothesis is that 60% of people support a regulation; the alternative is that more than 60% of people support the legislation.
 
-d) ?
+d) Yes. This would be a Gamma-Poisson model since we're given a rate. 
 
 ## Exercise 8.4
 
+a) Posterior odds are the posterior probability divied by 1 minus the posterior probability and represent an updated understanding of pi,mu, or lambda that indicates how much more liklely or unlikely an hypothesis is.
+
+b) Prior odds are the prior probability divided by 1 minus the prior probability and represent a prior understanding of pi, mu or lambda. 
+
+c) Bayes Factor is a ratio of posterior odds to prior odds and comparing Bayes Factor to 1 helps make judgements about H0 and Ha. BF = 1 means that the plausibility of Ha didn't change in light of data; >1 means the plausibility of Ha is greater in light of data; and < 1 means the plausibility of Ha decreased in light of data. 
+
 ## Exercise 8.5
+
+a) The two types of variability in posterior predictive models are sampling variability and posterior variability. Sampling variability is variability in the data; posterior variability is the variability in possible values of pi. 
+
+b) A real life situation for posterior prediction are elections or weather forecasting. 
+
+c) Posterior predictive models are conditional on both the data and the parameter since they take into account sampling variability (data) and the posterior variability which relates to the parameter. 
 
 ## Exercise 8.6
 
@@ -389,3 +401,179 @@ climate_chains_df |>
 The approximations in part a and b shows a post mode and mean of about 0.15. The exact posterior mean found in 8.14 is about 0.15 so the approximation is very close to the actual. 
 
 ## Exercise 8.18
+
+a) 
+```{r}
+# Set the seed
+set.seed(100)
+
+# Predict a value of Y' for each pi value in the chain
+climate_chains_df <- climate_chains_df |>  
+  mutate(y_predict = rbinom(length(pi), size = 100, prob = pi))
+
+# looking at the chains 
+climate_chains_df |> 
+  head(5)
+
+```
+
+Histogram of the model 
+```{r}
+# Plot the 20,000 predictions
+ggplot(climate_chains_df, aes(x = y_predict)) + 
+  stat_count()
+```
+
+b) 
+```{r}
+climate_chains_df |>  
+  summarize(mean = mean(y_predict),
+            lower_80 = quantile(y_predict, 0.1),
+            upper_80 = quantile(y_predict, 0.9))
+```
+c) There's an 80% chance that Y' is between 10 and 20. 
+
+## Exercise 8.19 
+
+a) 
+The normal-normal is appropriate since we're learning about mu and we have a series of measurements. 
+
+b) My prior understanding is that mu is 200mm. We're given a range of 140 and 260 to use to find stdev. 
+
+```{r}
+p <- c(140,142, 145, 150, 155, 157, 158, 175, 177, 180, 182, 270, 276, 260)
+sd(p) #standard deviation is several random values to estimate
+```
+Prior normal is N(200,48); though 48 seems high probably because I only used 14 values to estimate this sd. 
+
+c)
+With help from Braulio, found the number of Adelie penguins their mean height and true sd. 
+```{r}
+penguins_bayes |> filter(species=="Adelie") |> 
+  summarize(pen=n(), mean=mean(flipper_length_mm, na.rm=TRUE), sd=sd(flipper_length_mm, na.rm=TRUE))
+```
+```{r}
+qnorm(c(0.025, 0.975), 189.9536, 6.539457) #using posterior mean and sd from part c
+```
+
+There is a 95% posterior chance that the mean is between 177.13 and 202.77. 
+
+## Exercise 8.20 
+
+a) Write a 2 sided hypothesis test 
+H0: mu = 200
+Ha: 200 < mu < 220
+
+b) I would say that the H0 is more likely based on the credible interval from 8.19 which was between 177.13 and 202.77. 
+
+c) 
+```{r}
+pen_model <- "
+data {
+    vector[152] Y; 
+} 
+parameters {
+    real mu;
+} 
+model {
+   Y ~ normal(mu, 6.5);
+   mu ~ normal(200,7 );
+}
+"
+
+
+```
+
+
+## Exercise 8.21 
+
+a) The Gamma-poisson is appropriate since we're interested in lambda and a rate. 
+
+b) My prior is Gamma(1,2); this is based on wanting the model to be right skewed to indicate the lower rate (2 per 100) is more likely than a higher rate. I used view(loons) to see the range of possible rates is between 0 and 5. 
+
+```{r}
+view(loons)
+```
+
+c) There are 18 data points. The average loon count is 1.5.
+```{r}
+x <- c(0, 5, 0, 0, 0, 2, 0, 2, 1, 1, 0, 4, 2, 0, 3, 3, 1, 3) #create vector 
+result.mean <- mean(x) #find mean 
+print(result.mean) #viewing results. This section of code was inspired by https://www.tutorialspoint.com/r/r_mean_median_mode.htm
+```
+
+d) Find middle 95% posterior credible interval for lambda. 
+
+```{r}
+# 0.025th & 0.975th quantiles of the Gamma(18,92) posterior
+qgamma(c(0.025, 0.975), 1, 1.5) #used average rate from part c for rate. 
+
+```
+
+## Exercise 8.22
+
+a) The hypotheses are H0: lambda is greater than or equal to 1 and Ha: lambda <1
+
+b) Based on the credible interval from 8.21 and the data, I would expect the that both H0 and Ha are plausible and would need more testing to be decisive. 
+
+c) 
+```{r}
+qgamma(c(0.025, 0.975), 1, 1.5)
+```
+d) I would interpret this as most lambda values are between 0 and 3. 
+
+## Exercise 8.23
+```{r}
+# Step 1: Define  the model
+loongamma_model <- "
+  data {
+    int<lower = 0> Y[18];
+  }
+  parameters {
+    real<lower = 0> lambda;
+  }
+  model {
+    Y ~ poisson(lambda);
+    lambda ~ gamma(1, 1.5);
+  }
+  "
+# Step 2: simulate the posterior
+loon_sim <- stan(model_code = loongamma_model, data = list(Y = c(0, 5, 0, 0, 0, 2, 0, 2, 1, 1, 0, 4, 2, 0, 3, 3, 1, 3)), 
+               chains = 4, iter = 5000*2, seed = 500)
+
+#trace and density plots 
+mcmc_trace(loon_sim, pars = "lambda", size = 0.3)
+
+mcmc_dens(loon_sim, pars = "lambda") + 
+  yaxis_text(TRUE) + 
+  ylab("density")
+```
+
+
+d) Based on the simulation, the MCMC looks stable.  
+
+
+## Exercise 8.24
+
+```{r}
+# store 4 chains in a data frame
+loons_chains_df <- as.data.frame(loon_sim, pars = "lp__", include = FALSE)
+dim(loons_chains_df)
+
+# Set the seed
+set.seed(100)
+
+# Predict a value of Y' for each pi value in the chain
+loons_chains_df <- loons_chains_df |>  
+  mutate(y_predict = rgamma(length(pi), size = 18, prob = lambda))
+
+# looking at the chains 
+loons_chains_df |> 
+  head(5)
+
+ggplot(loons_chains_df, aes(x = y_predict)) + 
+  stat_count()
+
+## This set of code isn't working and had trouble with 8.19 - 8.24. 
+```
+
