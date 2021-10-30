@@ -1,0 +1,60 @@
+---
+title: "HW 10"
+author: "Brenda Onyango"
+date: "10/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise 9.1
+
+a) A normal prior is reasonable for B0 and B1 because these can take values around a center value (positive and negative or even zero).  
+
+b) A normal prior isn't reasonable for $\sigma$ because sigma can't be negative. 
+
+c) The difference between weakly informative priors and vague priors is that weakly informative priors are more focused in that they reflect uncertainty  
+across a range of *sensible* parameter values, whereas vague priors put weight on non-sensible parameter values. With weakly informative priors, chains don't have to spend time exploring non-sensible parameter values. 
+
+## Exercise 9.2
+
+Predictor = X and response variable = Y
+
+a) X = arm length, Y = height 
+b) X = distance b/w home and work, Y = person's carbon footprint
+c) X = age, Y = child's vocabulary level
+d) X = person's sleep habits, Y = reaction time 
+
+Notice these have an order i.e. a person's carbon footprint can't happen before they commute.
+
+## Exercise 9.3 
+
+Y = B0 + B1X where B0 is y-intercept (what typical Y value is when and X = 0) and B1 is slope. X indicates predictor.
+
+a) Y_kangheight = B_0 + X_ageB_1 Here B_0 is the height of the kangaroo at 0 months old or when it's born and B_1 is how much the kangaroo grows for each increase in month. B_1 is positive.
+
+b) Y_Githubfollowers = B_0 + X_commitsB_1 Here B_0 is the number of followers when the data scientists has 0 Github commits and B_1 is how many followers are added for each increase in Github commits. Assuming B_1 is positive. 
+
+c) Y_visitors = B_0 + X_rainfallB_1 B_0 is the number of visitors to a local park when there are 0 inches of rainfall. B_1 is the decrease in visitors for each additional inches of rainfall. B_1 is negative.
+
+d) Y_netflix = B_0 + X_sleepB_1 B_0 is the daily hours of Netflix a person watches when they have 0 hours of sleep. B_1 is the decrease in netflix hours for each increase in the hours of sleep. B_1 is negative. 
+
+## Exercise 9.4 
+
+$\sigma$ tells us about the spread of data in our sample. More spread or a higher standard deviation means that the relationship between X and Y is weaker. Less spread or lower variation means the relationship between X and Y is stronger. 
+
+```{r}
+# Load packages
+library(bayesrules)
+library(tidyverse)
+library(rstan)
+library(rstanarm)
+library(bayesplot)
+library(tidybayes)
+library(janitor)
+library(broom.mixed)
+```
+
+a) 

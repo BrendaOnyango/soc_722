@@ -57,6 +57,7 @@ library(rstan)
 library(bayesplot)
 library(broom.mixed)
 library(janitor)
+library(HDInterval)
 
 ```
 
@@ -100,6 +101,8 @@ c)
 qnorm(c(0.20, 0.8), -3, 1)
 ```
 
+#Corrected 
+
 ## Exercise 8.8
 
 a)
@@ -108,28 +111,45 @@ a)
 qgamma(c(0,.95), 1, 5)
 ```
 
+```{r}
+#code from https://search.r-project.org/CRAN/refmans/HDInterval/html/hdi.html to do hdi
+# for a vector:
+set.seed(50)
+tst <- rgamma(100, 1, 5) #randomly chose 100 for n
+hdi(tst)
+hdi(tst, credMass=0.95)
+# For comparison, the symmetrical 95% CrI:
+quantile(tst, c(0.025,0.975))
+```
 
-Next I'll plot this to see density. 
+Next I'll plot  this to see density. 
 ```{r}
 plot_gamma(1,5)
 ```
 
-b
+b)
 ```{r}
 # 0.025th & 0.975th quantiles of the Gamma(1,5) posterior with the middle approach 
 qgamma(c(0.025, 0.975), 1, 5)
 ```
 
-c) The two intervals are not the same; the second interval has a range of about 0.732 and the first has a range of .59. They also differ in their upper limit. Based on the plot in part a the first apporach is more appropriate because f(lambda) decreases and approaches 0 rapidly after 0.50. The more likely values are between 0 and 0.5 which is why the highest posterior density approach is better in this case. 
+c) The two intervals are not the same; the second interval (middle approach) has an upper limit of about 0.732 and the HDI method has an upper limit around 0.55.Based on the plot in part a the HDI approach is more appropriate because f(lambda) decreases and approaches 0 rapidly after 0.50. The more likely values are between 0 and 0.5 which is why the highest posterior density approach is better in this case. 
 
 d) 
 
 ```{r}
-# finding density between 0 and .95 for a normal dist.
+
 qnorm(c(0,.95), -13, 2)
+
+#finding highest density interval using hdi code 
+set.seed(1000)
+tst <- rnorm(100, -13, 2) #randomly chose 100 for n
+hdi(tst)
+hdi(tst, credMass=0.95)
 ```
+
 ```{r}
-plot_normal(-13,2)
+plot_normal(-13,2^2)
 ```
 
 e) Next the middle 95% approach.
@@ -138,9 +158,8 @@ e) Next the middle 95% approach.
 qnorm(c(0.025, 0.975), -13, 2)
 ```
 
-f) For the normal distribution the middle approach is more appropriate. The highest poster density appraoch gave a credible interval that ranged from - infinity to -9.71. -infinity is more improbable than -16.919 (lower bound of the middle 95% approach. 
 
-
+f) The highest poster density approach gave a credible interval that ranged from 16.84 to -8.88. The middle 95% approach gave a CI between -16.919 and -9.08. They are not the same, but they are very similar. I imagine if I had a chosen a different set.seed value I may be even closer between the HDI and middle 95% approach for the normal distribution. 
 
 ## Exercise  8.9
 a) what is posterior probability for alternative pi > 0.4? 
@@ -180,11 +199,12 @@ The posterior odds of our alternate hypothesis are about 2 times higher than the
 
 e) The posterior probability (0.8208) and Bayes Factor (2.312) establish evidence in favor the the altnerate hypothesis that pi is greater than 0.40. 
 
+# Corrected 
 ## Exercise 8.10 
 
 a) Find posterior probability that mu < 5.2 for N(5,3^2)
 ```{r}
-post_probb <- pnorm(5.2, 5,3)
+post_probb <- pnorm(5.2, 5, 3)
 ```
 
 b) 
@@ -200,7 +220,7 @@ prior_probb <- pnorm(5.2, 10, 10)
 prior_oddb <- prior_probb/(1-prior_probb)
 ```
 
-Prior odds are 4.580 which means the odds of mu being below 5.2 are about five times that of mu being above 5.2.
+Corrected: Prior odds are 0.4611 which means the odds of mu being below 5.2 are about half that of mu being above 5.2.
 ```{r}
 plot_normal(5,3)
 ```
@@ -215,11 +235,12 @@ BFb <- post_oddb/prior_oddb
 
 The Bayes Factor is 2.41188 which means posterior odds of our alternate hypothesis are about 2 times higher than the prior odds, therefore  our confidence in the alternate hypothesis (mu is less than 5.2) increased.
 
-e) The posterior probability (0.526576) and Bayes Factor (2.41188) establish evidence in favor the the altnerate hypothesis that mu is less than 5.2. 
+e) The posterior probability (0.526576) and Bayes Factor (2.41188) establish evidence in favor the the alternate hypothesis that mu is less than 5.2.  
 
 #Exercise 8.14
 
-a) The beta binomial is appropriate since we're interested in understanding pi 
+a) The beta binomial is appropriate since we're interested in understanding a distribution of pi. 
+
 b) I'm assuming that more people do believe in climate change than those that do not with mid level confidence so my prior is Beta(3,7) indicating more failures than successes for Y. 
 
 c) Below are plots comparing my prior to that of the author's. 
@@ -305,11 +326,13 @@ BFc
 
 d) The Bayes Factor is 750017.6 which means posterior odds of our alternate hypothesis are about 750017.6 times higher than the prior odds, therefore our confidence in the alternate hypothesis (pi is greater than .1) increased.
 
+#Corrected 
+
 ## Exercise 8.16
 
 a) 
 ```{r}
-# define the model
+# define the model; this is set of instructions (could've written this in notepad) that will pass to stan through r 
 climate_model <- "
   data {
     int<lower = 0, upper = 1000> Y;
@@ -326,6 +349,8 @@ climate_model <- "
 # simulate the posterior
 climate_sim <- stan(model_code = climate_model, data = list(Y = 150), 
                 chains = 4, iter = 5000*2, seed = 80)
+
+
 ```
 
 b) 
@@ -353,6 +378,7 @@ Rhat of 1 means that the simulation is extremely stable. If we multiply the neff
   0.3237526*20000 #multiplying by 20000 because four Markov chains each with 5000 iterations 
 ```
 
+# Corrected 
 
 ## Exercise 8.17
 
@@ -360,9 +386,21 @@ a) Use MCMC simulation to approximate a middle 95% posterior credible interval f
 
 ```{r}
 
-# MCMC posterior approximation
-mcmc_dens(climate_sim, pars = "pi") + 
-  lims(x = c(0,0.175)) #used upper limit from Markov
+# MCMC posterior approximation; corrected to use direct calculation andd tidy()
+
+tidy(climate_sim, conf.int = TRUE, conf.level = 0.95)
+
+#direct calculation 
+climate_chains_df <- as.data.frame(climate_sim, pars = "lp__", include = FALSE)
+dim(climate_chains_df) #creating dataframe 
+
+climate_chains_df |> #direct calculation
+  summarize(
+    low = quantile(pi, 0,25),
+    up = quantile(pi, 0.975),
+  )
+
+
 ```
 
 ```{r}
@@ -393,12 +431,22 @@ climate_chains_df |>
   tabyl(above)
 
 climate_chains_df |> 
-  mutate(exceed = pi < .10) |> 
-  tabyl(exceed)
+  mutate(below = pi < .10) |> 
+  tabyl(below)
 #interesting to see how tabyl returned the same percent of above and below .1
+
+climate_chains_df |> 
+  mutate(equal = pi > .12) |> #checked the approximate .95s CI values which makes more confident about my MCMC simulation 
+  tabyl(equal)
+
+climate_chains_df |> 
+  mutate(equals = pi < .17) |> 
+  tabyl(equals)
 ```
 
-The approximations in part a and b shows a post mode and mean of about 0.15. The exact posterior mean found in 8.14 is about 0.15 so the approximation is very close to the actual. 
+c) The approximations in part a and b shows a post mode and mean of about 0.15. The exact posterior mean found in 8.14 is about 0.15 so the approximation is very close to the actual. The confidence intervals are also very similar to each other (they mostly differ on third decimal).  
+
+#Corrected 
 
 ## Exercise 8.18
 
@@ -432,11 +480,21 @@ climate_chains_df |>
             upper_80 = quantile(y_predict, 0.9))
 ```
 c) There's an 80% chance that Y' is between 10 and 20. 
+```{r}
+climate_chains_df |> 
+  mutate(is = y_predict >= 20) |> #correction: using tabyl to find pi of Y = 20
+  tabyl(is)
+
+
+```
+This shows that there's an .118 change that Y is greater than or equal to 20. 
+
+# Corrected 
 
 ## Exercise 8.19 
 
 a) 
-The normal-normal is appropriate since we're learning about mu and we have a series of measurements. 
+The normal-normal is appropriate since we want to know the central tendency of a series of Y values.
 
 b) My prior understanding is that mu is 200mm. We're given a range of 140 and 260 to use to find stdev. 
 
@@ -446,31 +504,68 @@ sd(p) #standard deviation is several random values to estimate
 ```
 Prior normal is N(200,48); though 48 seems high probably because I only used 14 values to estimate this sd. 
 
+```{r}
+#plotting this distribution 
+data.frame(x = rnorm(10000, #dataframe with 1 column x and 10,000 pulls 
+                     mean = 200, 
+                     sd = 48)) |> 
+             ggplot(aes(x =x )) + 
+             geom_density() #good tool for checking priors 
+```
+
+
 c)
 With help from Braulio, found the number of Adelie penguins their mean height and true sd. 
 ```{r}
 penguins_bayes |> filter(species=="Adelie") |> 
-  summarize(pen=n(), mean=mean(flipper_length_mm, na.rm=TRUE), sd=sd(flipper_length_mm, na.rm=TRUE))
+  summarize(pen=n(), mean=mean(flipper_length_mm, na.rm=TRUE), sd=sd(flipper_length_mm, na.rm=TRUE)) #this is likelihood (what's observed in the data); prior is not affecting this at this state 
 ```
 ```{r}
-qnorm(c(0.025, 0.975), 189.9536, 6.539457) #using posterior mean and sd from part c
+data.frame(x = rnorm(10000, #dataframe with 1 column x and 10,000 pulls 
+                     mean = 189.9536, 
+                     sd = 6.539457)) |> 
+             ggplot(aes(x =x )) + 
+             geom_density() #notice that this is narrower and center is lower than prior estimate
 ```
 
-There is a 95% posterior chance that the mean is between 177.13 and 202.77. 
+
+```{r}
+qnorm(c(0.025, 0.975), 189.9536, 6.539457) #this is just the 95% CI for the liklihood; notice that you haven't used data in this qnorm 
+```
+
+```{r}
+summarize_normal_normal(mean = 200, #prior center of mass 
+                        sd = 48, #prior stdev
+                        sigma = 6.53, #data has sigma of 6.53
+                        y_bar = 189, #data had this mu 
+                        n = 152) #sample size; #variance is small because we're estimating credible interval of mu; not of the flipper lengths; this is dist. of possible mu 
+
+plot_normal_normal(mean = 200, #prior center of mass 
+                        sd = 48, #prior stdev
+                        sigma = 6.53, #data has sigma of 6.53
+                        y_bar = 189, #data had mu 
+                        n = 152) #we're estimating one parameter mu; notice x-axis 
+qnorm(c(0.025, 0.975), 189.0013, 0.5296207)
+```
+
+
+There is a 95% posterior chance that the mean is between 187.96 and 190.0393. 
+
+# Corrected 
 
 ## Exercise 8.20 
 
 a) Write a 2 sided hypothesis test 
-H0: mu = 200
+H0: mu < 200
 Ha: 200 < mu < 220
 
-b) I would say that the H0 is more likely based on the credible interval from 8.19 which was between 177.13 and 202.77. 
+b) I would say that I would fail to reject the null hypothesis based on the credible interval from 8.19 which was between 187.96 and 190.0393; this strongly suggests that mu will not exceed 200. 
 
 c) 
 ```{r}
 pen_model <- "
 data {
-    vector[152] Y; 
+    vector[146] Y; 
 } 
 parameters {
     real mu;
@@ -480,6 +575,11 @@ model {
    mu ~ normal(200,7 );
 }
 "
+d <- list(Y = penguins_bayes |> #making a list 
+  filter(species == "Adelie") |> drop_na() |> #filtering for Adelie species  
+  pull(flipper_length_mm)) #we're just interested in vector of flipper lengths 
+
+pen_sim <- stan(model_code = pen_model, data = d, chains = 4, iter = 5000)
 
 
 ```
@@ -557,6 +657,7 @@ d) Based on the simulation, the MCMC looks stable.
 
 ```{r}
 # store 4 chains in a data frame
+
 loons_chains_df <- as.data.frame(loon_sim, pars = "lp__", include = FALSE)
 dim(loons_chains_df)
 
@@ -565,13 +666,13 @@ set.seed(100)
 
 # Predict a value of Y' for each pi value in the chain
 loons_chains_df <- loons_chains_df |>  
-  mutate(y_predict = rgamma(length(pi), size = 18, prob = lambda))
+  mutate(ypredict = rgamma(length(pi), size = 18, prob = lambda))
 
 # looking at the chains 
 loons_chains_df |> 
   head(5)
 
-ggplot(loons_chains_df, aes(x = y_predict)) + 
+ggplot(loons_chains_df, aes(x = ypredict)) + 
   stat_count()
 
 ## This set of code isn't working and had trouble with 8.19 - 8.24. 
