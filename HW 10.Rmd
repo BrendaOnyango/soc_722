@@ -1,5 +1,5 @@
 ---
-title: "HW 10"
+title: "HW 10: Bayesian Regression"
 author: "Brenda Onyango"
 date: "10/30/2021"
 output: html_document
@@ -45,6 +45,7 @@ d) Y_netflix = B_0 + X_sleepB_1 B_0 is the daily hours of Netflix a person watch
 
 $\sigma$ tells us about the spread of data in our sample. More spread or a higher standard deviation means that the relationship between X and Y is weaker. Less spread or lower variation means the relationship between X and Y is stronger. 
 
+
 ```{r}
 # Load packages
 library(bayesrules)
@@ -57,4 +58,340 @@ library(janitor)
 library(broom.mixed)
 ```
 
+
+## Exercise 9.5 
+
+a) X = predictor = person's age in years, Y = orange juice consumption in gallons
+
+b&c) data: $Y_{i}$|$B_O$,$B_1$, $\sigma$  ~ N($u_i$, $\sigma$^2) with $u_i$ = $B_O$ + $B_1$$X_i$
+
+B0 ~ N(m0, s^2)
+
+B1 ~ N(m1, s1^2)
+
+$\sigma$ ~ Exp(l)
+
+d)  The unknown parameters are BO, B1, and $\sigma$. B1 can be 0 if we include infants under the age of 1 but a more realistic value is between 1-78 years of age with an average of 38 and sd of 13 years; B0 has to be positive (can't drink negative amount of orange juice). $\sigma$ has to be positive.  
+
+e) Let's assume that the capacity to drink OJ increases as we increase in age because of growing stomach capacity. Drinking OJ could have a normal distribution where younger and older people drink less than middle aged people.
+
+Let's say that the average amount of gallons is 20 (around 320 cups a year). let's say the amount of orange juice people drink per year has standard deviation of 2 gallons. 
+
+For the age assumptions I used average age, life expectancy, and sd from google searches. For the orange juice priors I based on my personal habits of drinking between 0.5-1.5 cups of OJ in a day and multiplied by 365 to get around 20 gallons a year.
+
+```{r}
+
+plot_normal(mean = 20, sd = 2) + #average of .05 gallons of oj for B1
+  labs(x = "beta_0c", y = "pdf")
+plot_normal(mean = 38, sd = 13) + #average age and sd of 13 years 
+  labs(x = "beta_1", y = "pdf")
+plot_gamma(shape = 1, rate = 0.07692307692) + #exponential model of sd 1/13 gives l of 0.07692307692 
+  labs(x = "sigma", y = "pdf")
+ 
+```
+Plugging in the tuned priors we can specificy the Bayesian regression model like this: 
+$Y_{i}$|$B_O$,$B_1$, $\sigma$  ~ N($u_i$, $\sigma$^2) with $u_i$ = $B_O$ + $B_1$$X_i$
+
+B0 ~ N(20, 4)
+
+B1 ~ N(38, 169)
+
+$\sigma$ ~ Exp(0.0769)
+
+# Exercise 9.6
+
+a) X = predictor = today's high temperature, Y = tomorrow's high temperature. 
+
+b &c) data: $Y_{i}$|$B_O$,$B_1$, $\sigma$  ~ N($u_i$, $\sigma$^2) with $u_i$ = $B_O$ + $B_1$$X_i$
+
+B0 ~ N(m0, s^2)
+
+B1 ~ N(m1, s1^2)
+
+$\sigma$ ~ Exp(l)
+
+d) TThe unknown parameters are BO, B1, and $\sigma$. B1 can between 0 and 56 degrees celcius (highest temp ever recorded was 134).  B0 has to be positive and also in the same range as B1 since they're both temperatures.  $\sigma$ has to be positive.
+
+e)  I'll assume it's fall so the average of today's temperature and tomorrow's is 15 degrees Celsius. I'll assume a sdev of 3 degrees Celsius. I'll use these values to build a model. 
+
+```{r}
+plot_normal(mean = 15, sd = 3) + #average of 15 degrees for B1
+  labs(x = "beta_0c", y = "pdf")
+plot_normal(mean = 15, sd = 3) + #average temp and sd of 3 degrees celsius 
+  labs(x = "beta_1", y = "pdf")
+plot_gamma(shape = 1, rate = 0.333333) + #exponential model of sd 1/3 gives l of 0.333
+  labs(x = "sigma", y = "pdf")
+```
+
+
+My tuned model is now: data: $Y_{i}$|$B_O$,$B_1$, $\sigma$  ~ N($u_i$, $\sigma$^2) with $u_i$ = $B_O$ + $B_1$$X_i$
+
+B0 ~ N(15, 9)
+
+B1 ~ N(15, 9)
+
+$\sigma$ ~ Exp(0.333)
+
+# Exercise 9.7 
+
+a) False; MCMC is used to *approximate* the posterior. 
+
+b) True. 
+
+# Exercise 9.8
+
+Specify appropriate stan_glm() syntax for simulating the Normal regression model using 4 chains each of length 10000 (don't run the code). 
+
+a) X = age; Y = height; dataset name: bunnies 
+
+
+bunnies_model <- stan_glm(height ~ age, data = bunnies,
+                       family = gaussian,
+                       prior_intercept = normal(m0, s0^2),
+                       prior = normal(m1, s1^2), 
+                       prior_aux = exponential(1/s1),
+                       chains = 4, iter = 5000*2, seed = 800)
+                       
+b) X = Snaps, Y = Clicks; dataset = songs 
+
+songs_model <- stan_glm(clicks ~ snaps, data = songs,
+                       family = gaussian,
+                       prior_intercept = normal(m0, s0^2),
+                       prior = normal(m1, s1^2), 
+                       prior_aux = exponential(1/s1),
+                       chains = 4, iter = 5000*2, seed = 801)
+                       
+c) X = age; Y = happiness; dataset = dogs 
+
+happy_model <- stan_glm(happiness ~ age, data = dogs,
+                       family = gaussian,
+                       prior_intercept = normal(m0, s0^2),
+                       prior = normal(m1, s1^2), 
+                       prior_aux = exponential(1/s1),
+                       chains = 4, iter = 5000*2, seed = 800)
+
+## Exercise 9.9 
+
 a) 
+$Y_{i}$|$B_O$,$B_1$, $\sigma$  ~ N($u_i$, $\sigma$^2) with $u_i$ = $B_O$ + $B_1$$X_i$
+
+B0 ~ N(5000,2000) based on using range rule (max-min/4) we can say sdev is approx. 
+
+B1 ~ N(10, 5) based on range rule sdev is 20/4 so about 5
+
+$\sigma$ ~ Exp(0.2)
+
+b) 
+```{r}
+# Load and plot data
+data(bikes)
+ggplot(bikes, aes(x = humidity, y = rides)) +#taking a look at rides and humidity 
+  geom_point(size = 0.5) + 
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+```{r}
+
+#simulating the prior 
+bike_modelp <- stan_glm(rides ~ humidity, data = bikes,
+                       family = gaussian,
+                       prior_intercept = normal(5000, 2000),
+                       prior = normal(10, 5), 
+                       prior_aux = exponential(0.2),
+                       prior_PD = TRUE, #Including instructions to find prior 
+                       chains = 5, iter = 4000*2, seed = 855)
+
+#visualizing the chains and density plot
+
+# Trace plots of parallel chains
+mcmc_trace(bike_modelp, size = 0.1)
+
+# Density plots of parallel chains
+mcmc_dens_overlay(bike_modelp)
+
+# Prior summary statistics
+tidy(bike_modelp, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.80)
+
+
+```
+
+```{r}
+#neff and rhat
+
+neff_ratio(bike_modelp)
+
+rhat(bike_modelp)
+```
+The r-hat is around 1 which suggests chains are stable. 
+
+c) 
+```{r}
+# 100 simulated model lines
+bikes |> 
+  add_fitted_draws(bike_modelp, n = 100) |> 
+  ggplot(aes(x = humidity, y = rides)) + #plotting humidity and rides 
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15) + 
+    geom_point(data = bikes, size = 0.05)
+
+# Simulate four sets of data
+bikes |> 
+  add_predicted_draws(bike_modelp, n = 4) |> 
+  ggplot(aes(x = humidity, y = rides)) + #changed froom textbook to humidity 
+    geom_point(aes(y = .prediction, group = .draw), size = 0.2) + 
+    facet_wrap(~ .draw)
+```
+
+
+d) These plots show different, positive relationships which indicates posterior uncertainty about the relationship between humidity and rides. The plot I made in part b shows a weak negative association between humidity and rides. 
+
+## Exercise 9.10 
+
+a) This plot I made earlier shows a weak negative association between humidity and rides.
+
+```{r}
+# Load and plot data
+data(bikes)
+ggplot(bikes, aes(x = humidity, y = rides)) +#taking a look at rides and humidity 
+  geom_point(size = 0.5) + 
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+
+b) Simple normal regression is reasonable to use because we have BO, B1, and sigma as unknowns. The only issue with using simple normal regression in this case is that there is a a lot of variability in the data that leads to uncertainty. 
+
+## Exercise 9.11
+
+```{r}
+
+#a)
+#simulating the posterior 
+bike_model <- stan_glm(rides ~ humidity, data = bikes,
+                       family = gaussian,
+                       prior_intercept = normal(5000, 2000),
+                       prior = normal(10, 5), 
+                       prior_aux = exponential(0.2),
+                       chains = 5, iter = 4000*2, seed = 850)
+
+#b)
+
+# Trace plots of parallel chains
+mcmc_trace(bike_model, size = 0.1)
+
+# Density plots of parallel chains
+mcmc_dens_overlay(bike_model)
+
+# Posterior summary statistics
+tidy(bike_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.80)
+
+
+```
+
+```{r}
+#neff and rhat
+
+neff_ratio(bike_model)
+
+rhat(bike_model)
+```
+
+
+The MCMC chains look like fuzzy caterpillars (stable). Rhat is close to 1 meaning chains are stable. The MCMC approximation shows a humidity CI between -4.755891 and 2.907006; the prior had a CI of 3.62-16.488. The posterior relationship is 3543.143 + -.930773X. For every increase in humidity we expect riders to decrease by about 1.Slope can range between -4.755891 and 2.907006. 
+
+
+c) 
+```{r}
+#posterior simulation 
+bike_default_post <- update(bike_model, prior_PD = FALSE)
+# 100 post model lines 
+bikes |> 
+  add_fitted_draws(bike_default_post, n = 100) |> 
+  ggplot(aes(x = humidity, y = rides)) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15)
+```
+Compared to the prior, the posterior model has many more lines wiith a negative slope. Both the prior and posterior show a lot of variablility among the lines. 
+
+## Exercise 9.12
+
+```{r}
+
+#a)
+# Posterior summary statistics
+tidy(bike_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.95) #.95 credible interval
+```
+
+b) The posterior median value of sigma (1281) means that values of Y (riders) will vary around the mean by this standard deviation. 
+
+c) The 95% posteior credible interval for humidity is between -6.859 and 4.92 meaning most values of humidity will be in this interval for the most probable lines. 
+
+d) Yes, we have a negative estimate for humidity and negative values in the 95% CI. 
+
+## Exercise 9.13
+
+Without using the posterior_predict function model (1) the posterior model for the typical number of riders on 90% humidity days; and (2)
+the posterior predictive model for the number of riders tomorrow.
+
+a)
+```{r}
+
+bike_model_df <- as.data.frame(bike_model) #storing 4 chains from posterior model as data farme 
+first_set <- head(bike_model_df, 1)
+
+```
+mu = BO^1 + B1^1X = 3729.559 + -2.95844X 
+
+```{r}
+
+mu <- first_set$'(Intercept)' + first_set$humidity * .90 #finding average of mu when humidity is .9
+
+
+```
+
+Mu is 3726.8960
+
+```{r}
+set.seed(853)
+y_new <- rnorm(1, mean = mu, sd = first_set$sigma)
+mu
+```
+
+y_new is 3264.8866 Notice this is below average rides on days with humidity of .90.
+
+```{r}
+# Predict rides for each parameter set in the chain
+set.seed(853)
+predict_90 <- bike_model_df |>  
+  mutate(mu = `(Intercept)` + (humidity*.90),
+         y_new = rnorm(20000, mean = mu, sd = sigma))
+
+#see predictions 
+head(predict_90, 5)
+```
+
+```{r}
+# Construct 95% posterior credible intervals
+predict_90 |> 
+  summarize(lower_mu = quantile(mu, 0.025),
+            upper_mu = quantile(mu, 0.975),
+            lower_new = quantile(y_new, 0.025),
+            upper_new = quantile(y_new, 0.975))
+```
+
+Used view to see what the variable for tomorrow (Sunday) is and it's sun. Built a posterior model for Sunday. 
+
+```{r}
+#see how often Sunday appears in data 
+
+bikes |> filter(day_of_week=="Sun") |> 
+  summarize(Sun=n())
+
+```
+
+
+#build posterior model for tomorrow
+sun_model_df <- as.data.frame(bike_model) #storing 4 chains from posterior model as data farme 
+first_set <- head(sun_model_df, 1)
+```
+
