@@ -175,7 +175,7 @@ happy_model <- stan_glm(happiness ~ age, data = dogs,
 a) 
 $Y_{i}$|$B_O$,$B_1$, $\sigma$  ~ N($u_i$, $\sigma$^2) with $u_i$ = $B_O$ + $B_1$$X_i$
 
-B0 ~ N(5000,2000) based on using range rule (max-min/4) we can say sdev is approx. 
+B0 ~ N(5000,2000) based on using range rule (max-min/4) we can say sdev is 2000. 
 
 B1 ~ N(10, 5) based on range rule sdev is 20/4 so about 5
 
@@ -302,15 +302,16 @@ The MCMC chains look like fuzzy caterpillars (stable). Rhat is close to 1 meanin
 
 c) 
 ```{r}
+
 #posterior simulation 
-bike_default_post <- update(bike_model, prior_PD = FALSE)
+bike_default_post <- update(bike_modelp, prior_PD = FALSE)
 # 100 post model lines 
 bikes |> 
   add_fitted_draws(bike_default_post, n = 100) |> 
   ggplot(aes(x = humidity, y = rides)) +
     geom_line(aes(y = .value, group = .draw), alpha = 0.15)
 ```
-Compared to the prior, the posterior model has many more lines wiith a negative slope. Both the prior and posterior show a lot of variablility among the lines. 
+Compared to the prior, the posterior model has many more lines with a negative slope. Both the prior and posterior show a lot of variability among the lines. 
 
 ## Exercise 9.12
 
@@ -336,9 +337,9 @@ the posterior predictive model for the number of riders tomorrow.
 a)
 ```{r}
 
-bike_model_df <- as.data.frame(bike_model) #storing 4 chains from posterior model as data farme 
+bike_model_df <- as.data.frame(bike_model) #storing 4 chains from posterior model as data frame
 first_set <- head(bike_model_df, 1)
-
+first_set
 ```
 mu = BO^1 + B1^1X = 3729.559 + -2.95844X 
 
@@ -387,11 +388,397 @@ Used view to see what the variable for tomorrow (Sunday) is and it's sun. Built 
 bikes |> filter(day_of_week=="Sun") |> 
   summarize(Sun=n())
 
+#create dataset with just Sunday data
+sunday_rides <- bikes |> 
+  filter(day_of_week == "Sun")
 ```
 
 
-#build posterior model for tomorrow
-sun_model_df <- as.data.frame(bike_model) #storing 4 chains from posterior model as data farme 
-first_set <- head(sun_model_df, 1)
+#build posterior model for Sunday
+First I'll take a look at rides on Sunday. 
+
+```{r}
+# Load and plot data
+data(sunday_rides)
+ggplot(sunday_rides, aes(x = day_of_week, y = rides)) +#taking a look at rides and day_of_week
+  geom_point(size = 0.5) + 
+  geom_smooth(method = "lm", se = FALSE)
+
+#will also take a look at data without Sunday filter
+# Load and plot data
+data(bikes)
+ggplot(bikes, aes(x = day_of_week, y = rides)) +#taking a look at rides and humidity 
+  geom_point(size = 0.5) + 
+  geom_smooth(method = "lm", se = FALSE)
 ```
+
+
+
+```{r}
+
+#a)
+#simulating the posterior 
+sun_model <- stan_glm(rides ~ humidity, data = sunday_rides, #using sunday only data
+                       family = gaussian,
+                       prior_intercept = normal(5000, 2000), #using same prior
+                       prior = normal(10, 5), 
+                       prior_aux = exponential(0.2),
+                       chains = 5, iter = 4000*2, seed = 830)
+#posterior simulation 
+sunday_post <- update(sun_model, prior_PD = FALSE)
+
+# 5 post model lines 
+sunday_rides |> 
+  add_fitted_draws(sunday_post, n = 5) |> 
+  ggplot(aes(x = day_of_week, y = rides)) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15)
+sunday_df <- as.data.frame(sun_model)
+
+#storing 4 chains from posterior model as data frame
+set.seed(30)
+second_set <- head(sunday_df, 1)
+second_set
+```
+
+Based on these 4 chains mu_sun = 2272.662 + 10.96X
+
+```{r}
+mu_sun <- second_set$'(Intercept)'+second_set$humidity*.90 #finding average of mu when humidity is 90 on Sunday
+mu_sun
+```
+
+```{r}
+y_newsun <- rnorm(1, mean = mu, sd = second_set$sigma)
+mu
+```
+
+```{r}
+# Predict rides for each parameter set in the chain
+set.seed(25)
+predict_90v2 <- sunday_df |>  
+  mutate(mu = `(Intercept)` + (humidity*.90),
+         y_newsun = rnorm(20000, mean = mu, sd = sigma))
+
+#see predictions 
+head(predict_90v2, 5)
+```
+
+b) 
+```{r}
+# Trace plots of parallel chains
+mcmc_trace(bike_model, size = 0.1)
+
+# Density plots of parallel chains for first posterior of .9 humidity
+mcmc_dens_overlay(bike_model)
+
+# Trace plots of parallel chains for Sunday's posterior
+mcmc_trace(sun_model, size = 0.1)
+
+# Density plots of parallel chains
+mcmc_dens_overlay(sun_model)
+```
+
+
+The density plots for both posteriors look stable.
+
+c) 
+```{r}
+# Construct 80% posterior credible intervals for Sunday data
+predict_90v2 |> 
+  summarize(lower_mu = quantile(mu, 0.20),
+            upper_mu = quantile(mu, 1),
+            lower_new = quantile(y_new, 0.20),
+            upper_new = quantile(y_new, 1.0))
+
+#using tidy to find credible interval for tomorrow
+tidy(sun_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.80)
+
+```
+
+The 80% interval for humidity (the slope) means humidity can be anywhere between 3.22 to 12.67.The same as for the most credible values of the intercept and sigma. 
+
+d) Use posterior predict for tomorrow's riders. 
+
+```{r}
+set.seed(222)
+fast_prediction <- 
+  posterior_predict(sun_model, newdata = data.frame(humidity = 0.90))
+
+# Construct a 80% posterior credible interval
+posterior_interval(fast_prediction, prob = 0.80)
+
+ 
+# Plot the approximate predictive model
+mcmc_dens(fast_prediction) + 
+  xlab("predicted ridership on a Sunday")
+```
+
+The posterior_predict shows an 80% credible interval for the number of riders to be between 1466 and 3293 on a Sunday when humidity is 90%. 
+
+## Exercise 9.14
+
+a) I would guess if it's too windy it might be dangerous to ride a bike so I would guess there would be a negative relationship between windspeed and biking. 
+
+
+```{r}
+data(bikes)
+ggplot(bikes, aes(x = windspeed, y = rides)) + #taking a look at rides and windspeed to think of good priors 
+  geom_point(size = 0.5) + 
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+
+
+b) $Y_{i}$|$B_O$,$B_1$, $\sigma$  ~ N($u_i$, $\sigma$^2) with $u_i$ = $B_O$ + $B_1$$X_i$
+
+B0 ~ N(6500,1625) based on using plausible (max-min/4) we can say sdev is approx. (6500-0/4)
+
+B1 ~ N(40, 10) based on range rule sdev is 40/4 so about 10
+
+$\sigma$ ~ Exp(0..10) found by 1/stdev of B1
+
+```{r}
+prior_summary(bike_model)
+```
+
+b) 
+```{r}
+
+wind_model_prior <- stan_glm(
+  rides ~ windspeed, data = bikes, 
+  family = gaussian,
+  prior_intercept = normal(6500, 2.5, autoscale = TRUE),
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(1, autoscale = TRUE),
+  prior_PD = TRUE,
+  chains = 4, iter = 5000*2, seed = 840)
+# 100 prior model lines with wind speed
+bikes |> 
+  add_fitted_draws(wind_model_prior, n = 100) |> 
+  ggplot(aes(x = windspeed, y = rides)) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15)
+
+# 4 prior simulated datasets
+set.seed(30)
+bikes |> 
+  add_predicted_draws(wind_model_prior, n = 4) |> 
+  ggplot(aes(x = windspeed, y = rides)) +
+    geom_point(aes(y = .prediction, group = .draw)) + 
+    facet_wrap(~ .draw)
+```
+
+Many of the 100 lines do reflect our prior understanding that rides decrease as windspeed increases, but there is variability. Half the datasets look similar and have a negative relationship. 
+
+d) I made a plot in part a to help me think about the priors and it is consistent with how I understood the relationship between wind and bike speed. 
+
+## Exercise 9.15
+
+a) Make a posterior analysis. 
+```{r}
+
+wind_model <- stan_glm(
+  rides ~ windspeed, data = bikes, 
+  family = gaussian,
+  prior_intercept = normal(6500, 2.5, autoscale = TRUE),
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(1, autoscale = TRUE),
+  chains = 4, iter = 5000*2, seed = 840)
+set.seed(222)
+fast_prediction_wind <- 
+  posterior_predict(wind_model, newdata = data.frame(windspeed = 20))
+
+# Construct a 80% posterior credible interval
+posterior_interval(fast_prediction_wind, prob = 0.80)
+
+ 
+# Plot the approximate predictive model
+mcmc_dens(fast_prediction) + 
+  xlab("predicted ridership by windspeed")
+
+tidy(wind_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.80)
+```
+
+The posterior understanding matches my prior understanding that windspeed and rides is negative. 
+
+## Exercise 9.16
+
+a) simulating the prior.
+
+```{r}
+pen_model_prior <- stan_glm(
+  flipper_length_mm ~ bill_length_mm, data = penguins_bayes, 
+  family = gaussian,
+  prior_intercept = normal(45, 2.5, autoscale = TRUE),
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(1, autoscale = TRUE),
+  prior_PD = TRUE, #making sure it's the prior 
+  chains = 4, iter = 5000*2, seed = 83)
+
+# 100 prior model lines with wind speed
+penguins_bayes |> drop_na() |> #added drop_na() so code could run
+  add_fitted_draws(pen_model_prior, n = 100) |> 
+  ggplot(aes(x = bill_length_mm, y = flipper_length_mm)) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15)
+```
+
+
+b) 
+```{r}
+prior_summary(pen_model_prior)
+```
+
+Using information from above below is the written prior model 
+ $Y_{i}$|$B_O$,$B_1$, $\sigma$  ~ N($u_i$, $\sigma$^2) with $u_i$ = $B_O$ + $B_1$$X_i$
+
+B0 ~ N(45,35) 
+
+B1 ~ N(0, 6.4) based on range rule sdev is 40/4 so about 10
+
+$\sigma$ ~ Exp(0.071)
+
+c) 
+```{r}
+# 100 prior model lines
+penguins_bayes |> drop_na() |> 
+  add_fitted_draws(pen_model_prior, n = 100) |> 
+  ggplot(aes(x = bill_length_mm, y = flipper_length_mm)) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15)
+
+# 4 prior simulated datasets
+set.seed(40)
+penguins_bayes |> drop_na() |> #added drop_na()
+  add_predicted_draws(pen_model_prior, n = 4) |> 
+  ggplot(aes(x = bill_length_mm, y = flipper_length_mm)) +
+    geom_point(aes(y = .prediction, group = .draw)) + 
+    facet_wrap(~ .draw)
+```
+
+
+d) My understanding is that as bill length increases flipper length decreases (3/4 of the plots show a negative slope). The line simulations show both positive and negative slopes. 
+
+## Exercise 9.17
+
+a) 
+```{r}
+data("penguins_bayes")
+ggplot(penguins_bayes, aes(x = bill_length_mm, y = flipper_length_mm)) +
+  geom_point(size = 0.1) + 
+  geom_line(method = "lm", se = FALSE)
+
+```
+
+
+b) I would say based on 9.16 a simple normal regression may not work for this data since the prior lines simulation shows the data may behave more like a parabola than a line. 
+
+## Exercise 9.18
+
+a) 
+
+```{r}
+pen_model <- stan_glm(
+  flipper_length_mm ~ bill_length_mm, data = penguins_bayes, 
+  family = gaussian,
+  prior_intercept = normal(51, 2.5, autoscale = TRUE),
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(1, autoscale = TRUE),
+  prior_PD = FALSE,
+  chains = 4, iter = 5000*2, seed = 83)
+
+# 100 posterior model lines with wind speed
+penguins_bayes |> drop_na() |> #added drop_na() so code could run
+  add_fitted_draws(pen_model, n = 100) |> 
+  ggplot(aes(x = bill_length_mm, y = flipper_length_mm)) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15)
+```
+
+```{r}
+view(penguins_bayes) #looking for pablo species in dataset
+```
+
+
+
+```{r}
+
+#creating Pablo dataset
+Pablo <- penguins_bayes |> 
+  filter(species == "Gentoo") #used Gentoo species since Pablo isn't in the dataset
+
+pablo_model <- stan_glm(
+  flipper_length_mm ~ bill_length_mm, data = Pablo, 
+  family = gaussian,
+  prior_intercept = normal(51, 2.5, autoscale = TRUE),
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(1, autoscale = TRUE),
+  prior_PD = FALSE,
+  chains = 4, iter = 5000*2, seed = 83)
+
+# 100 posterior model lines with wind speed
+Pablo |> drop_na() |> 
+  add_fitted_draws(pen_model, n = 100) |> 
+  ggplot(aes(x = bill_length_mm, y = flipper_length_mm)) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15)
+```
+b) Density plots for all penguins and Pablo. 
+
+```{r}
+# Trace plots of parallel chains for penguin_bayes
+mcmc_trace(pen_model, size = 0.1)
+
+# Density plots of parallel chains
+mcmc_dens_overlay(pen_model)
+
+# Trace plots of parallel chains
+mcmc_trace(pablo_model, size = 0.1)
+
+# Density plots of parallel chains
+mcmc_dens_overlay(pablo_model)
+```
+
+The chains look mostly stable and the density plots are narrow and show a normal distribution which increases confidence in these posteriors. 
+
+c) 
+```{r}
+tidy(pen_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.80)
+
+tidy(pablo_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.80)
+```
+
+
+The 80% CI for flipper length among all species is between 120.74 and 132.67. The 80% CI for flipper length is between 142.37 and 159.76 for the species designated as Pablo. Pablo has longer flipper lengths.For all penguins with 51 mm, their credible interval will be narrower. since that data set would match the prior average. 
+
+e) 
+```{r}
+
+#posterior predictions of penguins and pablo
+set.seed(51)
+shortpen_prediction <- 
+  posterior_predict(pen_model, newdata = data.frame(bill_length_mm = 51))
+posterior_interval(shortpen_prediction, prob = 0.80)
+
+#pablo
+set.seed(51)
+shortpab_prediction <- 
+  posterior_predict(pablo_model, newdata = data.frame(bill_length_mm = 51))
+posterior_interval(shortpab_prediction, prob = 0.80)
+
+```
+
+
+## Exercise 9.20
+
+a) Their prior understanding is that as body mass increases so does flipper length by a  small amount and with a small standard deviation. 
+
+b) 
+```{r}
+data("penguins_bayes")
+ggplot(penguins_bayes, aes(x = body_mass_g, y = flipper_length_mm)) +
+  geom_point(size = 0.1) + 
+  geom_line(method = "lm", se = FALSE)
+```
+
+c)
 
