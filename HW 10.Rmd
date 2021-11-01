@@ -780,5 +780,36 @@ ggplot(penguins_bayes, aes(x = body_mass_g, y = flipper_length_mm)) +
   geom_line(method = "lm", se = FALSE)
 ```
 
-c)
+As body mass increases flipper length also increases. 
+
+c) I think standard deviation is bigger when X = body mass than when X = flipper length since their is likley more variation among body mass than in the sizes that a bill can grow. If I make the above plot with X and Y reverse we can see more variability. 
+
+```{r}
+data("penguins_bayes")
+ggplot(penguins_bayes, aes(x = flipper_length_mm, y = body_mass_g )) +
+  geom_point(size = 0.1) + 
+  geom_line(method = "lm", se = FALSE)
+```
+
+d)
+```{r}
+
+penbody_model <- stan_glm(flipper_length_mm ~ body_mass_g, data = penguins_bayes, family = gaussian, 
+                     prior_intercept = normal(0.01, .002),#scientists prior
+                     prior = normal(3000, 500), #guessed prior 
+                     prior_aux = exponential(0.002),
+                     chains = 4, iter = 5000*2, seed = 322)
+
+
+```
+
+
+```{r}
+mcmc_trace(penbody_model, size = 0.1)
+
+# Density plots of parallel chains
+mcmc_dens_overlay(penbody_model)
+```
+
+e) Looking at the plot in B and the very stable Markov chains d makes me confident in the posterior estimate. 
 

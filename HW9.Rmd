@@ -656,6 +656,8 @@ d) Based on the simulation, the MCMC looks stable.
 ## Exercise 8.24
 
 ```{r}
+
+## still need to correct this one.
 # store 4 chains in a data frame
 
 loons_chains_df <- as.data.frame(loon_sim, pars = "lp__", include = FALSE)
@@ -664,16 +666,13 @@ dim(loons_chains_df)
 # Set the seed
 set.seed(100)
 
-# Predict a value of Y' for each pi value in the chain
-loons_chains_df <- loons_chains_df |>  
-  mutate(ypredict = rgamma(length(pi), size = 18, prob = lambda))
+
 
 # looking at the chains 
 loons_chains_df |> 
   head(5)
 
-ggplot(loons_chains_df, aes(x = ypredict)) + 
-  stat_count()
+
 
 ## This set of code isn't working and had trouble with 8.19 - 8.24. 
 ```
