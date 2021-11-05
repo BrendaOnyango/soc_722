@@ -232,7 +232,7 @@ ggplot(new_coffee, aes(y = total_cup_points, x = aroma)) + #plotting aroma on x 
 
 The relationship between aroma and coffee rating is positive. As aroma grade increases total_cup_points increases. One model indicates that for each unit increase in aroma, cup points increase by about 6 units. 
 
-b) 
+b) Could also use stan, but in b we're asked to use stan_glm to model.
 ```{r}
 coffee_model <- stan_glm(total_cup_points ~ aroma, data = new_coffee,
                        family = gaussian,
@@ -248,60 +248,138 @@ coffee_model_df <- as.data.frame(coffee_model)
 ```
 
 
-```{r}
-#visual summary of coffee_beta_1
-plot_normal(mean = 7.5, sd = .2) + labs(x = "beta_1", y = "pdf")
-```
+c) For c I'll use  tidy() to for a posterior summary of aroma. 
 
 ```{r}
-# STEP 1: DEFINE the model
-stan_coffee_model <- "
-  data {
-    int<lower = 0> n;
-    vector[n] Y;
-    vector[n] X;
-  }
-  parameters {
-    real beta0;
-    real beta1;
-    real<lower = 0> sigma;
-  }
-  model {
-    Y ~ normal(beta0 + beta1 * X, sigma);
-    beta0 ~ normal(75, 10);
-    beta1 ~ normal(7.5, 0.2);
-    sigma ~ exponential(0.1);
-  }
-"
-```
-
-
-```{r}
-stan_coffee_sim <- 
-  stan(model_code = stan_coffee_model, 
-       data = list(n = nrow(new_coffee), Y = new_coffee$total_cup_points, X = new_coffee$aroma), 
-       chains = 4, iter = 5000*2, seed = 84735)
-```
-
-```{r}
+#in this step I ahve a numerical psterior summary for aroma 
 tidy(coffee_model, effects = c("fixed", "aux"),
-     conf.int = TRUE, conf.level = 0.95)
-```
-
-
-
-```{r}
-#posterior predictive summary
-coffee_prediction <- coffee_model_df |> 
-  mutate(mu = `(Intercept)` + aroma*6.163, #used slope estimate from part a 
-         y_new = rnorm(20000, mean = mu, sd = sigma))
+     conf.int = TRUE, conf.level = 0.8)
 ```
 
 ```{r}
-ggplot(coffee_prediction, aes(x = y_new)) + 
-  geom_density()
+# 50 simulated model lines to provide visual summary of B_1 coefficient aroma
+new_coffee |> 
+  add_fitted_draws(coffee_model, n = 50) |> 
+  ggplot(aes(x = aroma, y = total_cup_points)) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.7, color = "grey") + 
+    geom_point(data = new_coffee, size = 0.05, color = "blue")
+#plot shows 50 posterior plausible sets of B_0 and B_1 (aroma). Notice that aroma is less plausible below 7.0.
 ```
 
 
+d) The posterior median relationship is 28.975120 + 7.010832X meaning that for every one unit increase in aroma we expect total_cup_points to increase by 7.010832. 
+
+e) I would say that yes I do based on my plots in a and c that show a positive correlation between aroma and cup score. The posterior summary of aroma shows that the 80% credible interval is above zero (6.8 - 7.2).  
 
 
+## Exercise 10.15
+
+a) 
+```{r}
+#finding first set of the posterior plausible parameter sets (B_0, B_1, sigma)
+first_set <- head(coffee_model_df, 1)
+first_set
+ 
+```
+
+```{r}
+#from observed data on each of the 572 observations in the new_coffee data we simulate a total_cup_points outcome from the normal data model tuned to this first parameter set 
+
+beta_0 <- first_set$`(Intercept)`#remember that beta_0 is intercept
+beta_1 <- first_set$aroma #x values 
+sigma <- first_set$sigma
+
+set.seed(84735)
+one_simulation <- new_coffee |> 
+  mutate(mu = beta_0 + beta_1 * aroma, #this is linear equation with data from the first set
+         simulated_points = rnorm(572, mean = mu, sd = sigma)) |> #remember 572 is sample size 
+  select(aroma, total_cup_points, simulated_points)
+```
+
+b) Next compare several of the data total_cup_points to the simulated points and then make density plot.
+
+```{r}
+head(one_simulation, 3)
+```
+
+Density plot.
+```{r}
+ggplot(one_simulation, aes(x = simulated_points)) +
+  geom_density(color = "lightblue") +
+  geom_density(aes(x = total_cup_points), color = "darkblue")
+```
+
+c) Use pp_check()
+
+```{r}
+#examine 100 of the 20000 simulated points
+pp_check(coffee_model, nreps = 100) +
+  xlab("points")
+```
+
+d) The 100 simulated lines capture the typical points (somewhere above 80) and the range. Given this, I would say that assumption 2 (that the outcome can be written as a linear function) and assumption 3 (at any X values, Y varies normally around mu with consistent variability sigma) are reasonable. 
+
+## Exercise 10.16 
+
+a) *Without* using posterior_predict(), simulate and plot a posterior predictive model for the rating of this batch. 
+
+```{r}
+new_coffee |> 
+  filter(farm_name == "-") |> #the first batch only had a hyphen for a name but this filter still worked. I could have also just looked at the data to see the aroma and points since these values are first in the list 
+  select(aroma, total_cup_points)
+```
+
+```{r}
+#simulate posterior predictive model for first farm.
+
+set.seed(84735)
+predict_firstfarm <- coffee_model_df |> 
+  mutate(mu = `(Intercept)` + aroma*7.67,
+         point_new = rnorm(20000, mean = mu, sd = sigma))
+
+#plot this model
+ggplot(predict_firstfarm, aes(x = point_new)) + 
+  geom_density() + 
+  geom_vline(xintercept = 84, color = "lightgreen")  #added this line to show where score for first farm in observed data = 84 
+```
+
+b) *Without* using prediction_summary() calculate and interpret raw & standardized posterior predictive error.
+
+```{r}
+#raw predictive error 
+predict_firstfarm |> 
+  summarize(mean = mean(point_new), error = 84 - mean(point_new))
+```
+The model under-predicted the points by 1.259727. 
+
+```{r}
+#standardized posterior error 
+predict_firstfarm |>  
+  summarize(sd = sd(point_new), error = 84 - mean(point_new),
+            error_scaled = error / sd(point_new))
+```
+
+The score of 84 we observed in the new_coffee data is 1.97503 standard deviations above the mean prediction. 
+
+c) construct ppc_intervals() plot.
+
+```{r}
+#in this case we'll use posterior_predict 
+coffpredictions <- posterior_predict(coffee_model, newdata = new_coffee)
+dim(coffpredictions)
+```
+
+
+```{r}
+ppc_intervals(new_coffee$total_cup_points, yrep = coffpredictions, x = new_coffee$aroma,  prob = 0.5, prob_outer = 0.95, size = 0.8) #adjusted size to make blue lines easier to see 
+```
+
+For each of the 572 total_cup_points, the 95% prediction interval is displayed as the narrow long blue bars and the 50% prediction interval is show in the wider short blue bars. The posterior predictive median is the light blue dot.What we are seeing is the center and spread of *each* posterior predictive model which informs us of how compatible each model is with the observed points (dark blue dots). Visually it looks like few of the observed points are outside of the 50% or 95% prediction intervals which means I can have confidence in the accuracy of the model.
+
+d) how many batches have ratings that are within 50% posterior prediction interval. 
+
+```{r}
+set.seed(84735)
+prediction_summary(coffee_model, data = new_coffee)
+```
+65.20979% of batches have ratings that are within their 50% posterior prediction interval. 
