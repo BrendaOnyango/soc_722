@@ -11,7 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Exercise 10.1
 
-The three big questions for evaluating a model are: 
+The three big questions for evaluating a model are:
+
 1)Is the model fair? Always ask this question and evaluate by questioning how data was collected, by whom and for what, and how might data affect individuals/communities. 
 
 2) How wrong is the model? We can use pp-check() to see if central tendency and spread of model is similar to data. 
@@ -93,13 +94,14 @@ plot(x,y)
 lm(y ~ x, data = line_data) #slope is the 2nd coefficient based on googling and this is just 1 model of these points. 
 
 ```
-```{r}
+```{r, results='hide'}
 line_model <- stan_glm(y ~ x, data = line_data, #create simulation with given parameter set 
                        family = gaussian,
                        prior_intercept = normal(-1.8),
                        prior = normal(2.1, .8), 
                        prior_aux = exponential(1.25), #arrived at 1.25 wiht 1/.8
                        chains = 4, iter = 5000*2, seed = 80)
+
 ```
 
 b)
@@ -233,13 +235,14 @@ ggplot(new_coffee, aes(y = total_cup_points, x = aroma)) + #plotting aroma on x 
 The relationship between aroma and coffee rating is positive. As aroma grade increases total_cup_points increases. One model indicates that for each unit increase in aroma, cup points increase by about 6 units. 
 
 b) Could also use stan, but in b we're asked to use stan_glm to model.
-```{r}
+```{r, results='hide'}
 coffee_model <- stan_glm(total_cup_points ~ aroma, data = new_coffee,
                        family = gaussian,
                        prior_intercept = normal(75, 10), #used range rule for sd and 75 was given 
                       prior = normal(7.5, .2), #7.5 seems like a reasonable mu for B_1 based on scanning the data
                        prior_aux = exponential(0.1),#found l by 1/10
                        chains = 4, iter = 5000*2, seed = 84735)
+ 
 ```
 
 ```{r}
@@ -383,3 +386,206 @@ set.seed(84735)
 prediction_summary(coffee_model, data = new_coffee)
 ```
 65.20979% of batches have ratings that are within their 50% posterior prediction interval. 
+
+## Exercise 10.17
+
+a) 
+```{r}
+set.seed(84735)
+
+cv_procedurecoff <- prediction_summary_cv(
+  model = coffee_model, data = new_coffee, k = 10) #used 10 because of Goldilocks challenge
+cv_procedurecoff
+
+```
+
+b) Median absolute error (mae) tells us that the typical difference between observed points and posterior predictive mean is .903. The scaled MAE tells us the typical number of standard deviations that the observed points fall from their posterior predictive means is .456 standard deviations. 64.52% of the observed points fall within 50% of the posterior prediction interval. 95.81% of the observed points fall within the 95% posterior prediction interval. 
+
+c) Looking at the MAE among the folds we see that it ranged from being as low as 0.613 to as high as 1.04. Looking at the variation among the four cross-validated metrics shows how some training models perform better on some sets than others. The within_50 metric was as low as 0.526 for one fold. The metrics found from the average of these 10 folds seems to represent the trend of the folds well. 
+
+## Exercise 10.18
+
+a) To assess if it's fair we should answer how the data was collected, by whom and for what, and how it might impact individuals and societies. Using ?coffee_ratings we see that the data was collected by James leDeoux, a data scientist, and shared through R for DataScience, a learning initiative. The data doesn't have protected personal information. It probably won't impact society or individuals poorly except for those farms rated the least were people to use this to change their coffee consumption choices. Overall, I'd say the model is fair. Exercise 10.17 supports that the model has useful accuracy. 
+
+## Exercise 10.19 
+
+a) Before using stang_glm() used visualizations to inform a prior. 
+
+```{r}
+lm(total_cup_points ~ aftertaste, data = new_coffee) #one estimate of parameters for a well fitting line; we see slope estimate (6.623) is positive 
+```
+
+```{r}
+ggplot(new_coffee, aes(y = total_cup_points, x = aftertaste)) + #plotting aroma on x axis and points on y axis  
+  geom_point(size = 0.5) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+```{r, results='hide'}
+aftertaste_model <- stan_glm(total_cup_points ~ aftertaste, data = new_coffee,
+                       family = gaussian,
+                       prior_intercept = normal(75, 10), #kept same prior for rating from earlier exercise 
+                      prior = normal(7.4, .3), #7.4 seems like a reasonable mu for B_1 based on second visualization for this problem .3 is an estimate of the range rule vale 
+                       prior_aux = exponential(0.1),#found l by 1/10
+                       chains = 4, iter = 5000*2, seed = 84735)
+
+```
+
+b) Plot to see if model is wrong. 
+
+
+```{r}
+pp_check(aftertaste_model, nreps = 100) +
+  xlab("total_cup_points")
+```
+
+c) 
+```{r}
+#finding 10-fold cross validation of the posterior predictive quality 
+set.seed(84735)
+
+cv_procedureaf <- prediction_summary_cv(
+  model = aftertaste_model, data = new_coffee, k = 10) 
+cv_procedureaf
+```
+d) Note that the aftertaste MAE of .711 is lower than MAE of model based on aroma (0.90) and a within_50 metric of .706 which is higher than the model based on aroma (.64). The second model also has a higher within_95 metric. Due to these factors, I would pick aftertaste as the better predictor of coffee bean ratings. 
+
+# Open-ended Exercises 
+
+## Exercise 10.20 
+
+a) Fit the model using stan_glm()
+
+First I'll visualize the data to inform some priors. 
+```{r}
+lm(maxtemp ~ mintemp, data = weather_perth) #the second value is one possible slope 
+```
+
+```{r}
+ggplot(weather_perth, aes(y = maxtemp, x = mintemp)) + 
+  geom_point(size = 0.5) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+Next I'll do stan_glm()
+
+```{r, results='hide'}
+temp_model <- stan_glm(maxtemp ~ mintemp, data = weather_perth,
+                       family = gaussian,
+                       prior_intercept = normal(25, 11), #points seem to cluster around 25 on maxtemp and used estimate of range rule for sd
+                      prior = normal(15, 7.5), #points seem to cluster around 15 on mintemp and used estmate of rangerule for sd
+                       prior_aux = exponential(0.09),#found l by 1/11
+                       chains = 4, iter = 5000*2, seed = 84735)
+```
+
+b)
+```{r}
+#Store 4 chains for each parameter in 1 data frame 
+temp_model_df <- as.data.frame(temp_model)
+```
+
+Use  tidy() to for a posterior summary of mintemp. 
+
+```{r}
+#in this step I ahve a numerical posterior summary for mintemp 
+tidy(temp_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.8)
+```
+Note credible intervals are above 0. 
+
+The posterior median relationship is 14.47 + 0.84X meaning that for every 1 degree increase in the mintemp, we can expect that maxtemp to increase by 0.84 degrees. 
+
+c) Evaluate model and summarize findings. 
+
+1) First I'll do a pp_check()
+```{r}
+pp_check(temp_model, nreps = 50) +
+  xlab("maxtemp")
+```
+
+Notice the model doesn't capture bimodality of the maxtemp that could represent seasonal changes or something else (maybe wildfires?). It captures the range, but has a slightly larger one. 
+
+2) I'll do ppc_intervals next. 
+```{r}
+predictions <- posterior_predict(temp_model, newdata = weather_perth)
+dim(predictions)
+
+ppc_intervals(weather_perth$maxtemp, yrep = predictions, x = weather_perth$mintemp, prob = 0.5, prob_outer = 0.95)
+
+prediction_summary(temp_model, data = weather_perth)
+```
+Note that 45% of observed maxtemps fall within the 50% posterior prediction interval. 
+
+3) Finally, I'll cross-validate. 
+```{r}
+cv_proceduret <- prediction_summary_cv(
+  model = temp_model, data = weather_perth, k = 10) 
+cv_proceduret
+```
+
+This model has ok or useful predictive accuracy and captures the generally positive relationship between min temp and max temp. However, we know the model could be improved because of the below 50% within_50 metrics and because it doesn't capture the bimodality of the sample data. 
+
+## Exercise 10.21
+
+First I'll visualize the data to inform some priors. 
+```{r}
+lm(rides ~ humidity, data = bikes) #the second value is one possible slope 
+```
+
+```{r}
+ggplot(bikes, aes(y = rides, x = humidity)) + 
+  geom_point(size = 0.5) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+Notice that there's a weakly negative association between humidity and rides. As humidity increases rides decrease slightly. 
+
+a) Next I'll do stan_glm()
+
+```{r, results='hide'}
+humid_model <- stan_glm(rides ~ humidity, data = bikes,
+                       family = gaussian,
+                       prior_intercept = normal(5000, 1000), #using priors from ch. 9 about the average and sd of rides on an average temp day 
+                      prior = normal(63, 15), #most of the humidity values are between 50 and 75 so I choose 63 as kind of a midpoint. Used range rule approx. for sd 
+                       prior_aux = exponential(0.0008),#used prior from chp. 9
+                       chains = 4, iter = 5000*2, seed = 84735)
+```
+
+b)
+```{r}
+#Store 4 chains for each parameter in 1 data frame 
+humid_model_df <- as.data.frame(humid_model)
+```
+
+```{r}
+# numerical posterior summary for humidity 
+tidy(humid_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.8)
+```
+
+The posterior median relationship between riders and humidity is 
+3558.56 + -1.06X meaning that for each unit increase in humidity, riders decrease by 1.06. 
+
+c) To evaluate my model I will do a pp_check, ppc_intervals, and cross-validation. 
+
+```{r}
+#first pp_check
+pp_check(humid_model, nreps = 50) +
+  xlab("rides")
+
+#ppc_intervals 
+humidpredictions <- posterior_predict(humid_model, newdata = bikes)
+dim(humidpredictions)
+
+ppc_intervals(bikes$rides, yrep = humidpredictions, x = bikes$humidity, prob = 0.5, prob_outer = 0.95)
+
+prediction_summary(humid_model, data = bikes)
+
+#cross-validation
+cv_procedureh <- prediction_summary_cv(
+  model = humid_model, data = bikes, k = 10) 
+cv_procedureh
+```
+
+The ppcheck shows the model captures the range and central tendency mostly well; it doesn't capture that the observed rides have bimodality. Note that 46.2% of observed rides fall within the 50% posterior prediction interval based on the ppc_intervals function.  
+The cross validation shows similar within_50 metrics and the mae_scaled shows a low typical number of standard deviations that the observed rides fall from the posterior predictive mean. 
+Overall this model is ok at capturing the weakly negative relationship between humidity and rides. An improved model would capture the bimodality of the observed data. We should keep in mind that a lot of variability in this model comes from the widely dispersed observed data; the ppc_intervals have wide bands that reflect this. 
+
