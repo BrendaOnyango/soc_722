@@ -64,6 +64,10 @@ library(bayesrules)
 library(tidyverse) 
 library(bayesplot)
 library(rstanarm)
+library(rstan)
+library(tidybayes)
+library(janitor)
+library(broom.mixed)
 ```
 
 ## Exercise 10.7
@@ -233,13 +237,71 @@ b)
 coffee_model <- stan_glm(total_cup_points ~ aroma, data = new_coffee,
                        family = gaussian,
                        prior_intercept = normal(75, 10), #used range rule for sd and 75 was given 
-                       prior = normal(7.5, .2), #7.5 seems like a reasonable mu for B_1 based on scanning the data
-                       prior_aux = exponential(0.0008),#found l by 1/10
+                      prior = normal(7.5, .2), #7.5 seems like a reasonable mu for B_1 based on scanning the data
+                       prior_aux = exponential(0.1),#found l by 1/10
                        chains = 4, iter = 5000*2, seed = 84735)
 ```
+
+```{r}
+#Store 4 chains for each parameter in 1 data frame as we might need this later. 
+coffee_model_df <- as.data.frame(coffee_model)
+```
+
 
 ```{r}
 #visual summary of coffee_beta_1
 plot_normal(mean = 7.5, sd = .2) + labs(x = "beta_1", y = "pdf")
 ```
+
+```{r}
+# STEP 1: DEFINE the model
+stan_coffee_model <- "
+  data {
+    int<lower = 0> n;
+    vector[n] Y;
+    vector[n] X;
+  }
+  parameters {
+    real beta0;
+    real beta1;
+    real<lower = 0> sigma;
+  }
+  model {
+    Y ~ normal(beta0 + beta1 * X, sigma);
+    beta0 ~ normal(75, 10);
+    beta1 ~ normal(7.5, 0.2);
+    sigma ~ exponential(0.1);
+  }
+"
+```
+
+
+```{r}
+stan_coffee_sim <- 
+  stan(model_code = stan_coffee_model, 
+       data = list(n = nrow(new_coffee), Y = new_coffee$total_cup_points, X = new_coffee$aroma), 
+       chains = 4, iter = 5000*2, seed = 84735)
+```
+
+```{r}
+tidy(coffee_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.95)
+```
+
+
+
+```{r}
+#posterior predictive summary
+coffee_prediction <- coffee_model_df |> 
+  mutate(mu = `(Intercept)` + aroma*6.163, #used slope estimate from part a 
+         y_new = rnorm(20000, mean = mu, sd = sigma))
+```
+
+```{r}
+ggplot(coffee_prediction, aes(x = y_new)) + 
+  geom_density()
+```
+
+
+
 
