@@ -181,3 +181,65 @@ a) The fours steps for the k-fold cross validation algorithm are:
 b) When you use the same data to train and test a model, the model has been optimized to capture features in the data it was built with so it produces an overly optimistic predictive accuracy. 
 
 c) My questions are how to generate how to split folds in R and in what sociological context would we use leave-one-out. 
+
+## Exercise 10.13
+
+Load data needed for exercises. 
+
+```{r}
+library(bayesrules)
+data("coffee_ratings")
+coffee_ratings <- coffee_ratings |> 
+  select(farm_name, total_cup_points, aroma, aftertaste)
+view(coffee_ratings)
+```
+
+a) Use head to look at subsample of coffee_ratings. 
+
+```{r}
+head(coffee_ratings, 15)
+```
+
+Modeling ratings by aroma likely violates the independence assumption (conditioned on X, observed data Y_i on case i is independent of the observed data on any other case j) because given X = aroma and Y = total_cup_points a reviewer is likely comparing i cup of coffee to j cup of coffee to make determination on aroma. Similarly with aftertaste as X and Y remaining total_cup_points, a taster may evaluate aftertaste of i depending on aftertaste of j. In other words, if you've never tried anything other than Folgers or my favorite, Nescafe Clasico, then you won't know if it has better or worse aroma or aftertaste than another brand.
+
+b) Take one observation per farm and name this subsample as new_coffee for the other excercises. 
+
+```{r}
+set.seed(84735)
+new_coffee <- coffee_ratings |> 
+  group_by(farm_name) |> #telling R how to group data for new set
+  sample_n(1) |> #telling R to take 1 sample from each group 
+  ungroup()
+dim(new_coffee) #new_coffee has 572 observations with 4 variables 
+```
+
+## Exercise 10.14 (Coffee ratings: model it)
+
+a) 
+```{r}
+lm(total_cup_points ~ aroma, data = new_coffee) #one estimate of parameters for a well fitting line; we see slope estimate (6.163) is positive 
+```
+
+```{r}
+ggplot(new_coffee, aes(y = total_cup_points, x = aroma)) + #plotting aroma on x axis and points on y axist  
+  geom_point(size = 0.5) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+The relationship between aroma and coffee rating is positive. As aroma grade increases total_cup_points increases. One model indicates that for each unit increase in aroma, cup points increase by about 6 units. 
+
+b) 
+```{r}
+coffee_model <- stan_glm(total_cup_points ~ aroma, data = new_coffee,
+                       family = gaussian,
+                       prior_intercept = normal(75, 10), #used range rule for sd and 75 was given 
+                       prior = normal(7.5, .2), #7.5 seems like a reasonable mu for B_1 based on scanning the data
+                       prior_aux = exponential(0.0008),#found l by 1/10
+                       chains = 4, iter = 5000*2, seed = 84735)
+```
+
+```{r}
+#visual summary of coffee_beta_1
+plot_normal(mean = 7.5, sd = .2) + labs(x = "beta_1", y = "pdf")
+```
+
