@@ -1,0 +1,183 @@
+---
+title: "HW 11"
+author: "Brenda Onyango"
+date: "11/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Exercise 10.1
+
+The three big questions for evaluating a model are: 
+1)Is the model fair? Always ask this question and evaluate by questioning how data was collected, by whom and for what, and how might data affect individuals/communities. 
+
+2) How wrong is the model? We can use pp-check() to see if central tendency and spread of model is similar to data. 
+
+3) How accurate are the posterior predictive models? We can use posterior predictive summaries to assess accuracy. 
+
+### Exercise 10.2 
+
+a) Unfairness in data collection - Only collecting data on political preferences from people who work on Capitol Hill. 
+
+b) Unfairness in purpose of data collection - Using a model to determine placement in AP classes for incoming high school students (thinking of tracking and how many students and parents don't know when and how a student is placed in a certain tack that affects post secondary outcomes; I only learned about my track/tracking in general in a coincidental conversation with admin in early high school. More on tracking: https://www.nassp.org/tracking-and-ability-grouping-in-middle-level-and-high-schools/)
+
+c) Unfairness in the impact of analysis on society - using a model to predict housing prices that overestimates prices and raises housing costs (think of Zillow scandal)
+
+d) Bias baked into the analysis - collecting data on demographics (race, BMI, gender) to create a model of survivorship on different medications to assign treatment to future patients based on demographics. Such a model bakes in racism, sexism, and fatphobia that affects survivorship. 
+
+### Exercise 10.3: Perspective
+
+a) My perspective is influenced by being a 1.5 generation immigrant and Black/African woman living in the South.
+
+b) There are many American subcultures for which I don't have a complete or near-complete picture of. I also don't have an inside view of how men socialize. 
+
+c) I have more insight on the immigration process than those who've never gone through it and living in the South gives me a truer sense of Southern cultures than Northeastern media simplifications. 
+
+## Exercise 10.4
+
+a) I would tell the colleague they were socialized and educated in a society experiencing coloniality that tries to naturalize various -isms and science and data analysis is not immune to this hegemony and that it can be argued that data science helps perpetuate it, so therefore they're not neutral. I could urge the colleague to check the three big questions at minimum and more questions like am I measuring race or racism, woman-dependent outcomes or sexism, etc. 
+
+b) I would respond that the model, unless efforts have been made to check for and remove bias in its data (garbage data in, garbage model out), data structure, and the premise and purpose of what is being modeled, the model will have bias baked in. 
+
+c) I once worked as a research assistant for a global health study exploring how youth understand HIV/AIDS transmission and we worked with narratives.I was able to provide some additional context to the research team about some content in the narratives from Kenyan youth; I know someone who grew up in Kenya would have probably given even better context, but even raised abroad I was able to give some insight.  
+
+## Exercise 10.5
+
+This quote means that models are ideal representations of a real phenomena so they don't capture all the nuances. Models that are less wrong than others give useful approximations that give a good sense of summary statistics that may be close to actual parameters. 
+
+## Exercise 10.6 
+
+The three assumptions of the Normal Bayesian linear regression model are: 
+1) Conditioned on X, the observed data Y on case i is independent of the observed data on any other case j.
+
+2) The typical Y outcome can be written as a linear function X, mu = B0 + B1X.
+
+3) At any X value, Y varies normally around mu with consistent variability sigma.
+
+
+```{r}
+#loading libraries for exercises
+library(bayesrules)
+library(tidyverse) 
+library(bayesplot)
+library(rstanarm)
+```
+
+## Exercise 10.7
+
+a) I would use the values of B_0, B_1 and sigma and sensible priors to create a Bayesian linear regression model. I can view the data to make informed choices about priors. Then I would use the model to predict more values of y and compare these to values of y in the dataset to assess if I have a good model.  
+
+See below. 
+
+```{r}
+#creating vectors 
+x <- c(12,10,4,8,6)
+y <- c(20,17,4,11,9)
+line_data <- data.frame(x,y)
+line_data #looking at data.frame to get a sense of the tendency and spread 
+plot(x,y)
+
+```
+
+
+
+```{r}
+#create simple linear regression with the given data
+lm(y ~ x, data = line_data) #slope is the 2nd coefficient based on googling and this is just 1 model of these points. 
+
+```
+```{r}
+line_model <- stan_glm(y ~ x, data = line_data, #create simulation with given parameter set 
+                       family = gaussian,
+                       prior_intercept = normal(-1.8),
+                       prior = normal(2.1, .8), 
+                       prior_aux = exponential(1.25), #arrived at 1.25 wiht 1/.8
+                       chains = 4, iter = 5000*2, seed = 80)
+```
+
+b)
+
+
+```{r}
+beta_0 <- -1.8 #these values given as first parameter set 
+beta_1 <- 2.1
+sigma  <- .8
+set.seed(678)
+y_simulation <- line_data |> 
+  mutate(mu = beta_0 + beta_1 * x,
+         simulated_y = rnorm(5, mean = mu, sd = sigma)) |> #we have 5 data points
+  select(x, y, simulated_y)
+
+head(y_simulation, 5) #Compare data to simulation.Part b) The predictions for Y1:Y5 are shown in the column labeled simulated_y.
+```
+
+Alternatively could have done this more simply with vectors and this would have produced the estimates Steve showed in class. These estimates are similar to the ones above. The ones above are within 1 or 2 sigma of the below estimates.  
+
+```{r}
+y_estimates <- beta_0 + beta_1*x
+y_estimates #y estimates with N~(-1.8 + 2.1x_i, 0.8)
+```
+
+
+```{r}
+#comparing data to simulated y's visually 
+ggplot(y_simulation, aes(x = simulated_y)) + 
+  geom_density(color = "red") + 
+  geom_density(aes(x = y), color = "darkblue")
+
+#simulation and data follow similar rises and falls. I feel comfortable generating more values based on this. For the majority of values the simulation is an underestimate. 
+```
+
+```{r}
+# Examine 80 simulated samples
+pp_check(line_model, nreps = 80) + 
+  xlab("lines")
+
+#This plot shows that most of the lines capture the range and central tendency of our limited data set.
+```
+
+
+## Exercise 10.8
+
+a) The goal of a posterior predictive check is to check whether a model is able to simulate data that is similar to the data used to create the model. The posterior predictive check gives insight to whether the assumptions that a Y outcome can be written as a linear function and that at any X value, Y varies normally around mu with consistent variability sigma. 
+
+b) Posterior predictive checks can be analyzed by comparing the simulated datasets to the observed dataset and looking for similarities in the spread and typical values of the simulated and observed data. If a model has a significantly different mean, range, and shape then the observed data, we know we have a bad model. 
+
+## Exercise 10.9 
+
+a) The median absolute error (MAE) tells us the typical difference between observed Y_i values and the Y_i' means from the model. It helps us judge quality of the model. 
+
+b) The *scaled* median absolute error measures the typical number of standard deviations that observed Y_i differs from the posterior predictive Y_i' means. It can be an improvement over MAE without a scale because it standardizes the difference which eases comparisons between models that may have different portions of the data we've used to train and test. 
+
+c) The within-50 statistic tells us what proportion of observed Y_i that falls within 50% of the posterior prediction interval. If this number is really low we know there's something off about the model. 
+
+## Exercise 10.10 
+
+a) In pp_check() the darker density is the actual observed data. The light blue density represents simulated data from a model. 
+
+b) If model fits well the light blue density will have similar central tendency or tendencies and spread as the dark blue density. A good fitting model will produce a plot like this because the model has the same data structure as the observed data and produces predictions mostly within 2 or 3 standard deviations of the observed value. 
+
+c) If a model fits poorly, it may have a different shape, different central tendency, and different range (either much more less) than the observed data. 
+
+## Exercise 10.11
+
+a) The data are the taco recipes.
+b) The model is Reem. Tacos with different recipes are the input to Reem and the output is some review. 
+c) Cross validation could be done by splitting the data into different subsets. In this case separating the the anchovie-based recipes and non-anchovie-based recipes and testing Reem on their flavors. We could give her 90% of the tacos without the anchovies for model training and then test with the anchovies or some other type of split. 
+d) Cross-validation would help identify which recipe combinations are the tastiest and could help point me in the direction of the range of taco flavors to offer. 
+I also think there could be an argument of adding more models so more people besides Reem has tasted the tacos and compare cross-validation estimates within and between the models or people in this case. 
+
+## Exercise 10.12 
+
+a) The fours steps for the k-fold cross validation algorithm are: 
+1) Create folds. Let k be some integer from 2 to sample size n. Split the data into k non-overlapping folds (subsets) of roughly equal size.
+2) Train and test the model by training with combined data in the first k-1 folds and testing the model with k^th data fold. Measure prediction quality by MAE or other way.  
+3) Repeat step two k-1 times and each time leave out a different fold for testing. 
+4) Average the k measures from steps 2 and 3 to obtain 1 cross-validation estimate of prediction quality. 
+
+b) When you use the same data to train and test a model, the model has been optimized to capture features in the data it was built with so it produces an overly optimistic predictive accuracy. 
+
+c) My questions are how to generate how to split folds in R and in what sociological context would we use leave-one-out. 
