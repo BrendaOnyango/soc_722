@@ -79,6 +79,10 @@ b) Bad models can be overly simple (high bias, low variability) or overly comple
 
 ## Exercise 11.8 
 
-a)  Techniques to assess models are 
-Techniques to compare models are 
+Techniques to assess models are visualization, cross-validation, and ELPD. Visualizations are used to evaluate predictive accuracy and compare different models. We can use pp_check and posterior predictive models to visualize how models compare to data and to each other. 
+Cross-validation is a way to numerically assess the posterior predictive quality of models. Using k-fold cross-validation involves *training* the model on one set of data and *testing* with another. 
+ELPD (expected log-predictive densities) is another numerical way to asess predictive accuracy. Larger expected logged posterior predictive pdf corresponds to more accurate posterior predictions of Y. 
 
+## Exercise 11.9 
+
+The bias-variance tradeoff is the the challenge of using enough predictors to get useful information about Y without including too much information. Too few predictors will give models with low variance across samples and high bias. Too many predictors will capture noise and errors and the model will be unstable; the model will have high variance and low bias. 
