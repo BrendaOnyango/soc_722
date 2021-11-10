@@ -1,0 +1,37 @@
+---
+title: "HW 12_due 11.13"
+author: "Brenda Onyango"
+date: "11/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Chapter 11.71 Conceptual Excercises 
+
+## Exercise 11.1
+
+We would want to build a regression model with more than 1 predictor because using more than 1 predictor can tell us more about our outcome variable. Including multiple predictors can improve a model and allow it to be used for prediction/forecasting. 
+
+## Exercise 11.2 
+
+Modeling car's miles per gallon in a city (Y) by the make of the car as represented by mu = B_0 + B_1*X_1 + B_2*X_2 + B_3*X_3 where X_1 = Kias, X_2 = Subarus, and X_3 = Toyotas. 
+
+a) There is no indicator term for the Ford category because it is our baseline or reference level of the make variable and will have X_0 = 0. 
+
+b) B_2 represents the typical difference in a car's gas mileage for a 1-unit increase in X2 i.e. versus a Ford, Subarus have an X2 change in gas mileage. 
+
+c) B_0 represents the typical gas mileage for a Ford. 
+
+## Exercise 11.3 
+
+mu = B_0 + B_1*X_1 + B_2*X_2 where B_0 is weight of Mr. Stripey, X_1 is days a tomato has been growing and X_2 is Roma tomato. 
+
+a) B_0 is our reference and level and it is the weight of a Mr. Stripey tomato. B_1 measures the weight of a tomato for a 1-unit increase in X_1 which is days a tomato has been growing. B_2 measures the typical change in the weight of a tomato for a unit increase of X_2 i.e. the weight change as a result of being a Roma tomato. 
+
+b) If B_2 were equal to 0 that means mu = B_0 + B_1*X_1 = weight of a Mr. Stripey tomato that has grown for X_1 days. I.e. if B_2 were 0, we would be measuring the size of a tomato when it is a Mr. Stripey tomato growing for X number of days. Weight is outcome and the Mr. Stripey and days of growth are the predictors. 
+
+## Exercise 11.4 
+
