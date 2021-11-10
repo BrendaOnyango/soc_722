@@ -35,3 +35,50 @@ b) If B_2 were equal to 0 that means mu = B_0 + B_1*X_1 = weight of a Mr. Stripe
 
 ## Exercise 11.4 
 
+a) For X_1 and X_2 to interact it means that X_1 moderates the relationship between X_2 and mu. In tomato terms, The number of days a tomato is growing (X_1) moderates the relationship between the Roma tomato category (X_2) and a tomato's weight in grams (Y). 
+
+b) B_3 is the interaction coefficient and it captures the difference in slopes which represents the change in weight when Roma category is excluded/included.
+
+## Exercise 11.5 
+
+a) Sketch a model that would benefit from interaction between a categorical and quantitative predictor. 
+Looking at weather data for categorical ad quant variables.  
+```{r}
+view(weather_WU)
+```
+
+```{r, results='hide'}
+#sketching a model 
+coffee_interaction <- stan_glm(
+  total_cup_points ~ aroma + flavor + aroma:flavor,
+  data = coffee
+  
+
+```
+
+
+## Exercise 11.6 
+
+Y = shoe size 
+X_1 = children's age in years
+X_2 = children's swimming knowledge 
+
+a) Generally speaking, adding predictors improves models because outcomes may be correlated with more than 1 predictor. Adding predictors incorporates flexibility that improves upon models with high bias. 
+
+b) It is possible to overfit. When there is high variance and low bias in a model, the model closely aligns with data which means it is also reflecting noise or error in the data and is actually a worse model than those that with in between varaince and in-betweeen bias. 
+
+c) For a model on children's shoe size I would add children's height in cm. I would add height assuming that height and feet length have some proportion. It's also data that is feasible and probablly fair  to collect. 
+
+d) I would remove children's knowledge of swimming as there is not a reasonable causal pathway for how swimming or not leads to variation in shoe size. 
+
+## Exercise 11.7 
+
+a) Good models capture the central tendency and range of data it was created with. Good models have also undergone training and testing. They also have bias and variability that is neither too high or too low. 
+
+b) Bad models can be overly simple (high bias, low variability) or overly complex (low bias, high variability) meaning they don't capture enough of key features of the data or capture too much noise/error. 
+
+## Exercise 11.8 
+
+a)  Techniques to assess models are 
+Techniques to compare models are 
+
