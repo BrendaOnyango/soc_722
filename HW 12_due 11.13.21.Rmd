@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Chapter 11.71 Conceptual Excercises 
+# 11.71 Conceptual Excercises 
 
 ## Exercise 11.1
 
@@ -42,19 +42,9 @@ b) B_3 is the interaction coefficient and it captures the difference in slopes w
 ## Exercise 11.5 
 
 a) Sketch a model that would benefit from interaction between a categorical and quantitative predictor. 
-Looking at weather data for categorical ad quant variables.  
-```{r}
-view(weather_WU)
-```
+Used view(weather_WU) in console to see weather data for categorical ad quant variables.  
 
-```{r, results='hide'}
-#sketching a model 
-coffee_interaction <- stan_glm(
-  total_cup_points ~ aroma + flavor + aroma:flavor,
-  data = coffee
-  
 
-```
 
 
 ## Exercise 11.6 
@@ -86,3 +76,210 @@ ELPD (expected log-predictive densities) is another numerical way to asess predi
 ## Exercise 11.9 
 
 The bias-variance tradeoff is the the challenge of using enough predictors to get useful information about Y without including too much information. Too few predictors will give models with low variance across samples and high bias. Too many predictors will capture noise and errors and the model will be unstable; the model will have high variance and low bias. 
+
+# 11.7.2 Applied Exercises 
+
+Load packages for applied exercises.
+
+```{r}
+
+#loading libraries for exercises
+library(bayesrules)
+library(tidyverse) 
+library(bayesplot)
+library(rstanarm)
+library(rstan)
+library(tidybayes)
+library(janitor)
+library(broom.mixed)
+
+```
+
+Using penguins_bayes to build models of body_mass_g (Y). Average penguin weighs between 3500-4500 g (estimated variance 250)
+X= species = Adelie, Chinstrap, Gentoo = categorical. 
+Will work with 2 level predictors in penguin_data. 
+
+```{r}
+#loading alternative penguin data
+penguin_data <- penguins_bayes |> 
+  filter(species %in% c("Adelie", "Gentoo"))
+
+```
+
+## Exercise 11.10
+
+a) Plot and summarize relationship among 3 variables (Y = body_mass_g, X_1 = flipper_length, X_2,3 = species)
+
+```{r}
+ggplot(data = penguin_data, aes(y = body_mass_g, x = flipper_length_mm, color = species)) + geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+For both species, as flipper length increases, body mass increases. For Gentoo the increase is more rapid, suggesting that species may moderate the relationship between flipper length and body mass. 
+
+b) Use stan_glm() to simulate a posterior Normal regression of body_mass_g by flipper_length_mm (X) and species, without an interaction. 
+
+
+```{r, results = 'hide'}
+penguin_model <- stan_glm(
+  body_mass_g ~ flipper_length_mm + species,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250), #midpoint of avg g given in th ech.
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.004, autoscale = TRUE), #1/250
+  chains = 4, iter = 5000*2, seed = 8000)
+```
+
+MCMC diagnostics 
+
+```{r}
+#Store 4 chains for each parameter in 1 data frame for later 
+penguin_model_df <- as.data.frame(penguin_model)
+```
+
+```{r}
+#visual diagnostics 
+#trace and density plots 
+mcmc_trace(penguin_model, size = 0.1)  
+
+# Density plots of parallel chains
+mcmc_dens_overlay(penguin_model)
+
+#chains look stable and density plots look 
+```
+```{r}
+#numerical diagnostics 
+# Effective sample size ratio and Rhat
+neff_ratio(penguin_model)
+
+rhat(penguin_model)
+```
+
+The R-hat values are very close to 1 meaning the chains are stable and mix quickly. The effective sample size ratio. 
+
+d) Produce tidy() summary of this model. Interpret the non-intercept coefficients' posterior median values in context. 
+
+```{r}
+tidy(penguin_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.80) |> 
+  select(-std.error)
+```
+
+flipper_length_mm is positively associated with body_mass_g as is species Gentoo, which is 216.52 g heavier than Adelie.                             
+
+e) Simulate, plot and describe the posterior predictive model for the body mass of an Adelie penguin that has a flipper length of 197. 
+
+
+## Exercise 11.1 (penguins interaction)
+
+a) Use stan_glm()  to simulate the posterior for this model with 4 chains at 10,000 iterations. 
+
+```{r, results = 'hide'}
+penguin_interaction_model <- stan_glm(
+   body_mass_g ~ species + flipper_length_mm + species:flipper_length_mm,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250), 
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.004, autoscale = TRUE), 
+  chains = 4, iter = 5000*2, seed = 8000)
+  
+
+```
+
+
+b) Simulate and plot 50 posterior model lines. 
+
+```{r}
+pp_check(penguin_interaction_model)
+```
+
+The plot shows that the model captures the range and central tendencies of the data well. Both the model and the 50 lines have a minimum of 2 peaks. While the model doesn't overfit the data, the use of multiple predictors gave us a better model than flipper length alone. 
+
+For comparison here is the pp_check of a non-interaction model with one predictor, flipper length. 
+
+```{r, results = 'hide'}
+penguin_one_model <- stan_glm(
+   body_mass_g ~ flipper_length_mm,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250), 
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.004, autoscale = TRUE), 
+  chains = 4, iter = 5000*2, seed = 8000)
+```
+
+```{r}
+pp_check(penguin_one_model)
+```
+
+
+c)
+```{r}
+tidy(penguin_interaction_model, effects = c("fixed", "aux"))
+
+posterior_interval(penguin_interaction_model, prob = 0.80,
+                   pars = "speciesGentoo:flipper_length_mm")
+```
+
+
+```{r}
+penguin_data |> drop_na() |> 
+  add_fitted_draws(penguin_interaction_model, n = 200) |> 
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_line(aes(y=.value, group = paste(species, .draw)), alpha = 0.1)
+```
+Based on summary and this visualization I would say that the interaction term is necessary. Species moderates the relationship between flipper_length_mm and body_mass_g. Being Gentoo (blue) as opposed to Adelie increases the positive relationship between flipper_length_mm and body_mass_g. The 80% posterior credible interval for the interaction coefficient is above 0 and ranges from 9.17 to 25.61. 
+
+## Exercise 11.12
+
+Three predictors and no interactions: flipper_length_mm, bill_length_mm, bill_depth_mm. 
+
+a) 
+```{r, results = 'hide'}
+penguin_model_3 <- stan_glm(
+  body_mass_g ~ flipper_length_mm + bill_length_mm + bill_depth_mm ,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250), 
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.004, autoscale = TRUE), 
+  chains = 4, iter = 5000*2, seed = 8000)
+
+# Confirm prior specification
+prior_summary(penguin_model_3)
+
+# Check MCMC diagnostics
+mcmc_trace(penguin_model_3)
+mcmc_dens_overlay(penguin_model_3)
+mcmc_acf(penguin_model_3)
+```
+
+b) 
+```{r}
+posterior_interval(penguin_model_3, prob = 0.95)
+```
+
+c) All three 3 have significant positive association with body mass. None of the 95% credible intervals for the model parameters overlap with 0. Comparing all predictors of body_mass_g (below) we see that year has a negative assocation with body_mass_g. Island has no signifact association. 
+
+```{r, results = 'hide'}
+penguin_model_4 <- stan_glm(
+  body_mass_g ~ .,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250), 
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.004, autoscale = TRUE), 
+  chains = 4, iter = 5000*2, seed = 8000)
+```
+
+
+```{r}
+posterior_interval(penguin_model_4, prob = 0.95)
+```
+
+## Exercise 11.13
+
+a) simulate 4 models with stan_glm() function. 
+
+```{r, results = 'hide'}
+
+
+```
+
