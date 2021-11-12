@@ -280,6 +280,112 @@ a) simulate 4 models with stan_glm() function.
 
 ```{r, results = 'hide'}
 
+#model 1
+penguin_model_1 <- stan_glm(
+  body_mass_g ~ flipper_length_mm,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250), 
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.004, autoscale = TRUE), 
+  chains = 4, iter = 5000*2, seed = 8000)
+
+#model 2
+penguin_model_2 <- stan_glm(
+  body_mass_g ~ species,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250), 
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.004, autoscale = TRUE), 
+  chains = 4, iter = 5000*2, seed = 8000)
+
+#model 3
+penguin_model_3 <- stan_glm(
+  body_mass_g ~ flipper_length_mm + species,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250), 
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.004, autoscale = TRUE), 
+  chains = 4, iter = 5000*2, seed = 8000)
+
+#model 4 
+penguin_model_4 <- stan_glm(
+  body_mass_g ~ flipper_length_mm + bill_length_mm + bill_depth_mm,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250), 
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.004, autoscale = TRUE), 
+  chains = 4, iter = 5000*2, seed = 8000)
 
 ```
 
+
+b) Produce pp_check() for the 4 simulations
+```{r}
+pp_check(penguin_model_1)
+pp_check(penguin_model_2)
+pp_check(penguin_model_3)
+pp_check(penguin_model_4)
+```
+
+c) 
+```{r}
+#creating data set without missing data
+penguins_comp <- penguin_data |> 
+  select(flipper_length_mm, body_mass_g, species, 
+         bill_length_mm, bill_depth_mm) |> 
+  na.omit()
+```
+
+```{r}
+#cross validation of four models 
+set.seed(8000)
+prediction_summary_cv(model = penguin_model_1, data = penguins_comp, k = 10)
+
+set.seed(8000)
+prediction_summary_cv(model = penguin_model_2, data = penguins_comp, k = 10)
+
+set.seed(8000)
+prediction_summary_cv(model = penguin_model_3, data = penguins_comp, k = 10)
+
+set.seed(8000)
+prediction_summary_cv(model = penguin_model_4, data = penguins_comp, k = 10)
+
+
+```
+
+Two models (model 1 and model 4) have within_50 values above .50. Based on the pp_check, model 4 may be overfitted. Model 4 has the lowest within_95 value.  
+
+d) Evaluate and compare the ELPD posterior predictive accuracy of the 4 models.
+
+```{r}
+#calculate ELPD for the 4 models 
+
+set.seed(8000)
+loo_1 <- loo(penguin_model_1)
+
+loo_2 <- loo(penguin_model_2)
+
+loo_3 <- loo(penguin_model_3)
+
+loo_4 <- loo(penguin_model_4)
+
+#viewing results 
+c(loo_1$estimates[1], loo_2$estimates[1],
+  loo_3$estimates[1], loo_4$estimates[1])
+
+```
+
+Next, I'll compare the ELPD for the 4 models. 
+
+```{r}
+#compare the ELPD for the 4 models
+loo_compare(loo_1, loo_2, loo_3, loo_4)
+```
+
+The ELPD's show that model 4 is the best, followed by model 3, 2, then 1. It uses the most predictors. The other models are within 2 standard errors of 7.4.I still lean toward model 3 being the best for predictive purposes since it has a higher within_95 value than model 4 and is not as fitted to data as model 4. 
+
+## Summary of Final Project 
+
+tell me a bit about what you want to talk about in the presentation. Tell me what dataset you are interested in, what variables grab your attention, and - given the nature of those variables - what kind of model would be useful to examine a relationship between them.
+
+I'll be using the GSS to analyze 
