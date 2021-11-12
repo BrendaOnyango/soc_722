@@ -42,9 +42,18 @@ b) B_3 is the interaction coefficient and it captures the difference in slopes w
 ## Exercise 11.5 
 
 a) Sketch a model that would benefit from interaction between a categorical and quantitative predictor. 
-Used view(weather_WU) in console to see weather data for categorical ad quant variables.  
 
+```{r}
+knitr::include_graphics("/Users/brendaonyango/Desktop/exercise115.png")
+```
 
+a) Sex moderates the relationship between age and height. Sex is the categorical predictor and age is the quantitative predictor.
+
+b) B shows two categorical predictors (state and season) and quantitative outcome. This doesn't benefit from an interaction variable since state does not moderate the relationship between season and temperature. The x axis could have elevation above sea level (quantitative). 
+
+c) Besides visualization I could think of context and whether it makes prima facie sense if two predictors affecta Y. I could also use hypothesis tests to see if the interaction term does not equal 0. If it doesn't include 0 in it's posterior credible interval, I could keep the interaction term. 
+
+c) Besides visualization
 
 
 ## Exercise 11.6 
@@ -168,6 +177,25 @@ tidy(penguin_model, effects = c("fixed", "aux"),
 flipper_length_mm is positively associated with body_mass_g as is species Gentoo, which is 216.52 g heavier than Adelie.                             
 
 e) Simulate, plot and describe the posterior predictive model for the body mass of an Adelie penguin that has a flipper length of 197. 
+
+```{r}
+set.seed(8000)
+shortcut_prediction <- 
+  posterior_predict(penguin_model, newdata = data.frame(flipper_length_mm = 197, species = "Adelie"))
+```
+
+```{r}
+# Construct a 95% posterior credible interval for penguin_model
+posterior_interval(shortcut_prediction, prob = 0.95)
+```
+
+```{r}
+mcmc_dens(shortcut_prediction) + 
+  xlab("predicted body_mass_g for Adelie with flipper length of 197")
+```
+
+An Adelie penguin with flipper length of 197 will most likley weight between 3000 and 5000 grams with a center around 4000. 
+
 
 
 ## Exercise 11.1 (penguins interaction)
