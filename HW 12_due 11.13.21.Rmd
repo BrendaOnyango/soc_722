@@ -414,6 +414,8 @@ The ELPD's show that model 4 is the best, followed by model 3, 2, then 1. It use
 
 ## Summary of Final Project 
 
-tell me a bit about what you want to talk about in the presentation. Tell me what dataset you are interested in, what variables grab your attention, and - given the nature of those variables - what kind of model would be useful to examine a relationship between them.
+I'll be using the GSS to analyze the relationship between natheal (improving and protecting nation's health), sex, age, and race. Sex, age, and race are the predictors and natheal will be the outcome. Sex and race are categorical variables. Age is a quantitative variable.I will use a normal model and will explore if there are any interactions among age, sex, and race. My hypothesis is that natheal will have more responses of spending "too Little" as age increases because older people utilize healthcare more than younger people and may be more concerned about its direction. 
 
-I'll be using the GSS to analyze 
+
+```
+
