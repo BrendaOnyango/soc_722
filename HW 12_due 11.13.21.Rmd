@@ -417,5 +417,5 @@ The ELPD's show that model 4 is the best, followed by model 3, 2, then 1. It use
 I'll be using the GSS to analyze the relationship between natheal (improving and protecting nation's health), sex, age, and race. Sex, age, and race are the predictors and natheal will be the outcome. Sex and race are categorical variables. Age is a quantitative variable.I will use a normal model and will explore if there are any interactions among age, sex, and race. My hypothesis is that natheal will have more responses of spending "too Little" as age increases because older people utilize healthcare more than younger people and may be more concerned about its direction. 
 
 
-```
+
 
