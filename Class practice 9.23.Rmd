@@ -1,0 +1,64 @@
+---
+title: "Class practice"
+author: "Brenda Onyango"
+date: "9/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+```{r}
+p <- seq(0,1, length.out = 50) #sequence of 0 to 1 of 50 numbers
+lik <- dbinom(1,2,p)
+plot(p, lik)
+```
+
+```{r}
+pp <- seq(0,1, length.out = 50) #sequence of 0 to 1 of 50 numbers
+lik <- dbinom(4,6,p) #applied to 6 and got 2
+plot(p, lik) #this is plotting p 
+```
+## Using GSS data find Pr(college), Pr(college|one parent with degree), and Pr(college|<one parent) and Pr(college|x) = max
+
+```{r}
+library(tidyverse)
+library(gssr)
+```
+```{r}
+data(gss_all)
+gss2018 <- gss_all |> 
+  filter(year == 2018) #didn't have janitor package so just filtered by year 
+  
+```
+
+## looking at data 
+```{r}
+data(gss_doc)
+my_varnames <- colnames(gss2018)
+gss_doc <- gss_doc |> filter(id %in% my_varnames) 
+```
+
+```{r}
+d <- gss2018 |> select(degree) |> mutate(college = if_else(degree >= 3, 1, 0))
+```
+
+### probability of college
+```{r}
+sum(d$college)/nrow(d) #total probability
+```
+
+## probabilty of college given one parent has a degree 
+```{r}
+d <- gss2018 |> select(madeg, padeg) |> mutate(parents= case_when(madeg >= 3~ 2, padeg >= 3~ 4))
+```
+```{r}
+glimpse(d)
+```
+
+```{r}
+sum(d$parents,na.rm = T)/nrow(d) #T is indicating as long as its not na, not saying that if it's a number. know the difference
+```
+

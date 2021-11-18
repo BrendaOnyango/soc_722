@@ -1,0 +1,201 @@
+---
+title: "Soc 722 Final Project due 11.18.21"
+author: "Brenda Onyango"
+date: "11/16/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading packages needed for gssr and linear regressions. 
+
+```{r}
+library(tidyverse)
+library(gssr)
+library(bayesrules)
+library(bayesplot)
+library(rstanarm)
+library(rstan)
+library(tidybayes)
+library(janitor)
+library(broom.mixed)
+```
+
+With the GSS, I'll be analyzing how respondents' incomes (rincome) and work status correlate with self-rated health (mntlhlth and physhlth which measure days of poor mental and physical health in the last 30 days, and miss work which is days missed due to health). My hypotheses is that those with higher incomes will rate health higher and that income is a stronger predictor of than work status. 
+
+## Create dataset with relevant variables. 
+
+```{r}
+data(gss_all)
+gss2018 <- gss_all |> #creating dataset with just 2018 data 
+  filter(year == 2018)
+```
+
+```{r}
+gsshealth <- gss2018 |> #creating dataset with just variables of interest
+  select(natheal, sex, age, race, wrkstat,rincome, health1, physhlth, misswork, mntlhlth) |> 
+  na.omit()
+```
+
+There are severalpotential models; I will plot a few to decide which to do more linear regression and assessments on. 
+Model 1: X = work status, Y = physhlth
+Model 2: X = work status, Y = mntlhlth
+Model 3: X = income, Y = physhlth
+Model 4: X = income, Y = mntlhlth
+Model 5: X = income, Y = misswork
+Model 5: X_1,2 = work status, income Y = physhlth 
+
+First I will plot models 1 and 3 to inform priors. 
+
+```{r}
+ggplot(gsshealth, aes(y = physhlth, x = wrkstat)) + 
+  geom_point(size = 0.5) +
+  geom_smooth(method = "lm", se = FALSE)
+#workstatus is a discrete variable so it may not be appropriate to use a linear model
+```
+
+```{r}
+ggplot(gsshealth, aes(y = physhlth, x = rincome)) + 
+  geom_point(size = 0.5) +
+  geom_smooth(method = "lm", se = FALSE) #this plot of income and physhlth shows a negative association b/w income and days of poor physical health in last 30 days  
+```
+
+```{r}
+ggplot(gsshealth, aes(y = misswork, x = rincome)) + 
+  geom_point(size = 0.5) +
+  geom_smooth(method = "lm", se = FALSE) #this plot shows an almost horizontal  line; difficult to assess relationship linearly 
+```
+
+Based on these visualizations I will focus my analysis on income (rincome) and work status as predictors and physhlth as the outcome. 
+
+## Posterior Model
+
+Use Use stan_glm()  to simulate the posterior for model of rincome and physhlth with 4 chains at 10,000 iterations.
+```{r}
+mean(gsshealth$physhlth) #finding prior mean and sd for outcome
+sd(gsshealth$physhlth)
+```
+
+
+```{r, results = 'hide'}
+income_physhlth_model <- stan_glm(
+   physhlth ~ rincome,
+  data = gsshealth, family = gaussian, 
+  prior_intercept = normal(3, 6), #slightly informed prior based on visualizations 
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.16, autoscale = TRUE), #found l as 1/6
+  chains = 4, iter = 5000*2, seed = 8000)
+  
+```
+
+
+MCMC diagnostics 
+```{r}
+#Store 4 chains for each parameter in 1 data frame for later 
+hlth_model_df <- as.data.frame(income_physhlth_model)
+```
+
+```{r}
+#visual diagnostics 
+#trace and density plots 
+mcmc_trace(income_physhlth_model, size = 0.1)  
+
+# Density plots of parallel chains
+mcmc_dens_overlay(income_physhlth_model)
+
+#chains look stable 
+```
+Simulate and plot 50 posterior lines.
+
+```{r}
+pp_check(income_physhlth_model)
+```
+
+Let's see what the ppc intervals are. 
+```{r}
+#in this case we'll use posterior_predict 
+physhlthpredictions <- posterior_predict(income_physhlth_model, newdata = gsshealth)
+dim(physhlthpredictions)
+```
+
+Posterior summary statistics 
+```{r}
+tidy(income_physhlth_model, effects = c("fixed", "aux"))
+```
+
+
+ppc_intervals(gsshealth$physhlth, yrep = physhlthpredictions, x = gsshealth$rincome, prob = 0.5, prob_outer = 0.95, size = 0.8)  
+
+This code doesn't work likely because physhlth isn't normally distributed. 
+
+```{r}
+gsshealth |> drop_na() |> 
+  add_fitted_draws(income_physhlth_model, n = 200) |> 
+  ggplot(aes(x = rincome, y = physhlth, color = sex)) + 
+  geom_line(aes(y=.value, group = paste(sex, .draw)), alpha = 0.1)
+```
+
+Using this visualization we can see that there isn't an interaction with sex. 
+
+## Model 2 
+
+Next I will do a model with rincome and wrkstat as predictors and physhlth as outcome. 
+
+```{r, results = 'hide'}
+
+physhlth_model_2 <- stan_glm(
+   physhlth ~ rincome + wrkstat,
+  data = gsshealth, family = gaussian, 
+  prior_intercept = normal(3, 6), 
+  prior = normal(0, 2.5, autoscale = TRUE), 
+  prior_aux = exponential(0.16, autoscale = TRUE), 
+  chains = 4, iter = 5000*2, seed = 8000)
+
+# Check MCMC diagnostics
+mcmc_trace(physhlth_model_2)
+mcmc_dens_overlay(physhlth_model_2)
+```
+
+PP_check of second model. 
+```{r}
+pp_check(physhlth_model_2)
+
+```
+
+In order to cross validate I will create a data set without missing data of variables of interest. 
+
+```{r}
+tidy(physhlth_model_2, effects = c("fixed", "aux"))
+```
+
+
+## Attempting to compare models 
+
+```{r}
+#creating data set without missing data
+hlth_comp <- gsshealth |> 
+  select(rincome, physhlth, wrkstat) |> 
+  na.omit()
+```
+
+Cross validation of both models.
+
+
+set.seed(8000)
+prediction_summary_cv(model = income_physhlth_model, data = hlth_comp, k = 10)
+
+set.seed(8000)
+prediction_summary_cv(model = physhlth_model_2, data = hlth_comp, k = 10)
+
+This code chunk also doesn't work because of data labeling issues probably related to variables not being normal. 
+
+## Conclusions 
+
+That said we can see from the pp_check that both models are equally not great at reflecting the range and central tendency of the data. 
+
+I would need to improve the models before using them for predicting how income affects physhlth and how income and wrkstat affects physhlth. 
+
+Improving the models involves either log transformations so variables are normally distributed or to use a different data structure. 
+
