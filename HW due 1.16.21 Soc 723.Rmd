@@ -1,5 +1,5 @@
 ---
-title: "Soc. 723 HW due 1.16.21"
+title: "Soc. 723 HW due 1.16.22"
 author: "Brenda Onyango"
 date: "1/9/2022"
 output: html_document
