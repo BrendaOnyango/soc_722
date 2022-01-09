@@ -9,22 +9,94 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Chapter 3 Homework
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+1) What is a variable? A variable is a characteristic that takes on different values across a unit of analysis. In the chapter monthly incomes of 433 South Africans was given as a variable, but it would be more precise to say that monthly income is the variable measured at the unit of the individual and that there are 433 observations for this variable. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+2) For each of the following variables describe if it is continuous, count, ordinal, categorical or qualitative. 
 
-```{r cars}
-summary(cars)
+a) Age - continuous*
+b) gender - categorical
+c) number of times of presidential tweets - count 
+d) income - continuous 
+e) number of Insta posts about stats - count
+g) college students' attend - categorical
+h) therapist's written assessment - qualitative 
+i) soccer divisions - ordinal 
+
+*Technically continuous but I know practically for data analyses age is often treated as discrete. 
+
+3) distribution
+
+### Frequency Table 
+
+Before answering 4, I created an object with given data to do some visualization and calculate relative frequencies. 
+
+```{r}
+#create table with salaries and frequency
+
+salaryset <- c(rep('85K', 5), rep('90K', 4), rep('100K', 1), rep('120K', 2), 
+rep('125K', 3), rep('130K', 2))
+
+salarytable <- table(salaryset)
+
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+Let's look at the table.
+```{r}
+salarytable #notice that R arranged in different order than what was entered in set 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+#constructing relative frequency distribution of the data in the table.
+
+s <- sum(salarytable)
+
+#divide by sum to get relative frequencies
+relfreq <- salarytable/s 
+
+#view freq
+relfreq
+```
+
+```{r}
+dotchart(sort(relfreq),
+         xlab = 'Relative frequency of salaries',
+         main = 'Dot Chart of Econ Professor Salaries',
+         xlim = c(0, 0.4), pch = 20, color = 'black')
+```
+
+a) Calculate average salary.
+```{r}
+salaries <- c(rep(85000, 5), rep(90000, 4), rep(100000, 1), rep(120000, 2), 
+rep(125000, 3), rep(130000, 2))
+
+head(salaries, 9) #confirming data entered correctly. Note that salaries is numerical and salaryset is categorical.
+```
+
+```{r}
+mean(salaries)
+```
+
+Average salary is $103,529.40.
+
+b) Find median.
+```{r}
+median(salaries)
+```
+
+The median is $90,000. 
+
+c) Find min and max. 
+```{r}
+min(salaries)
+max(salaries)
+```
+Min is 85,000 & max is $130,000. Instead of using min() and max(), I could have looked at the table. 
+
+d) Find IQR. 
+```{r}
+IQR(salaries) #IQR is 40,000
+summary(salaries) #quartiles 
+```
+
