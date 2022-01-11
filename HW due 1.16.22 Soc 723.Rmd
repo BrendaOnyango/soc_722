@@ -28,7 +28,7 @@ i) soccer divisions - ordinal
 
 3) distribution
 
-### Frequency Table 
+### Frequency Table and Salaries
 
 Before answering 4, I created an object with given data to do some visualization and calculate relative frequencies. 
 
@@ -98,5 +98,59 @@ d) Find IQR.
 ```{r}
 IQR(salaries) #IQR is 40,000
 summary(salaries) #quartiles 
+```
+
+5) c. Greek letters
+
+6) a. Log transforming the variable 
+
+7) Order from *low* to *high* variability: D, A, C, B  
+
+8) 
+
+a) The distribution ranges from about 73 about 89 with a mode of about 79. 
+
+b) There is a slight right skew. 
+
+c) Because of the right skew (very few people scoring very well), the median may be a better measure for the center of distribution.
+
+d) I would use standard deviation to describe variability. 
+
+9) b. The mean< median. 
+
+### Frequency Table and Students 
+
+```{r}
+#create table with grade and frequency
+
+students <- c(rep('First Year', 1000), rep('Sophomore', 1200), rep('Junior', 900), rep('Senior', 1500))
+
+studenttable <- table(students)
+studenttable
+```
+
+a) For an individual student their standing is ordinal; i.e. I moved up one grade. 
+
+b) For the university itself the number of students within a given student standing is categorical. 
+
+c) Because this is categorical data, I would prefer to use a bar chart. 
+
+```{r}
+#building up to bar chart by making a relative frequency distribution
+
+n <- sum(studenttable)
+
+#divide by sum and make new table w/ relative frequencies 
+
+studentfreq <- studenttable/n
+studentfreq
+```
+
+```{r}
+#barplot
+barplot(studenttable, col = c('red', 'green', 'blue', 'orange'),
+        xlab = 'Student Standing',
+        ylab = 'Count',
+        ylim = c(0, 2000), main = 'Bar Graph of Student Standing Data')
 ```
 
