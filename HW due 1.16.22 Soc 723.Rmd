@@ -153,4 +153,61 @@ barplot(studenttable, col = c('red', 'green', 'blue', 'orange'),
         ylab = 'Count',
         ylim = c(0, 2000), main = 'Bar Graph of Student Standing Data')
 ```
+## continuous data from contacts 
+
+11) a. Collected some height data from a sample of 8 friends. 
+
+```{r}
+#entered heights in total inches 
+heights <- c(70, 65, 66, 66, 68, 65, 62, 72)
+```
+
+I would say the heights are normally distributed with a left skew. Below are the min, max, median, and mean of this heights data. 
+
+```{r}
+summary(heights)
+```
+
+```{r}
+IQR(heights) #IQR is 3.5 inches
+sd(heights) #3.150964 is standard deviation 
+```
+
+b) The theoretical distribution is normal. 
+
+c) Thinking of last semester, the normal distribution is conjugate to the normal distriubtion. 
+
+
+## Chapter 4 Homework 
+
+1) A conditional distribution is the distribution of observations of one variable given the values of the observationso f another variable. 
+
+2) a. Based on visual inspection, as income increases, the values on the depression scale decreases.
+
+b. The graph does not indicate that lower income causes depression since this negative relationship between increasing income and a depression scale does not explain the why or how of this relationship. A theoretical framework explaining how income relates to depression and additional data and data analysis is needed to say if there is a causal relationship rather than just an association.
+
+3) I'll first create a table with the given data.
+
+```{r}
+#using as.table() and other functions to create a contingency table of counts. Source: anvas.evergreen.edu/courses/3164/modules/items/311641  
+
+tab <- as.table(rbind(c(508, 349, 425, 288), c(371, 337, 384, 338)))
+dimnames(tab) <- list(finaid = c("Yes", "No"),
+                      class = c("First Year", "Sophomore", "Junior", "Senior"))
+tab
+```
+
+```{r}
+total <- rowSums(tab) #finding row sums
+tab <- cbind(tab, total) #adding row sums to table
+total <- colSums(tab) #reusing "total" for finding column sums 
+fintab <- rbind(tab, total) #second table with sums for cross tabulation 
+fintab #viewing table with totals 
+```
+
+```{r}
+prop.table(fintab) #using prop.table 
+```
+
+
 
