@@ -206,8 +206,29 @@ fintab #viewing table with totals
 ```
 
 ```{r}
-prop.table(fintab) #using prop.table 
+#3A
+#finding conditional probability of p(yes|senior)
+fintab[1,4]/fintab[3,4] #numerator is 1st row fourth column and denominator is 3rd row fourth column 
 ```
 
+a) P(finaid Yes|senior) = 0.46
 
+```{r}
+#3B
+#finding conditional probability of p(senior|yes)
+fintab[1,4]/fintab[1,5]
+```
 
+b) p(senior|finaid Yes)
+
+```{r}
+#3C
+#finding conditional probability of p(yes|first year)
+fintab[1,1]/fintab[3,1] #first years with finaid/total number of first years
+```
+
+c) p(finaid yes|first year) = 0.5779
+
+4) Two advantages of line-fitting methods are . One disadvantage is 
+
+5) 
