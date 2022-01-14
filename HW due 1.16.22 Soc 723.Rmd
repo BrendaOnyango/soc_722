@@ -1,7 +1,7 @@
 ---
 title: "Soc. 723 HW due 1.16.22"
 author: "Brenda Onyango"
-date: "1/9/2022"
+date: "1/13/2022"
 output: html_document
 ---
 
@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Chapter 3 Homework
 
-1) What is a variable? A variable is a characteristic that takes on different values across a unit of analysis. In the chapter monthly incomes of 433 South Africans was given as a variable, but it would be more precise to say that monthly income is the variable measured at the unit of the individual and that there are 433 observations for this variable. 
+1) What is a variable? A variable is a characteristic that takes on different values across a unit of analysis. In the chapter, monthly incomes of 433 South Africans was given as a variable, but it would be more precise to say that monthly income is the variable measured at the unit of the individual and that there are 433 observations for this variable. 
 
 2) For each of the following variables describe if it is continuous, count, ordinal, categorical or qualitative. 
 
@@ -153,6 +153,7 @@ barplot(studenttable, col = c('red', 'green', 'blue', 'orange'),
         ylab = 'Count',
         ylim = c(0, 2000), main = 'Bar Graph of Student Standing Data')
 ```
+
 ## continuous data from contacts 
 
 11) a. Collected some height data from a sample of 8 friends. 
@@ -229,6 +230,116 @@ fintab[1,1]/fintab[3,1] #first years with finaid/total number of first years
 
 c) p(finaid yes|first year) = 0.5779
 
-4) Two advantages of line-fitting methods are . One disadvantage is 
+4) Two advantages of line-fitting methods are that 1) we can get the conditional mean of Y for any value of X even when we don't have data and 2) that we can describe the relationship between X and Y in a more precise w way than methods using local means. One disadvantage of line-fitting is needing to select the correct line to use (e.g. is the line of best fit linear or parabolic). 
 
 5) 
+```{r}
+#plotting the given line source: http://www.countbio.com/web_pages/left_object/R_for_biology/R_fundamentals/curve_to_function_R.html
+curve(4 - 3.5*x, from=-10, to=10, n = 25, xlab="x value", ylab = "y value", 
+      col ="blue", lwd=3, main = "Plot of Y= 4 - 3.5x")
+```
+ Reminder to self that conditional mean is asking given a certain value of X, what do I expect the mean of Y to be? 
+ 
+ a) Y = 4 - 3.5(6) = -17
+ b) Y = 4 - 3.5(-2) = 11
+ 
+ 6. c. covariance 
+ 
+ 7. Covariance shows to what extent two variables move together or apart, and has a theoretical range of values between negative and positive infinity. A positive covariance means that an increase in one variable would mean that the other variable increases. A covariance of 0 means that the two variables don't vary with each other. Covariance only tells us the direction, if any, of the relationship between variables.
+ 
+ Pearson's correlation coefficient can only range between -1 and 1 and tells us the direction *and* strength of the relationship between two variables. Another difference between covariance and correlation is that correlation is standardized (which is why it can only take values between -1 to 1). 
+ 
+ 8.
+ a) A is fitted to a line.
+ 
+ b) B is fitted to what appears to be a LOESS curve or a parabola. 
+ 
+ c) B is a better fit for the data and I can tell because the residuals for B are smaller than for A. 
+ 
+ d) For exam scores between -2 and -1, the residuals are mostly positive (above the curve). For exam scores between -1 and 1 residuals are mostly negative (below the curve). The residuals are mostly below the curve as most data points are below the line. 
+ 
+ 9) 
+ 
+ a) 
+ 
+```{r}
+#observed - prediction = residual 
+observed <- c(5.07, 4.05, 5.33, 4.02, 3.59) #creating vectors to find residuals 
+prediction <- c(4.72, 4.28, 5.38, 4.22, 3.45)
+observed - prediction
+```
+
+
+```{r}
+#loading library to use texttotable
+library(DescTools)
+```
+
+ 
+```{r}
+
+#recreating table using #txttotable
+txt <- "GetAlong, Satisfaction, Prediction, Residual
+    4.7, 5.07, 4.72,  0.35
+    4.21, 4.05, 4.28, -0.23
+    5.42, 5.33, 5.38, -0.05
+    4.14, 4.02, 4.22, -0.20
+    3.3, 3.59, 3.45,  0.14"
+TextToTable(txt, sep=",", dimnames = c(" ", "Coworker Congeniality and Satisfaction Report"))
+
+#QUESTION to Nico: how do I get rid of the V1, V2... and A,B, C, ...?
+```
+
+ b) When fitting a line with ordinary least squares, the line that gives the lowest sum of squared residuals is the best fit. 
+ 
+ 10) 
+```{r}
+library("tidyverse")
+library("DiagrammeR")
+```
+ 
+```{r}
+tree <-
+    create_graph() |>   # creating tree graph to represent causal diagram
+    add_n_nodes( #adding nodes on tree
+      n = 3, 
+      type = "path",
+      label = c("familial poverty", "first generation status", "graduation rate"), # Labelling nodes
+      node_aes = node_aes(
+        shape = "rectangle",
+        height = 1.5,
+        width = 1.5,
+        x = c(0, 3, 3), # specifying height of nodes
+        y = c(0, 2, -2), 
+        fill = c("black", "blue", "orange"))) |>  #coloring nodes 
+    add_edge(
+      from = 1,
+      to = 2,
+      edge_aes = edge_aes(
+        label = "+" 
+      )) |>  
+  add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        label = "-"
+      )) 
+  
+       
+render_graph(tree)
+```
+ 
+ a) Poverty measured by family income could explain both first generation status and graduation rate. Poverty could lead to a decreased graduate rate if students have barriers to registering and continuing coursework due to needing to work or high bursar balances. Familial poverty in areas where college costs are high can explain a high proportion of first generation students. This diagram could apply to high school first generation status and high school graduation rates, too. 
+ 
+ b) 
+ 1) Get the mean of graduation rate conditional on poverty. (Given poverty value what is graduation rate?)
+ 
+ 2) Subtract the conditional mean to get the residual of graduation rate.
+ 
+ 3) Get the mean of first generation status conditional on poverty. (Given poverty value what is first generation status?)
+ 
+ 4) Subtract the conditional mean to get the residual of first generation status. 
+ 
+ 5) Describe the relationship betweeen the residual of graduation rate and the residual of first generation status. 
+ 
+ c) I would interpret the result from the above steps as the relationship between first generation status and graduation rate that is *not* explained by familial poverty. It is the mean of graduation rate conditional on first generation status when poverty doesn't vary. 
