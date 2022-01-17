@@ -1,0 +1,61 @@
+---
+title: "Ch 5 HW due 1.23.22"
+author: "Brenda Onyango"
+date: "1/17/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Identification
+
+1) The chapter describes physical laws as part of the data generating process that explains observations. For sitting in a chair, the assumptions I made about the data generating process are:
+  1: The chair would not move between me beginning to sit and finally sitting.
+  2: The chair would not change shape once I sit.
+  3: I wouldn't have a physical challenge sitting like stiff knees or back pain.
+ 
+2) d
+
+### News 
+
+3) A recent news headline is *Improving reading skills through action video games* from https://www.sciencedaily.com/releases/2022/01/220117115113.htm
+
+Some features of the data generating process is an assumption that there are literacy issues, that video games wouldn't worsen reading, that other reading improvement methods (school, reading for leisure, class or home incentives) are not at play, and that action games are meaningfully different from other types of video games. 
+
+Researchers conducted this study in Italy with 150 school children between the ages of 8 to 12. There were two groups: one played a child-appropriate action game and the other played a coding game. The researchers' rationale is that both types of game require attention control and executive function, but in different ways that could explain different outcomes in reading improvement. At baseline, researchers tested children's ability to read words and paragraphs and administered attention tests. Follow up was at 6 weeks, 6 months, 12 months, and 18 months. 
+
+My main alternative explanation is that the schoolchildren by definition are going to school and would have improved on reading because of their academic curriculum. Based on the news article and summary, I don't think they controlled for the effect of regular school on improved reading. Additionally, even if a group of children didn't attend school (like in summertime) reading gains could be explained by regular reading. The actual article https://www.nature.com/articles/s41562-021-01254-x seems to focus more on the gains in attention control from an action video game. I still say they would not at least three groups to compare: action video game players, non-action video game players, and no video games played. I would also suggest a sample of people, maybe 40 year olds that have some distance from being school-aged to see if there are literacy improvements for those in a life stage that does not involve regular schooling. 
+
+### Caviar 
+
+4) Think about positive relationship between caviar and lifespan and question "does eating caviar make you live longer?"
+ a) An alternative explanation is that both eating caviar and a long lifespan are a result of increased wealth that gives access to health-promoting environments and good medical care. Another explanation is that eating caviar and a long lifespan are both associated with with a regular exercise routine and a nutrient-dense diet. 
+ b) The type of variation that would identify whether caviar makes one live longer would be variation in life span based on diet.
+ c) Researchers' would need to control for smoking status, exercise, income, gender and other factors associated with mortality. 
+ 
+### Alternative Explanation for Headlines
+
+5) 
+a) I could reverse the order and say that presidential approval ratings dropping lead to a drop in the stock market.
+b) Downtown restaurant sales are up during the summer since more people are travelling and eating outside of their home. Capturing travellers or people on vacation is why dates were announced for the summer concert series. 
+c) People with illness are more vulnerable to disease and also more likely to go to the hospital.*
+d) CEO success is due to strong personalities that also explain fashion choices. 
+
+*Healthcare associated-infections are a real issue for healthcare delivery: https://www.who.int/gpsc/country_work/gpsc_ccisc_fact_sheet_en.pdf
+ 
+6) Identification is the process of finding where the variation of interest is and *isolating* that variation for the purpose of answering a research question. A variable that causes both the treatment and outcome variables makes isolating the variation of interest difficult because we could be identifying a spurious relationship between two variables when we are unaware that the treatment and outcome have the same cause, an altnerative explanation. 
+
+### Crikey Shoes
+
+7) 
+a) The data generating process includes that shoes affect running performance differently. I can accept that since individuals probably run faster in tennis shoes than heels. 
+The other parts of the data-generating process are that running speeds are being based on the brand of shoe and not on a training regimen. If we had a scatterplot of running speeds and shoe brands across several months, we would want to focus on within month or within week variation in speed for runners to make sure we're not capturing changes in speed based on de/increased training. 
+
+b) An alternative explanation is that people who buy the professional running shoes are professional runners that run more than a casual runner that opts to buy other models. We would want to know among those who bought the shoes, did running speeds increase.Another explanation is that this is some type of placebo effect where the belief that the shoe will increase speed causes the runner to run faster. To test this we would want to, with the same runner, have them run distances in a shoe with clear model markings indicating it's a Mistrunner and run in shoes with discreet or no branding, maybe even with a branding of a known bargain shoe, to see if there are speed changes.
+
+c) As described in part b, an important explanation is placebo effect induced by marketing (would want to double blind the athlete and researcher on which shoe is being tested). The implication is that the athlete is adjusting their performance to align with the expected outcome and that the researchers are knowingly or unknowingly implying which shoe should result in higher speeds. 
+
+
+8) b. variation 
