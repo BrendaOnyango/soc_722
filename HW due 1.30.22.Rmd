@@ -1,0 +1,28 @@
+---
+title: "HW due 1.30.22 Soc 723 Ch. 6 and 7"
+author: "Brenda Onyango"
+date: "1/23/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Chapter 6 
+
+1) The friend's reasoning does make sense as they have cases showing that height and income seem unrelated or maybe only *associated*, rather than causal. However, their reasoning also doesn't make sense from the perspective that causality doesn't mean that in every case of y (high income) is caused by x (height), but that as x changes (taller heights), then the *distribution* of y (income) changes; theoretically it's possible to know people for which height didn't lead to the $100K+ income. 
+
+### Terry, Coin, and Cake 
+
+2)
+a) Variables with a direct effect on money are "CoinFlip" and "TerryInRoom."
+
+b) "Terry'sMood" has an indirect effect on Money. 
+
+### Harry Potter & Reading
+
+3) 
+a) The effect of "HarryPotterAsKid" on "ReadingAsAdult" is what we should include to answer the research question. 
+
+b) 
