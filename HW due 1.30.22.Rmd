@@ -25,4 +25,51 @@ b) "Terry'sMood" has an indirect effect on Money.
 3) 
 a) The effect of "HarryPotterAsKid" on "ReadingAsAdult" is what we should include to answer the research question. 
 
-b) 
+b) The indirect effects to include are "ReadOtherRowlingBooks" and a variable not pictured "PeersReading" to capture how the popularity of a book and reading could be about group or network membership. 
+
+c) The alternative explanation between reading Harry Potter and reading more as an adult is the latent variable pictured, which is "LikesReading" that leads to both reading Harry "PotterAsKid" and "ReadingAsAdult." Other antecedent variables are "Parent'sReadingHabit" and "LiteracyEducation." These two are probably more important antecedent variables than "AgePotterReleased" since they affect ability to read and attitude towards reading. I say "AgePotterReleased" is not an important part of the data generating process as other variables because compelling, popular books are read long after their initial publication e.g., *The Lord of the Rings*, another popular fantasy, was initially published in 1954. 
+
+4) 
+a) Including variables we're unable to observe on our diagram gives us a fuller picture of the data generating process. "LikesReading" is a latent variable that we can't observe and that can cause both the indepedent and dependent variable. Including latent variables in a diagram can also add to thinking about whether a relationship between two variables is a correlation or is causal. That "HarryPotterAsKid" has to occur before "ReadingAsAdult" can be support for interpreting this diagram as showing a causal relationship. 
+
+b) Latent variables cause both independent and dependent variables. LikesReading could precede and cause both reading Harry Potter as a kid and reading as an adult. 
+
+### Government Fire-Safety
+
+5
+a) Draw causal diagram with given features.  
+
+```{r}
+# install.packages("devtools")
+devtools::install_github("malcolmbarrett/ggdag") #installing a package made for path diagrams 
+```
+
+```{r}
+library(ggdag) #loading package and ggplot2 to make diagram 
+library(ggplot2)
+```
+
+```{r}
+firedag <- dagitty::dagitty("dag {
+  GoodBudget <- ShortTimeSinceLastFire
+  FireSafetyAds <- GoodBudget 
+  ParkRangers <- GoodBudget
+  DecreaseForestFires <- FireSafetyAds
+  DecreaseForestFires <- ParkRangers
+  ShortTimeSinceLastFire [exposure]
+  DecreaseForestFires [outcome]  
+}")
+
+tidy_dag <- tidy_dagitty(firedag)
+
+tidy_dag
+```
+
+```{r}
+ggdag(tidy_dag) + theme_dag() #visualizing diagram notice the font and nodes are small
+```
+
+```{r}
+ggdag_adjustment_set(tidy_dag, node_size = 21, text_size = 2.5, text_col = 'black') #adjusting size of nodes and colors for readability 
+```
+
