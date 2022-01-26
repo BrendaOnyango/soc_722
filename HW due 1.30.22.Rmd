@@ -37,7 +37,7 @@ b) Latent variables cause both independent and dependent variables. LikesReading
 ### Government Fire-Safety
 
 5
-a) Draw causal diagram with given features.  
+a) Draw causal diagram with given features. Referenced: https://ggdag.malco.io/
 
 ```{r}
 # install.packages("devtools")
@@ -72,4 +72,33 @@ ggdag(tidy_dag) + theme_dag() #visualizing diagram notice the font and nodes are
 ```{r}
 ggdag_adjustment_set(tidy_dag, node_size = 21, text_size = 2.5, text_col = 'black') #adjusting size of nodes and colors for readability 
 ```
+
+b) One ommitted variable is ParkVisitorBehavior. An increase in ParkRangers could improve ParkVisitorBehavior and that could lead to DecreaseForestFires. 
+
+### Research Question in Sociology
+
+6) A research question in 
+
+b) The cause of interest or indepednet variable is and the outcome (dependent variable) is 
+
+c) Other variables at play are 
+
+d & e) causal diagram with latent variables. 
+
+### Effect of Free Shipping 
+
+7) Does "free shipping" cause people to buy items from an online store more? I interpret this question as "does free shipping cause people to increase the frequency of visiting and buying from an online store" instead of "does free shipping cause people to buy more from an online store."
+
+a) Six variables that should be included are 
+
+b) It is not feasible to collect data on all the variables listed in part a. 
+
+### Defining Causality
+
+8)
+
+9) d. Causal diagram 
+
+## Chapter 7 
+
 
