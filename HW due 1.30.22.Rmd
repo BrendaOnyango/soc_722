@@ -124,16 +124,29 @@ Risk behavior and parentsincome are latent variables displayed in teh causal dia
 
 a) Six variables that should be included are:
 
-1. 
+1. Cost of items for sale. 
+2. Type of items for sale e.g., is it necessary groceries or boutique/collectible online store
+3. Other promotions/sales.
+4. Distance to nearest retail/in-person store. 
+5. Cost of shipping if it were not free. 
+6. Item is for personal use or for someone else. 
+7. Shoppers' discretionary income. 
+
+b) It is feasible to collect data on most of the variables above. Cost of items, type of items sold, and whether other promotions were co-occuring with free shipping is publicly available data that could be found with internet archives. The less feasible data to collect is cost of shipping if it were not free since this varies based on the individual locations of people in the sample as do variables 6 and 7. These would need a survey or more advanced data scraping to collect. 
 
 b) It is not feasible to collect data on all the variables listed in part a. 
 
 ### Defining Causality
 
-8)
+8) Causality describes a relationship between variables or events. To say that variable *A* causes *B* is saying that as the value of *A* changes, the distribution of *B* would also change. 
 
 9) d. Causal diagram 
 
 ## Chapter 7 
+
+1) 
+
+### Doctors and Shift Hours
+
 
 
