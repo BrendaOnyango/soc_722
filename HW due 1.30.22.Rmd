@@ -77,19 +77,54 @@ b) One ommitted variable is ParkVisitorBehavior. An increase in ParkRangers coul
 
 ### Research Question in Sociology
 
-6) A research question in 
+6) A research question in the field of sociology is how does class affect individual health outcomes, namely lifespan, in the U.S.?
 
-b) The cause of interest or indepednet variable is and the outcome (dependent variable) is 
+a) Data generating process includes the following assumptions:
 
-c) Other variables at play are 
+1. Class is measured by income and class won't change drastically across someone's wokring life. 
+2. Class determines access to a health-promoting environment (housing near parks, far from pollution, access to gyms and this leads to health outcomes. 
+3. Class determines access to healthcare and this leads to lifespan.
+4. Parents' income may lead to both class and individual's lifespan. 
+5. Individual risk behaviors lead to individual's lifespan. 
+
+b) The cause of interest or independent variable is class and the outcome (dependent variable) is lifespan. 
+
+c) Other variables at play are occupation (different jobs have different mortality risks), smoking status (which might fall under individual risk behavior), social belonging (is an individual married, has friends, etc.), and net worth. 
 
 d & e) causal diagram with latent variables. 
+
+```{r}
+lifedag <- dagitty::dagitty("dag {
+  individualincome <- parentsincome
+  lifespan <- parentsincome
+  lifespan <- healthcareaccess
+  livedenvironment <- individualincome
+  lifespan <- livedenvironment
+  healthcareaccess <- individualincome
+  lifespan <- riskbehavior
+  indivdiualincome [exposure]
+  lifespan [outcome]  
+}")
+
+tidy_dag2 <- tidy_dagitty(lifedag)
+
+tidy_dag2
+
+
+```
+```{r}
+ggdag_adjustment_set(tidy_dag2, node_size = 21, text_size = 2.5, text_col = 'black') 
+
+```
+Risk behavior and parentsincome are latent variables displayed in teh causal diagram above. 
 
 ### Effect of Free Shipping 
 
 7) Does "free shipping" cause people to buy items from an online store more? I interpret this question as "does free shipping cause people to increase the frequency of visiting and buying from an online store" instead of "does free shipping cause people to buy more from an online store."
 
-a) Six variables that should be included are 
+a) Six variables that should be included are:
+
+1. 
 
 b) It is not feasible to collect data on all the variables listed in part a. 
 
