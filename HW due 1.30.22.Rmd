@@ -11,14 +11,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Chapter 6 
 
-1) The friend's reasoning does make sense as they have cases showing that height and income seem unrelated or maybe only *associated*, rather than causal. However, their reasoning also doesn't make sense from the perspective that causality doesn't mean that in every case of y (high income) is caused by x (height), but that as x changes (taller heights), then the *distribution* of y (income) changes; theoretically it's possible to know people for which height didn't lead to the $100K+ income. 
+1) The friend's reasoning makes some sense as they have cases showing that height and income seem unrelated or maybe only *associated*, rather than causal. However, I would caution them to consider that causality doesn't mean that every case of y (high income) is caused by x (height), but that as x changes (taller heights), then the *distribution* of y (income) changes; theoretically it's possible to know people for which height didn't lead to the $100K+ income while height still be a cause for income. 
 
 ### Terry, Coin, and Cake 
 
 2)
 a) Variables with a direct effect on money are "CoinFlip" and "TerryInRoom."
 
-b) "Terry'sMood" has an indirect effect on Money. 
+b) "Terry'sMood" is an indirect cause on "Money". 
 
 ### Harry Potter & Reading
 
@@ -27,7 +27,7 @@ a) The effect of "HarryPotterAsKid" on "ReadingAsAdult" is what we should includ
 
 b) The indirect effects to include are "ReadOtherRowlingBooks" and a variable not pictured "PeersReading" to capture how the popularity of a book and reading could be about group or network membership. 
 
-c) The alternative explanation between reading Harry Potter and reading more as an adult is the latent variable pictured, which is "LikesReading" that leads to both reading Harry "PotterAsKid" and "ReadingAsAdult." Other antecedent variables are "Parent'sReadingHabit" and "LiteracyEducation." These two are probably more important antecedent variables than "AgePotterReleased" since they affect ability to read and attitude towards reading. I say "AgePotterReleased" is not an important part of the data generating process as other variables because compelling, popular books are read long after their initial publication e.g., *The Lord of the Rings*, another popular fantasy, was initially published in 1954. 
+c) The alternative explanation between reading Harry Potter and reading more as an adult is the latent variable pictured, which is "LikesReading" that leads to both reading Harry "PotterAsKid" and "ReadingAsAdult." Other potential causal variables are "Parent'sReadingHabit" and "LiteracyEducation." These two are probably more important predictor variables than "AgePotterReleased" since they affect ability to read and attitude towards reading. I say "AgePotterReleased" is not an important part of the data generating process as other variables because compelling, popular books are read long after their initial publication e.g., *The Lord of the Rings*, another popular fantasy, was initially published in 1954. 
 
 4) 
 a) Including variables we're unable to observe on our diagram gives us a fuller picture of the data generating process. "LikesReading" is a latent variable that we can't observe and that can cause both the indepedent and dependent variable. Including latent variables in a diagram can also add to thinking about whether a relationship between two variables is a correlation or is causal. That "HarryPotterAsKid" has to occur before "ReadingAsAdult" can be support for interpreting this diagram as showing a causal relationship. 
@@ -101,6 +101,7 @@ lifedag <- dagitty::dagitty("dag {
   livedenvironment <- individualincome
   lifespan <- livedenvironment
   healthcareaccess <- individualincome
+  lifespan <- individualincome
   lifespan <- riskbehavior
   indivdiualincome [exposure]
   lifespan [outcome]  
@@ -116,7 +117,8 @@ tidy_dag2
 ggdag_adjustment_set(tidy_dag2, node_size = 21, text_size = 2.5, text_col = 'black') 
 
 ```
-Risk behavior and parentsincome are latent variables displayed in teh causal diagram above. 
+
+Risk behavior and parentsincome are latent variables displayed in the causal diagram above. I debated removing livedenvironment and healthcareaccess since they are mediators, but they are important to the question of the relationship between income and lifespan in the US. In a scenario where healthcareaccess is made universal then the causal link between income and lifespan may disappear; another important latent variable is healthcare economy (national, private, etc.). However, health policy experts often say only 10% (maybe up to 20%) of health outcomes for a population can be attributed to medical care so I can also see an argument to remove healthcareaccess from the diagram (source: https://nam.edu/social-determinants-of-health-101-for-health-care-five-plus-five/). 
 
 ### Effect of Free Shipping 
 
@@ -144,9 +146,209 @@ b) It is not feasible to collect data on all the variables listed in part a.
 
 ## Chapter 7 
 
-1) 
+1) a. the diagram should include a variable for "number of celebrities in the cast" since having or not having celebrities could draw/repel viewers. I eliminated option c about not having "show budget" since this is a latent variable that affects both the ability to have celebrities in the cast and a marketing budget that can pull viewers, therefore, it is important to include.
 
-### Doctors and Shift Hours
+### Shift Hours and Doctors
+
+I interpreted this question as wanting us to add the additional features as we went along, rather than starting a new diagram each time. 
+
+A) 
+
+```{r}
+docdagA <- dagitty::dagitty("dag {
+  qualofcare <- experience
+  qualofcare <- tiredness
+  experience <- shifthours
+  tiredness <- shifthours
+  shifthours [exposure]
+  qualofcare [outcome]  
+}")
+
+tidy_dagA <- tidy_dagitty(docdagA)
+
+ggdag_adjustment_set(docdagA, node_size = 21, text_size = 2.5, text_col = 'black') 
+
+
+```
+
+B)
+
+```{r}
+docdagB <- dagitty::dagitty("dag {
+  qualofcare <- fundinglevel <- hospitalemployer
+  qualofcare <- patientcensus <- hospitalemployer
+  qualofcare <- experience
+  qualofcare <- tiredness
+  shifthours <- hospitalemployer
+  experience <- shifthours
+  tiredness <- shifthours
+  hospitalemployer [exposure]
+  qualofcare [outcome]  
+}")
+
+#patientcensus represents crowding variable
+tidy_dagB <- tidy_dagitty(docdagB)
+
+ggdag_adjustment_set(docdagB, node_size = 21, text_size = 2.5, text_col = 'black') #had to list hospitalemployer as the exposure to get an unconditionally closed path. leaving shifthours as exposure messes up the paths. 
+```
+
+C)
+
+```{r}
+docdagC <- dagitty::dagitty("dag {
+  shiftpolicy <- policypref
+  qualpolicy <-  policypref
+  qualofcare <- qualpolicy
+  shifthours <- shiftpolicy
+  qualofcare <- fundinglevel <- hospitalemployer
+  qualofcare <- patientcensus <- hospitalemployer
+  qualofcare <- experience
+  qualofcare <- tiredness
+  shifthours <- hospitalemployer
+  experience <- shifthours
+  tiredness <- shifthours
+  policypref [exposure]
+  qualofcare [outcome]  
+}")
+
+#patientcensus represents crowding variable
+tidy_dagC <- tidy_dagitty(docdagC)
+
+ggdag_adjustment_set(docdagC, node_size = 16, text_size = 2.5, text_col = 'black', label_col = text_col, node = TRUE) #adjusted node size to try to make sure arrows don't appear to overlap. Had to change exposure again even though exposure of interest is shifthours. Policypref is latent varaible. 
+```
+
+
+### School Funding 
+
+a) The treatment is funding level of public schools and the outcome is student achievement for students in the country. 
+
+b) List of relevant variables:
+
+1. student/teacher ratio. Lower student teacher ratios could help students achieve and the inverse could be true. I could separate this variable into two separate variables for student census and teacher census.
+2. Average teacher experience. Student achievement could be explained by teacher experience. Average teacher experience will flucuate as there are new entrants (graduates, career switches) and turnover (retirement, exiting the field, promotion). 
+3. Inflation on teaching supplies. Inflation on supplies needed by schools to deliver education, like books, technology, heating costs, etc.,  can affect student achievement.
+4. Participation in National School Lunch Program. Nutrition could affect student achievement and whether schools participate or not can affect students' access to nutrition. (https://frac.org/wp-content/uploads/School-Meals-State-Legislation-Chart.pdf). Several states don't mandate that schools participate in a meal program. 
+5. Parents home value. Lots of public schools base funding on property taxes which could change as the housing market changes or if anything happens to homes. 
+6. Whether a student is fluent in the language of instruction, is part of a marginalized group, has parents that can/'t afford tutoring, etc. can affect student achievement. I'll simplify these variables as student's SES.  
+
+c) I think parent's home value causes both school funding and student achievement since home value is associated with parent's wealth and parent's wealth contributes to student SES and their achievement. 
+
+d) Parent's home value is important to pay attention to since it could be a confounding variable; this would mean that funding level and student achievement have an association rather than being causally related.
+
+e and f) 
+
+```{r}
+
+schooldag <- dagitty::dagitty("dag {
+  studentachiev <- funding <- parenthomevalue
+  studentachiev <- languagefluency
+  studentachiev <- studentmarginalization
+  studentachiev <- studentteacherratio
+  studentachiev <- schoollunch
+  
+  parenthomevalue [exposure]
+  studentachiev [outcome]  
+}")
+
+
+tidy_dag4 <- tidy_dagitty(schooldag)
+
+ggdag_adjustment_set(schooldag, node_size = 21, text_size = 2.5, text_col = 'black')
 
 
 
+schooldag2 <- dagitty::dagitty("dag {
+  studentachiev <- funding <- parenthomevalue
+  studentachiev <- studentSES 
+  studentachiev <- studentteacherratio
+  studentSES <- parenthomevalue
+  studentachiev <- schoollunch
+  
+  parenthomevalue [exposure]
+  studentachiev [outcome]  
+}")
+
+
+tidy_dag5 <- tidy_dagitty(schooldag2)
+
+ggdag_adjustment_set(schooldag2, node_size = 21, text_size = 2.5, text_col = 'black') 
+
+#SES is simplified version of language fluency, marginalization, etc. 
+```
+
+I'm wondering if I should draw an arrow between funding and studentteacherratio since funding could affect ability to recruit teachers, but I'm ok with this diagram for now. 
+
+### Simplifying a Diagram
+
+4) 
+
+a. Unimportance - This can be applied if a variable is reasoned or there is evidence that it causes a small effect on the outcome of interest. In the previous dag, a variable not shown is parent's attitude toward funding since it is reasonable to think this has a small effect given that parents can't opt out of property taxes regardless of whether they think public schools should be publicly funded. 
+
+b. Redundancy - Applied when variables in the diagram occupy the same space. I used redundancy to combine several variables to studentSES. 
+
+c. Mediators - Applied when a variable is included only as a way for another variable to lead to the outcome variable. 
+
+d. Irrelevance - Applied when there is a variable that is substantive to the data generating process but not to the research question of interest. For example, what proportion of students are in private or public schools and how does cost/student compare in different types of schools is substantial to thinking about the relationship between funding and achievement, but the question above asked about public schools specifically. 
+
+### Avoiding Cyclic Relationships 
+
+5) When there is a cycle in a diagram we are stating that a variable causes itself. One way to avoid cyclic relationships is to add time dimensions to the variables so that one variable is an obligatory antecedent to another. 
+
+### Sociological Research Question 
+
+6) Does parent's age cause vaccine choice for offspring? 
+
+a) causal variable = parent age; outcome variable = vaccinechoiceforoffspring
+
+b) 5 relevant variables are:
+1. parent's education
+2. parent's income
+3. intention of pregnancy (was child planned or unplanned?)
+4. parent's history of childhood illness (did parent have/not have chickenpox etc.)
+5. prenatal care (how many visits did they go to)
+
+c) draw diagram with variables from part b. 
+
+```{r}
+
+vacdag <- dagitty::dagitty("dag {
+  childvacchoice <- parenteducation
+  childvacchoice <- parentincome
+  childvacchoice <- intentionofpregnancy
+  childvacchoice <- parentillnesshistory
+  childvacchoice <- parentage <- parenteducation
+  
+  parenteducation [exposure]
+  childvacchoice [outcome]  
+}")
+
+
+tidy_dag6 <- tidy_dagitty(vacdag)
+
+ggdag_adjustment_set(vacdag, node_size = 21, text_size = 2.5, text_col = 'black') 
+
+#had to set exposure to parenteducation to make closed path even though exposure of interest is parent age 
+```
+
+d) This diagram is missing parent gender. I should specify which parent, gestating or not, is of interest. It is possible for parent dyads to have different ages. Another element of this diagram to fix is to possibly condense parenteducation and parentincome. Another latent variable is child vaccine policy as there are some states where parents don't have the choice to opt out of vaccines as part of the requirements for school entry. I should have also included network effects since parents aren't making these choices in a vacuum. 
+
+### Break the Cycle 
+
+7) 
+```{r}
+motdag <- dagitty::dagitty("dag {
+ quarter2grades <-  quarter2motivation <- quarter1grades
+  
+  quarter2motivation [exposure]
+  quarter3grades [outcome]  
+}")
+
+
+tidy_dag7 <- tidy_dagitty(motdag)
+
+ggdag_adjustment_set(motdag, node_size = 21, text_size = 2.5, text_col = 'black') 
+
+#got rid of the cyclical relationship by introducing a time dimension in which grades from the first quarter cause the motivation experienced in the second quarter, which then causes the grades achieved at the end of the second quarter. 
+
+ 
+```
