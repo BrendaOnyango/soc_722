@@ -1,0 +1,48 @@
+---
+title: "Ch. 8 and 9 HW due 2.6.22 Soc 723"
+author: "Brenda Onyango"
+date: "1/29/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Chapter 8: Causal Paths
+
+1) An open path is one that has variation in all the variables along the path. A closed path is one in which at least one variable has no variation i.e. is held constant or controlled for in another way like by sample selection. 
+
+2) a. List every path from X -> Y:
+
+1) X -> A -> Y
+2) X <- B -> Y
+3) X -> C <- D -> Y
+4) X <- B <- D -> Y 
+5) X -> C <- D -> B -> Y
+
+b. front door paths:
+
+1) X -> A -> Y is the front door path since it's the only path where all the arrows point away from X. I decided X -> C <- D -> Y is NOT a front door path since D points toward X. 
+
+c. which are open back-door paths:
+
+d. what *must* be controlled to find effect of X on Y:
+
+### Income and Health 
+
+a. 
+
+### Arrows point away from treatment
+
+4) c. front door path
+
+### Teaching Quality & Popularity
+
+a. In one path of this diagram, popularity is an outcome variable. 
+
+b. If we controlled for popularity then 
+
+### Lockdown and Recession
+
+6) a. 
