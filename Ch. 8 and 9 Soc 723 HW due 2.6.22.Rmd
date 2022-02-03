@@ -152,3 +152,33 @@ e. An improved path would include pandemic pathogen -> morbidity/mortality -> fe
 higher education <- familywealth -> income 
 higher education <- student loan policy <- president -> wage/tax policy -> income
 
+## Chapter 9: Finding Front Doors
+
+1) b. natural experiment is when randomization of treatment occurs *without* a researcher controlling the randomizaton. 
+
+### Necessary Conditions 
+
+2) a. The variation we need to isolate when we're trying to isolate front door paths must have no open back doors (be closed) and contain the treatment. This is known as exogenous variation. 
+
+b. Experiments ensure that variation in the treatment contain no back doors by randomizing which parts of the sample get treatment and which don't. 
+
+### Randomized Experiments v. Natural Experiments
+
+3) 4 major differences between randomized experiments & natural experiments:
+
+1. Natural experiments will sometimes have back doors between the source of exogenous variation and the outcome. Randomized trials will not have back doors. 
+
+2. Natural experiments won't have social desirability bias. Randomized trials require consent and the knowledge of being in a study may affect behavior. 
+
+3. Natural experiments toss out any treatment that occurs for other reasons besides natural randomness and the treatment effect observed is only among the group of people who experienced the natural randomness. This means we won't know the effect of treatment on outcome for those not subject to the natural randomness. With RCTs, we can plan ahead and select different samples and then randomize to treatment and control to understand treatment effects across different groups (e.g., we can do an RCT of a language learning app in multiple countries with people randomized to treatment and control to see if the effect of the app on language acquisition varies across groups).
+
+4. RCTs enjoy high faith that their source of variation in treatment does not have open back doors. Natural experiments produce doubt about whether the source of variation is truly exogenous. 
+
+5. Bonus: Natural experiments will have bigger samples sizes made up of more than people who are prone to volunteering. There are restrictions (e.g., pregnant women in drug trials) and potential biases (affinity for volunteering) that lead to a potential skew in the sample size and diversity for a randomized trial. 
+
+### Causal & Unfeasible Research Question
+
+4. Last semester we discussed the ethics of a model (is it fair, how will the data be used, biases, and how will data impact individuals and society) and those ethical questions can affect the feasibility of a study. An experimental question that is unfeasible is "what effect does a woman's botox regimen have on annual performance reviews?" 
+
+
+
