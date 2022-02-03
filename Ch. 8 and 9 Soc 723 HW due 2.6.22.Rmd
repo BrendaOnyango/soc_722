@@ -11,38 +11,144 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Chapter 8: Causal Paths
 
-1) An open path is one that has variation in all the variables along the path. A closed path is one in which at least one variable has no variation i.e. is held constant or controlled for in another way like by sample selection. 
+1) An open path is one that has variation in all the variables along the path. A closed path is one in which at least one variable has no variation. 
 
-2) a. List every path from X -> Y:
+2) 
 
-1) X -> A -> Y
-2) X <- B -> Y
-3) X -> C <- D -> Y
-4) X <- B <- D -> Y 
-5) X -> C <- D -> B -> Y
+a. List every path from X -> Y:
+
+1. X -> A -> Y
+2. X <- B -> Y
+3. X -> C <- D -> Y
+4. X <- B <- D -> Y 
+5. X -> C <- D -> B -> Y
 
 b. front door paths:
 
-1) X -> A -> Y is the front door path since it's the only path where all the arrows point away from X. I decided X -> C <- D -> Y is NOT a front door path since D points toward X. 
+X -> A -> Y is the front door path since it's the only path where all the arrows point away from X. I decided X -> C <- D -> Y is NOT a front door path since D points toward X and C is a collider. 
 
-c. which are open back-door paths:
+c. which are open back-door paths (arrows toward X and no colliders):
+
+X <- B -> Y
+X <- B <- D -> Y
 
 d. what *must* be controlled to find effect of X on Y:
 
+Ch. says we can pick one variable along each bad path to control for to find answer to research question. The paths without colliders are 2 and 4. 
+
+I need to control for B and D to find the effect of X on Y. 
+
 ### Income and Health 
 
-a. 
+3) 
+a. loading package needed to draw causal diagram.
+
+```{r}
+library(ggdag)
+library(ggplot2)
+```
+
+The experience or absence of racism and sexism affects income across strata. Income leads to access to built environments (green space and sidewalks on one extreme and no sidewalks and no green space at the other extreme) and affects if people have housing at all and if they do have housing whether it is free of toxicants (mold, pests, etc.) or not. In the U.S. for many people, their job determines their health insurance status which affects if and which health facilities they can receive care. The predictor variable/treatment is income and the outcome variable is health. The six added variables are racism, sexism, job, insurance, built environment, and housing. 
+
+The diagram of these variables are below. 
+
+```{r}
+incomedag <- dagitty::dagitty("dag {
+  
+  health <- builtenviron
+  builtenviron <- income
+  housing <- income
+  health <- housing
+  income <- job
+  healthinsurance <- job
+  health <- healthinsurance 
+  health <- income
+  income <- racism
+  income <- sexism 
+  job [exposure]
+  health [outcome]  
+}")
+
+tidy_dagA <- tidy_dagitty(incomedag)
+
+ggdag_adjustment_set(incomedag, node_size = 21, text_size = 2.8, text_col = 'black')
+```
+
+
+b. front door paths (all arrows pointing away from income and leading to health):
+
+income -> builtenvironment -> health 
+income -> housing -> health 
+income -> health
+
+Based on chapter 6 and 7 I could combine builtenvironment and housing into one variable called neighborhood, but I think there's a meaningful difference between household toxic exposures or having housing and the access to areas for physical/mental wellness like parks. 
+
+c. back door paths (arrows pointing to income):
+
+income <- job -> healthinsurance -> health
+
+d. direct effects: 
+
+income -> health
+
+Though I don't think this is realistic as the relationship between income and health might change based on economic structure (democratic socialism v. market-based healthcare). 
+
+e. 
+Good Paths:
+income -> builtenvironment -> health 
+income -> housing -> health 
+income -> health
+
+Bad Paths:
+
+income <- job -> healthinsurance -> health
 
 ### Arrows point away from treatment
 
-4) c. front door path
+4) Front door path (path where all arrows point away from treatment)
 
 ### Teaching Quality & Popularity
 
-a. In one path of this diagram, popularity is an outcome variable. 
+5) 
 
-b. If we controlled for popularity then 
+a. In one path of this diagram, popularity is an outcome variable. We could ask "what is the relationship between teaching quality (treatment) and popularity (outcome)?" 
+
+b. If we controlled for popularity, which is a collider between teaching quality and numberofpublications, then the path between teachingquality and numberofpublications opens. Opening this path allows us to ask/answer "what effect does teachingquality have on numberofpublications?" or vice versa depending which of the two other variables we want to view as a treatment. 
+
 
 ### Lockdown and Recession
 
-6) a. 
+6) 
+a. paths from lockdown to recession, but for those through stimulus:
+
+lockdown -> recession
+lockdown -> unemployment -> recession
+lockdown <- prior economy -> recession
+lockdown <- prior economy -> unemployment -> recession 
+
+paths with stimulus are:
+lockdown <- prior economy -> stimulus -> recession
+lockdown <- prior economy -> stimulus -> unemployment -> recession 
+
+b. front door paths:
+
+lockdown -> recession
+lockdown -> unemployment -> recession
+
+c. If we controlled for unemployment we could answer the question "other than through unemployment, does lockdown cause recession?" I.e. if we controlled for unemployment then we would only study direct effects. 
+
+d. It depends on what we mean by adequate. Most of the variables have measurement issues. For example, the sporadic closing of some businesses in some states is what some might view as a lockdown, but compared to countries that limited movement, provided meals, and had a serious test, trace, and isolate program, the U.S. did not have a lockdown.There's also a question of duration of lockdown and whether non-pharmaceutical interventions (e.g., masks) should be considered as part of the lockdown definition.  
+
+Secondly, prioreconomy is nebulous - does the author mean since the last recession or since the 1980s and does their measures of economy limit them to stock performance or are they interested in inflation, growth in houselessness, measures of wage, or other metrics of the real economy versus the speculative economy.
+
+Government unemployment numbers are also misleading. https://www.marketwatch.com/story/why-the-unemployment-rate-is-so-misleading-2013-03-08
+
+Recession is based on GDP so that is probably the variable that can be measured the most adequately even with the issues with GDP. Stimulus can also be measured adequately. The other variables will have much debate. 
+
+e. An improved path would include pandemic pathogen -> morbidity/mortality -> fewer employees -> recession and other paths that highlight that allowing a virus to spread can't lead to economic prosperity. 
+
+### Bad Paths 
+
+higher education <- familywealth -> income 
+higher education <- student loan policy <- president -> wage/tax policy -> income
+
