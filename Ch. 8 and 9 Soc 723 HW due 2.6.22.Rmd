@@ -184,9 +184,46 @@ b. Experiments ensure that variation in the treatment contain no back doors by r
 
 ### A Natural Experient 
 
-6. A natural experiment is states adopting different tax rates for cigarettes. This would allow us to see if the price of cigarettes affects how many people smoke or at least how many cigarettes people buy.
-Variables: cigarette tax, nicotine addiction,
+6) a. A natural experiment is states adopting different tax rates for cigarettes. This would allow us to see if there is a threshold of cigarette price that affects how many people smoke or at least how many cigarettes people buy.I think I want to analyze how many cigarettes people buy (individual smoking behavior change versus looking at number of smokers).
+Variables: parent smoking status, peer smoking status, cancer burden in a state, state's cigarette tax, cigarette price, nicotine addiction, cigarette purchase 
 
+```{r}
+cigdag <- dagitty::dagitty("dag {
+  
+  cigarettepurchase <- peersmoke
+  cigarettepurchase <- parentsmoke
+  cigarettepurchase <- nicotineaddiction
+  nicotineaddiction <- peersmoke
+  nicotineaddiction <- parentsmoke
+  cigprice <- statecigtax
+  statecigtax <- cancerburden <- parentsmoke
+  statecigtax <- cancerburden <- peersmoke
+  cigarettepurchase <- cigprice
+   
+  parentsmoke [exposure]
+  cigarettepurchase [outcome]  
+}")
 
+tidy_dagB <- tidy_dagitty(cigdag) #expsure of interst is cigarette tax but needed to write parentsmoke for dag to work 
+
+ggdag_adjustment_set(cigdag, node_size = 19, text_size = 2.8, text_col = 'black')
+```
+
+b. paths from exogenous variation to outcome: 
+1. state cigarette tax -> cigarette price -> cigarettepurchase 
+2. state cigarette tax <-cancerburden <- peersmoke -> cigarettepurchase
+3. state cigarette tax <-cancerburden <- peersmoke -> nicotine addiction -> cigarettepurchase
+4. state cigarette tax <- cancerburden <- parentsmoke -> cigarettepurchase
+5. state cigarette tax <- cancerburden <- parentsmoke -> niicotine addiction ->  cigarettepurchase
+
+c. The paths that need to be closed are numbers 2 through 5 in part b. 
+
+d. Since there are other reasons people choose to smoke and other factors that determine a state's tax rate for cigarettes, it is not believable that I haven't missed any paths. I do think I can close the paths I need for this question, not only because other researchers have estimated the effect of tax rate on cigarettes (precedence), but also because of the ability to compare smoking rates before and after a state had a cigarette tax and trends in cigarette purchases as the tax rate changes. Essentially, the treatment group can also be it's comparison which could allow me to hold all other factors I didn't control for or perceive constant. 
+
+7. b; looking at charter school example the reason we can use LotteryWin to predict student achievement is because it doesn't have a backdoor path to  student achievement. 
+
+### Natural Experiment: Exports and Public Opinion 
+
+8. 
 
 
