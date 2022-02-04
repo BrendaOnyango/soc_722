@@ -178,7 +178,15 @@ b. Experiments ensure that variation in the treatment contain no back doors by r
 
 ### Causal & Unfeasible Research Question
 
-4. Last semester we discussed the ethics of a model (is it fair, how will the data be used, biases, and how will data impact individuals and society) and those ethical questions can affect the feasibility of a study. An experimental question that is unfeasible is "what effect does a woman's botox regimen have on annual performance reviews?" 
+4. Last semester we discussed the ethics of a model (is it fair, how will the data be used, biases, and how will data impact individuals and society) and those ethical questions can affect the feasibility of a study. An experimental question that is unfeasible is "what effect does a woman's botox regimen have on annual performance reviews?" It would be unethical to randomize women to receive botox or not and it would be challenging to isolate whether botox regimen alone affects results of a performance review. 
+
+5. Exogenous variation is variation in treatment that has no back doors meaning that variation to treatment or not is not caused by some factor that also causes the outcome. 
+
+### A Natural Experient 
+
+6. A natural experiment is states adopting different tax rates for cigarettes. This would allow us to see if the price of cigarettes affects how many people smoke or at least how many cigarettes people buy.
+Variables: cigarette tax, nicotine addiction,
+
 
 
 
