@@ -29,12 +29,12 @@ X -> A -> Y is the front door path since it's the only path where all the arrows
 
 c. which are open back-door paths (arrows toward X and no colliders):
 
-X <- B -> Y
-X <- B <- D -> Y
+1. X <- B -> Y
+2. X <- B <- D -> Y
 
 d. what *must* be controlled to find effect of X on Y:
 
-Ch. says we can pick one variable along each bad path to control for to find answer to research question. The paths without colliders are 2 and 4. 
+Ch. says we can pick one variable along each bad path to control for to find answer to research question. The paths without colliders are 2 and 4 from part a. 
 
 I need to control for B and D to find the effect of X on Y. 
 
@@ -77,15 +77,15 @@ ggdag_adjustment_set(incomedag, node_size = 21, text_size = 2.8, text_col = 'bla
 
 b. front door paths (all arrows pointing away from income and leading to health):
 
-income -> builtenvironment -> health 
-income -> housing -> health 
-income -> health
+1. income -> builtenvironment -> health 
+2. income -> housing -> health 
+3. income -> health
 
 Based on chapter 6 and 7 I could combine builtenvironment and housing into one variable called neighborhood, but I think there's a meaningful difference between household toxic exposures or having housing and the access to areas for physical/mental wellness like parks. 
 
 c. back door paths (arrows pointing to income):
 
-income <- job -> healthinsurance -> health
+1. income <- job -> healthinsurance -> health
 
 d. direct effects: 
 
@@ -95,9 +95,9 @@ Though I don't think this is realistic as the relationship between income and he
 
 e. 
 Good Paths:
-income -> builtenvironment -> health 
-income -> housing -> health 
-income -> health
+1. income -> builtenvironment -> health 
+2. income -> housing -> health 
+3. income -> health
 
 Bad Paths:
 
@@ -105,7 +105,7 @@ income <- job -> healthinsurance -> health
 
 ### Arrows point away from treatment
 
-4) Front door path (path where all arrows point away from treatment)
+4) c. Front door path (path where all arrows point away from treatment)
 
 ### Teaching Quality & Popularity
 
@@ -121,19 +121,19 @@ b. If we controlled for popularity, which is a collider between teaching quality
 6) 
 a. paths from lockdown to recession, but for those through stimulus:
 
-lockdown -> recession
-lockdown -> unemployment -> recession
-lockdown <- prior economy -> recession
-lockdown <- prior economy -> unemployment -> recession 
+1. lockdown -> recession
+2. lockdown -> unemployment -> recession
+3. lockdown <- prior economy -> recession
+4. lockdown <- prior economy -> unemployment -> recession 
 
 paths with stimulus are:
-lockdown <- prior economy -> stimulus -> recession
-lockdown <- prior economy -> stimulus -> unemployment -> recession 
+1. lockdown <- prior economy -> stimulus -> recession
+2. lockdown <- prior economy -> stimulus -> unemployment -> recession 
 
 b. front door paths:
 
-lockdown -> recession
-lockdown -> unemployment -> recession
+1. lockdown -> recession
+2. lockdown -> unemployment -> recession
 
 c. If we controlled for unemployment we could answer the question "other than through unemployment, does lockdown cause recession?" I.e. if we controlled for unemployment then we would only study direct effects. 
 
@@ -149,8 +149,8 @@ e. An improved path would include pandemic pathogen -> morbidity/mortality -> fe
 
 ### Bad Paths 
 
-higher education <- familywealth -> income 
-higher education <- student loan policy <- president -> wage/tax policy -> income
+1. higher education <- familywealth -> income 
+2. higher education <- student loan policy <- president -> wage/tax policy -> income
 
 ## Chapter 9: Finding Front Doors
 
@@ -224,6 +224,8 @@ d. Since there are other reasons people choose to smoke and other factors that d
 
 ### Natural Experiment: Exports and Public Opinion 
 
-8. 
+8. a) A potential backdoor is bilateral relationships between Brazil and China or other countries that the U.S. is antagonistic to. Industries that may be in jeopardy of damaging relations with China because of taking their market share with the U.S. may not improve their opinion of the U.S. Another backdoor is other trade agreements and regulations for imports to the U.S.; if manufacturers have to adjust their product to meet U.S. market regulations then Brazilian industry opinion of the U.S. may remain the same or worsen (I'm thinking of the issues with sanitation regulation of Brazil exporting meat to the U.S.). 
+
+b) I would not believe the results. I would think the study design is good if they truly were able to identify industries affected by the tariffs on an external country, and somehow measure their affect toward the U.S. would answer the question do tariffs change the opinion of the U.S. However, I would not base my acceptance or rejection of the results on one study and I would want to see alternate methods of isolating the assignment to treatment (exports increase because of tariffs) or no treatment (exports not directly affected by tariffs). Supply chains are complex and interrelated so I would have doubts that the analysis was truly able to say which industries exports were affected by U.S. tariffs on other countries and these weren't. 
 
 
