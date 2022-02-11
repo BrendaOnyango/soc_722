@@ -1,0 +1,27 @@
+---
+title: "CH. 10 and ch. 11 hw due 2.13.22"
+author: "Brenda Onyango"
+date: "2/7/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Definitions 
+
+1) write your own definitions:
+
+a. conditional average treatment effect - This is an average treatment effect for which the variation in treatment is conditioned on some facet. An ATE can be conditioned on a sample if the sample is not representative of the population or on a sub-sample of a representative sample, such as women, older people, etc. 
+
+b. average treatment on the treated - This is a treatment effect for which you calculate the average treatment effect of those who got treatment. In other words this is a type of conditional average treatment effect in which the condition is got treatment. 
+
+c. average treatment on the untreated - This is a treatment effect for which you calculate the average treatment effect of those who did not receive treatment. This is a type of conditional ATE in which the the condition is not treated/control.
+
+2) A heterogeneous treatment effect is one that differs from subject to subject. I would expect birth control to affect individuals differently, both within groups and between groups (women, men, perimenopausal, etc.) given variations in hormonal levels across people.
+
+## CBT Example 
+
+
