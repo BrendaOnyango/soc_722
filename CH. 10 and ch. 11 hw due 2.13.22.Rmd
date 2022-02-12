@@ -25,3 +25,35 @@ c. average treatment on the untreated - This is a treatment effect for which you
 ## CBT Example 
 
 
+a.  Find overall average treatment effect.
+
+```{r}
+ATE <- (7+ 3 + 7 + 8 + 7 + 4)/6 
+```
+
+ATE  = 6 
+
+b. Find ATE for women. 
+
+```{r}
+womenATE <- (3 + 7 + 4)/3
+```
+
+ATE for women = 4.67
+
+c. We would get a variance-weighted average treatment effect because we see different variance in treatment among non-binary and women participants. The variance in women is higher (a mix of treated versus untreated) relative to non-binary people (nearly all treated) so the weighted average is closer to women's effect than nonbinary people's effect. 
+
+d. This is a conditional average treatment effect among teenagers. The numerical estimate will be closer to the group with more variation in treatment. If only young people receive treatment they have more variation in treatment than people over 19 years of age since >19 aged people get no treatment so their variation in treatment is 0. 
+
+4) The average treatment effect on the treated is the effect among those who got treated in a study. A condition of using ATT is that the outcome is unrelated to the probability of being treated (no backdoor). ATT is useful for observational studies since people often choose if they experience the "treatment" or not. ATT would be useful for assessing the effect of Narcan or specialty drugs if the control groups are people without opioid addiction or another condition. 
+
+5) c. intent-to-treat
+
+## Weighted Treatment Effects 
+
+6)
+a. variance-weighted treatment effect - this is an average treatment effect that is weighted on the variation in *treatment* after closing back doors. 
+
+b. distribution-weighted treatment effect - this is an average treatment effect found  by selecting a sample where the treated and untreated groups have similar values of variables on back door paths, which closes the back doors. Individuals with shared values of the variables of interest are weighted more. 
+
+c. In both of these we're closing back doors, but in different ways. A study design in which we use variance-weighted treatment effects is 
