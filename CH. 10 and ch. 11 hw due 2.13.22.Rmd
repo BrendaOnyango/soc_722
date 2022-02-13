@@ -10,7 +10,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-## Definitions 
+## Chapter 10 
+
+### Definitions 
 
 1) write your own definitions:
 
@@ -43,17 +45,100 @@ ATE for women = 4.67
 
 c. We would get a variance-weighted average treatment effect because we see different variance in treatment among non-binary and women participants. The variance in women is higher (a mix of treated versus untreated) relative to non-binary people (nearly all treated) so the weighted average is closer to women's effect than nonbinary people's effect. 
 
-d. This is a conditional average treatment effect among teenagers. The numerical estimate will be closer to the group with more variation in treatment. If only young people receive treatment they have more variation in treatment than people over 19 years of age since >19 aged people get no treatment so their variation in treatment is 0. 
+d. This is an average treatment effect. The numerical estimate will be closer to the group with more variation in treatment. If only young people receive treatment they have more variation in treatment than people over 19 years of age since >19 aged people get no treatment so their variation in treatment is 0. 
 
-4) The average treatment effect on the treated is the effect among those who got treated in a study. A condition of using ATT is that the outcome is unrelated to the probability of being treated (no backdoor). ATT is useful for observational studies since people often choose if they experience the "treatment" or not. ATT would be useful for assessing the effect of Narcan or specialty drugs if the control groups are people without opioid addiction or another condition. 
+4) The average treatment effect on the treated is the effect among those who got treated in a study. A condition of using ATT is that the outcome is unrelated to the probability of being treated (no backdoor). ATT is useful for observational studies since people often choose if they experience the "treatment" or not. ATT would be useful for assessing the effect of Narcan or specialty drugs if the control groups are people without opioid addiction or another condition. We want to know the effect of Narcan on those who've actually received it for an opioid overdose. Narcan has no effect on people who don't take opioids (reference: https://nida.nih.gov/publications/drugfacts/naloxone) so an ATE on a nationally representative sample would be less useful than an ATT. 
 
 5) c. intent-to-treat
 
-## Weighted Treatment Effects 
+### Weighted Treatment Effects 
 
 6)
-a. variance-weighted treatment effect - this is an average treatment effect that is weighted on the variation in *treatment* after closing back doors. 
+  a. variance-weighted treatment effect - this is an average treatment effect that is weighted on the variation in *treatment* after closing back doors. 
 
-b. distribution-weighted treatment effect - this is an average treatment effect found  by selecting a sample where the treated and untreated groups have similar values of variables on back door paths, which closes the back doors. Individuals with shared values of the variables of interest are weighted more. 
+  b. distribution-weighted treatment effect - this is an average treatment effect found  by selecting a sample where the treated and untreated groups have similar values of variables on back door paths, which closes the back doors. Individuals with shared values of the variables of interest are weighted more. 
 
-c. In both of these we're closing back doors, but in different ways. A study design in which we use variance-weighted treatment effects is 
+  c. In both of these we're closing back doors, but in different ways. We should use  variance-weighted treatment effect when some aspect of individuals affects both their treatment and outcome. In the chapter, being a Briana or Diego affected treatment and outcome and the part of the sample that is weighted more heavily is that which has more variation in treatment. A design that uses distribution-weighted treatment effect is when a sample of treatment and control groups are matched on variables on back door paths. 
+
+7) If the university participants are representative of the national population (ages, gender composition, political beliefs, income, etc.) since people of many types of life make a university operational then we theoretically could identify an average treatment effect. However, since most university research pools are mostly students then what we will probably get is a conditional average treatment effect among university students. 
+
+### Name that Effect
+
+8)
+
+a. average treatment effect 
+b. conditional average treatment effect
+c. weighted-average treatment effect 
+d. intent-to-treat
+e. average treatment on the treated 
+
+## Chapter 11
+
+1) In this case the confounding variables that go into the "stuff" part of the basic causal diagram include campus characteristics like student body size, public/private, rural/urban, timing of holiday breaks, and more. To avoid collecting data on all these characteristics that are *constant over time* I could use a fixed effects method and add a control for the individual university and observe changes in positive rate over time at each school. I could also find a sample control group that is similar to the treatment (remained open) and try to match cases between treatment and control. 
+
+
+2) Intuitively, isolating and focusing on front door paths allows us to ignore unmeasured backdoor variables since we 1) avoid opening backdoor paths with colliders and 2) are preparing a research design and analysis based on paths that don't have back doors by virtue of being front door paths. In other words, by isolating the front door path variables we no longer need to worry about variation caused by backdoors. 
+
+### Robustness
+
+3) 
+a. Robustness test - a way of checking whether we can disprove an assumption or repeating an analysis without an assumption(s) to see if effects change. 
+
+b.Robustness tests are for checking to see if assumptions in a causal diagram and subsequent statistical analyses are false (it's rare to be able to say if assumption is true) or too wrong to use. 
+
+c. Placebo test - a type of robustness test used when comparing a treatment to a control group in which a placebo (substance or other material with no effect) is given to a control group or perhaps a third group to see if there is an effect. If there is an effect in a control group or placebo group we have insight that an assumption is wrong. Double-blind drug trials where neither researcher nor patient-participant knows if they've received treatment or a placebo pill can show whether a new medication produces an effect. 
+
+### GPA 
+
+4)  Five variables that impact both tutoring session attendance and student GPA:
+  1. internal motivation 
+  2. prior semester GPA (past GPA affects future GPA and desire to go to tutoring)
+  3. peer support (i.e. friends that attend/don't attend tutoring sessions, suggest studying instead of leisure or vice versa)
+  4. transportation (ability or inability to travel to tutoring sessions or class affects both variables)
+  5. work schedule (having or not having a job affects ability to attend a tutoring session and maintaining a GPA)
+
+It is not easy to control for all the variables. For example, internal motivation and peer support are difficult variables to operationalize (what peer support for one person looks like is different for others). I could probably control for prior semester GPA and work schedule within one school since GPA formulas and max work limits vary between schools. 
+
+### Partial Identification 
+
+5) Partial identification - an approach to finding a range of estimates for an effect or effects based on different sets of assumptions 
+
+### Causal Diagrams
+
+6)
+  a. Pick diagram from the book and reproduce the diagram. Reproduced Figure 9.5 
+  
+```{r}
+library(ggdag)
+library(ggplot2)
+```
+  
+  
+```{r}
+drivedag <- dagitty::dagitty("dag {
+  
+  driving <- pollution  <- weather <- U1
+  pollution <- winddirection <- U1
+  pollution <- economicactivity -> driving 
+  pollution <- season -> driving 
+  winddirection <- season
+  driving <- weather 
+  
+  U1 [exposure]
+  driving [outcome]  
+}")
+
+tidy_dagdrive <- tidy_dagitty(drivedag) 
+
+ggdag_adjustment_set(drivedag, node_size = 19, text_size = 2.8, text_col = 'black')
+```
+
+b. Two variables without a direct link: weather and economic activity 
+
+c. Pollution is a collider between weather and economic activity so if I control for pollution I can open a path between economic activity and weather that allows me to ask/answer how does weather affect economic activity. 
+
+d. If I looked at the relationship between weather and economic activity while controlling for pollution and got a nonzero result I would conclude that there may be some relationship, whether positive or negative, between weather and economic activity. I would do robustness checks and partial identification to ensure the effect is based on good assumptions and the range of possibilities for the effect estimate before sharing results. 
+
+### Partial Identification Part II
+
+7) d. The effect is no larger than 2 percentage points 
