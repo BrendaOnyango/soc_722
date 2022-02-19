@@ -60,3 +60,18 @@ c. To say that the coefficient is statistically significant from 0 is to say tha
 
 ### Women's work 
 
+1) annual hours worked = years of education + constant
+2) annual hours worked = #ofchildren + constant
+3) annual hours worked = years of education +  #ofchildren + constant
+
+are a basic representation of what the columns in the table represent. 
+
+a. Adjusting for number of children a one-unit increase of years of education is associated with 76.185 increase in annual hours worked. 
+
+b. When not adjusting for years of education, the standard error on the "children under 5" is 19.693. 
+
+c. For a woman with 0 children and 0 years of education, the predicted number of hours worked annually is the constant or intercept which is 306.553. 
+
+d. 3382 observations are used in each regression. 
+
+e. The coefficient on "children under 5" is statistically significant from 0 at the p<0.01 or the 99% level as indicated by the three asterisks. This also means that p is less than 0.05 so the coefficient is also statistically signicant from 0 at the 95% level. 
