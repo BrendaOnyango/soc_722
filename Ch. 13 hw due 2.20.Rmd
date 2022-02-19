@@ -1,0 +1,62 @@
+---
+title: "Ch. 13 HW due 2.20.22"
+author: "Brenda Onyango"
+date: "2/15/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Chapter 13
+
+
+### Errors and residuals 
+
+Y = 2 + 3x + $\epsilon$
+
+a. find error for observation A. 
+
+9 = 2 + 3(2) + $\epsilon$
+
+$\epsilon$ = 1
+
+b. Y = $\beta_0$ + $\beta_1$*X + $\epsilon$
+
+find the residual for Observation A 
+9 = 1.9 + 3.1(2) + $\epsilon$
+
+$\epsilon$ = 0.9 = residual since the residual is the difference between the prediction we make with our fitted line and the actual value. The "error term" represents the residual when we're using a prediction line. 
+
+### Writing the regression equation 
+
+2) I would use:
+
+Y = B_0 + B_1*X + B_2*A + B_3*B + e
+
+Including coefficients for A and B closes the backdoors X <- A -> Y and X <- B -> Y. C is included in e. 
+
+### Coefficients 
+
+3) 
+a. The coefficient that multiplies a variable is a slope, so a one-unit increase in X results in a 1.3 increase in Y. 
+
+b. 
+```{r}
+pnorm(q = (3/1.3)) #using pnorm and z-score to find the percentiles. Z score is score - mean/stdev and in this case we can use 0 as mean and the stadard error as stdev. 
+```
+
+The estimate of 3 is in the 98.95th percentile of the normal distribution. 
+
+```{r}
+a  <- (100 - 98.95)*2 
+a
+```
+
+The above shows that finding something as far from 0 as the estimate 3 happens 2.09% of the time. I multiplied by 2 above to do a two-tailed test. If our alpha = 0.05 then we reject the null since 2.09% is less than 5% and the estimate is statistically significant from 0. 
+
+c. To say that the coefficient is statistically significant from 0 is to say that 0 is an unlikely value for the coefficient. It doesn't mean that 3 is a true value or that that the effect is meaningful. 
+
+### Women's work 
+
