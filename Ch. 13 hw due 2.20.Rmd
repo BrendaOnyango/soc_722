@@ -29,15 +29,15 @@ find the residual for Observation A
 
 $\epsilon$ = 0.9 = residual since the residual is the difference between the prediction we make with our fitted line and the actual value. The "error term" represents the residual when we're using a prediction line. 
 
-### Writing the regression equation 
+### 2: Writing the regression equation 
 
 2) I would use:
 
 Y = B_0 + B_1*X + B_2*A + B_3*B + e
 
-Including coefficients for A and B closes the backdoors X <- A -> Y and X <- B -> Y. C is included in e. 
+Including coefficients for A and B closes the backdoors X <- A -> Y and X <- B -> Y. C is included in e. B_0 is a constant/intercept. 
 
-### Coefficients 
+### 3: Coefficients 
 
 3) 
 a. The coefficient that multiplies a variable is a slope, so a one-unit increase in X results in a 1.3 increase in Y. 
@@ -58,7 +58,7 @@ The above shows that finding something as far from 0 as the estimate 3 happens 2
 
 c. To say that the coefficient is statistically significant from 0 is to say that 0 is an unlikely value for the coefficient. It doesn't mean that 3 is a true value or that that the effect is meaningful. 
 
-### Women's work 
+### 4: Women's work 
 
 1) annual hours worked = years of education + constant
 2) annual hours worked = #ofchildren + constant
@@ -75,3 +75,51 @@ c. For a woman with 0 children and 0 years of education, the predicted number of
 d. 3382 observations are used in each regression. 
 
 e. The coefficient on "children under 5" is statistically significant from 0 at the p<0.01 or the 99% level as indicated by the three asterisks. This also means that p is less than 0.05 so the coefficient is also statistically signicant from 0 at the 95% level. 
+
+
+### 5 
+
+annualhoursworked = 10.145 + 11.230YearsEducation - 1.581YearsEducation^2
+
+a. A one-year increase in YearsEducation is associated with a (110.230 - 3.162YearsEducation) hour change in annual hours worked. 
+
+b. annualhoursworked = 10.145 + 110.230(16) - 1.581 * 16^2
+
+```{r}
+10.145 + (110.230*16) - (1.581 * (16^2))
+```
+
+c. 
+```{r}
+YearsEducation <- c(0,1,2,3,4,5, 6, 7, 8, 9,10,10.145, 11, 12, 13)
+annualhoursworked <-  10.145 + 11.230*YearsEducation - 1.581*(YearsEducation^2)
+annualhoursworked
+```
+
+```{r}
+plot(annualhoursworked)
+```
+
+d. Mathematically, the squared term has a negative coefficient which tells us that the parabola is an upside-down u or getting less positive with higher x-values. The plot above also shows that the relationship between YearsEducation and AnnualHoursWorked are getting less positive for higher values of YearsEducation. 
+
+d. One reason to not include more polynomial terms is to avoid overfitting. More polynomials can lead to overfitting if a model tries to fit noise and ends up performing worse than a model with fewer polynomials. 
+
+### 6: Binary and categorical variables 
+
+a. The coefficient on Homeowner is 50.174 which means that on average, homeowners work that many more hours annually than non-owners. 
+
+b. The coefficient for "4 children under 5" = -923.904 and the coefficient for "3 children under 5" = -773.412. 
+
+The difference: 
+```{r}
+fourchildren <- -923.904
+threechildren <- -773.412
+
+fourchildren - threechildren 
+```
+
+People with 4 children under 5 work on average 150 fewer hours than people with 3 children under age 5. 
+
+c. From this table we can't tell if there's a statistical significance between having 2 children and having 3 children. We need to perform a joint F test and could do so using the linearHypothesis in R. 
+
+### 7: log transformation 
