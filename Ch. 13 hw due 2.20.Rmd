@@ -83,10 +83,10 @@ annualhoursworked = 10.145 + 11.230YearsEducation - 1.581YearsEducation^2
 
 a. A one-year increase in YearsEducation is associated with a (110.230 - 3.162YearsEducation) hour change in annual hours worked. 
 
-b. annualhoursworked = 10.145 + 110.230(16) - 1.581 * 16^2
+b. A one year increase in YearsEducation will increase hours worked by 59.638 if the current level of education is 16. 
 
 ```{r}
-10.145 + (110.230*16) - (1.581 * (16^2))
+(110.230) - (3.162 * (16))
 ```
 
 c. 
@@ -118,25 +118,25 @@ threechildren <- -773.412
 fourchildren - threechildren 
 ```
 
-People with 4 children under 5 work on average 150 fewer hours than people with 3 children under age 5. 
+People with 4 children under 5 work on average 150.492 fewer hours than people with 3 children under age 5. 
 
 c. From this table we can't tell if there's a statistical significance between having 2 children and having 3 children. We need to perform a joint F test and could do so using the linearHypothesis in R. 
 
 ### 7: log transformation 
 
-a. In Model 1 a one-unit increase in education is associated with an 110.073 increase in annual hours worked at the 99% level when adjusting for homeowner.  
+a. In Model 1 a one-unit increase in education is associated with an 110.073 increase in annual hours worked at the 99% level when adjusting for homeowner. 
 
 b. Assuming that annual hours worked is positively correlated with annual earnings then yes, annual earnings rise more quickly for homeowning families than nonhomeowning families. The regression table shows us that on average homeowners work 682.992 more hours (*note table shows hour not earnings*) annually than non-owners when adjusting for education. The difference between homeowners and nonhomeowners regarding hours worked is statistically significant at the 99% level (which includes the 95% level).
 
 c. Homeowner x Education is an interaction term meaning that the effect of homeowner status on annual hours worked is moderated by education.  The effect of being a homeowner on annual hours worked is 53.994 weaker when education is increased by one unit. 
 
-d. In model 2, when adjusting for homeowner, for every 1% increase in education, annual hours worked increases by about 6.7%. 
+d. In model 2, when adjusting for homeowner, for every one-unit increase in education, annual hours worked increases by about 6.7%. 
 
 e. In model 3, log(Education) has a coefficient of 832.347. This tells us that for a 1% increase in education, annual hours worked will increase by about 8.323 hours. 8.32 was found by doing (832.347/100). It's important to notice if both predictor and outcome variables are log transformed. 
 
 To use 10% we can say a 10% increase in education, is associated with a 83.2344 increase in annual hours worked. 
 
-f. The sample sizes may vary between models because the log transformations may exclude outliers. 
+f. The sample sizes may vary between models because the log transformations can't take log(0). 
 
 ### Autocorrelation & heteroskedasticity (optional)
 
@@ -152,7 +152,7 @@ The pollsters can use sample weights to address this problem. Like the chapter d
 
 11) a 
 
-Non-classical measurement error is related to the true value. In a the true value is harder to access because it's a sensitive topic. 
+Non-classical measurement error is related to the true value. In a the true value is harder to access because it's a sensitive topic. I'm assuming c is using data from an archive and that the data was generated in a validated way so is not a non-classical error.
 
 
 ## Chapter 13: Coding HW
@@ -241,9 +241,8 @@ Add a control for temperature, rerun regression, and show results.
 
 ```{r}
 m5 <- lm(NoYes ~ humid + temp, data = dengue)
-msummary(list(m5))
-stars =TRUE
-output='regression_table.html'
+msummary(list(m5),
+stars =TRUE)
 ```
 
 
@@ -279,8 +278,8 @@ Run an OLS regression of humidity on temperature. Rerun the model with heteroske
 ```{r}
 denguehum <- dengue |> filter(!is.na(dengue$humid))
 m7 <- lm(humid ~ temp, data = denguehum) #question says regression of humidity on temperature so humid is Y(dependent) and temp is x 
-msummary(list(m7))
-stars =TRUE
+msummary(list(m7),
+stars =TRUE)
 ```
 
 Calculate the residuals of that regression, and then make a plot that will let you evaluate whether there is likely heteroskedasticity in the model. 
