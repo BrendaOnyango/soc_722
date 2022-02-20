@@ -275,6 +275,37 @@ fourchildren - threechildren </code></pre>
 </div>
 <div id="log-transformation" class="section level3">
 <h3>7: log transformation</h3>
+<ol style="list-style-type: lower-alpha">
+<li><p>In Model 1 a one-unit increase in education is associated with an 110.073 increase in annual hours worked at the 99% level when adjusting for homeowner.</p></li>
+<li><p>Assuming that annual hours worked is positively correlated with annual earnings then yes, annual earnings rise more quickly for homeowning families than nonhomeowning families. The regression table shows us that on average homeowners work 682.992 more hours (<em>note table shows hour not earnings</em>) annually than non-owners when adjusting for education. The difference between homeowners and nonhomeowners regarding hours worked is statistically significant at the 99% level.</p></li>
+<li><p>Homeowner x Education is an interaction term meaning that the effect of homeowner status on annual hours worked is moderated by education. The effect of being a homeowner on annual hours worked is 53.994 weaker when education is increased by one unit.</p></li>
+<li><p>In model 2, when adjusting for homeowner, for every 1% increase in education, annual hours worked increases by about 6.7%.</p></li>
+<li><p>In model 3, log(Education) has a coefficient of 832.347. This tells us that for a 1% increase in education, annual hours worked will increase by about 8.323 hours. 8.32 was found by doing (832.347/100). It’s important to notice if both predictor and outcome variables are log transformed.</p></li>
+</ol>
+<p>To use 10% we can say a 10% increase in education, is associated with a 83.2344 increase in annual hours worked.</p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>The sample sizes may vary between models because the log transformations may exclude outliers.</li>
+</ol>
+</div>
+<div id="autocorrelation-heteroskedasticity-optional" class="section level3">
+<h3>Autocorrelation &amp; heteroskedasticity (optional)</h3>
+<ol start="8" style="list-style-type: decimal">
+<li><ol start="2" style="list-style-type: lower-alpha">
+<li>Of these options, b seems to be the most accurate definition as it describes temporal autocorrelation.</li>
+</ol></li>
+<li>a and b. I think c doesn’t make sense to determine issues with standard errors with a term that’s not in the model. R^2 is about the quality of the model in terms of whether our DGP was more complete than not so d is eliminated. That elaves a,b, and e. A and b</li>
+</ol>
+</div>
+<div id="polls-and-sample-weights" class="section level3">
+<h3>10: Polls and Sample weights</h3>
+<p>The pollsters can use sample weights to address this problem. Like the chapter discussed, the pollsters could compare the proportion of people with a given attribute to the population value and find the probabilities of people with different attributes being included. Each individual would be weighed by the <em>inverse</em> of the probability so that people less likely to be included are counted for more. This makes the sample more representative of the population.</p>
+</div>
+<div id="non-classical-measurement-error" class="section level3">
+<h3>11: non-classical measurement error</h3>
+<ol start="11" style="list-style-type: decimal">
+<li>a</li>
+</ol>
+<p>Non-classical measurement error is related to the true value. In a the true value is harder to access because it’s a sensitive topic.</p>
 </div>
 </div>
 

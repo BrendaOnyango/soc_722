@@ -123,3 +123,33 @@ People with 4 children under 5 work on average 150 fewer hours than people with 
 c. From this table we can't tell if there's a statistical significance between having 2 children and having 3 children. We need to perform a joint F test and could do so using the linearHypothesis in R. 
 
 ### 7: log transformation 
+
+a. In Model 1 a one-unit increase in education is associated with an 110.073 increase in annual hours worked at the 99% level when adjusting for homeowner.  
+
+b. Assuming that annual hours worked is positively correlated with annual earnings then yes, annual earnings rise more quickly for homeowning families than nonhomeowning families. The regression table shows us that on average homeowners work 682.992 more hours (*note table shows hour not earnings*) annually than non-owners when adjusting for education. The difference between homeowners and nonhomeowners regarding hours worked is statistically significant at the 99% level. 
+
+c. Homeowner x Education is an interaction term meaning that the effect of homeowner status on annual hours worked is moderated by education.  The effect of being a homeowner on annual hours worked is 53.994 weaker when education is increased by one unit. 
+
+d. In model 2, when adjusting for homeowner, for every 1% increase in education, annual hours worked increases by about 6.7%. 
+
+e. In model 3, log(Education) has a coefficient of 832.347. This tells us that for a 1% increase in education, annual hours worked will increase by about 8.323 hours. 8.32 was found by doing (832.347/100). It's important to notice if both predictor and outcome variables are log transformed. 
+
+To use 10% we can say a 10% increase in education, is associated with a 83.2344 increase in annual hours worked. 
+
+f. The sample sizes may vary between models because the log transformations may exclude outliers. 
+
+### Autocorrelation & heteroskedasticity (optional)
+
+8) b. Of these options, b seems to be the most accurate definition as it describes temporal autocorrelation. 
+
+9) a and b. I think c doesn't make sense to determine issues with standard errors with a term that's not in the model. R^2 is about the quality of the model in terms of whether our DGP was more complete than not so d is eliminated. That elaves a,b, and e. A and b 
+
+### 10: Polls and Sample weights 
+
+The pollsters can use sample weights to address this problem. Like the chapter discussed, the pollsters could compare the proportion of people with a given attribute to the population value and find the probabilities of people with different attributes being included. Each individual would be weighed by the *inverse* of the probability so that people less likely to be included are counted for more. This makes the sample more representative of the population. 
+
+### 11: non-classical measurement error 
+
+11) a 
+
+Non-classical measurement error is related to the true value. In a the true value is harder to access because it's a sensitive topic. 
