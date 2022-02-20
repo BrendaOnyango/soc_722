@@ -274,14 +274,64 @@ The marginal effect for the coefficient on humid is 0.0317 and the marginal effe
 
 ### Relationship b/w temp and humidity 
 
+Run an OLS regression of humidity on temperature. Rerun the model with heteroskedasticity-robust standard errors. 
+
 ```{r}
-m7 <- lm(humid ~ temp, data = dengue) #question says regression of humidity on temperature so humid is Y(dependent) and temp is x 
+denguehum <- dengue |> filter(!is.na(dengue$humid))
+m7 <- lm(humid ~ temp, data = denguehum) #question says regression of humidity on temperature so humid is Y(dependent) and temp is x 
 msummary(list(m7))
 stars =TRUE
 ```
 
+Calculate the residuals of that regression, and then make a plot that will let you evaluate whether there is likely heteroskedasticity in the model. 
+
 ```{r}
 #calculate residuals
-resid(m7)
+res <- resid(m7)
 ```
 
+
+```{r}
+plot(denguehum$temp, res,
+     ylab = "Residuals of humid on temp", xlab = "Temperature",
+     main = "Heteroskedasticity Check")
+```
+
+Looking at the above plot we see that as temperature increases,  variation in the error term increases. This means that there is a failure of the "independent and identically distributed" assumption for the error term and so there is likely heteroskedasticity. 
+
+Rerun the model with heteroskedasticity-robust standard errors. Show both models, and say whether you think there is heteroskedasticity Save the model as `m7`, and `m7b` if you rerun with robust standard errors.
+
+```{r}
+library(sandwich) #loading packages ch. 13 used for robust SEs
+library(fixest)
+```
+
+```{r}
+msummary(m7, vcov = 'robust', 
+         stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01)) #used the same regression object and did robust SEs inside msummary
+```
+
+
+Seeing that the intercept and temp coefficients are the same in the model with robust SEs now makes me think that there likely isn't heteroskedasticity. 
+
+
+### 8: Robust standard errors 
+
+Run the model from question 7 again (with heteroskedasticity-robust standard errors), but this time use the logarithm of humidity in place of humidity. Add a sentence interpreting the coefficient on temperature. 
+
+
+```{r}
+m8 <- lm(log(humid) ~ temp, data = denguehum)
+modelsummary(m8, vcov = 'robust', 
+         stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01))
+```
+
+For every one-unit increase in temperature, humidity increases by [exp(0.056) - 1]* 100 = 13.76%. 
+
+```{r}
+plot(dengue$temp, dengue$humid) #taking a look at untransformed temperature and humidity data to confirm that saying temp and humid have positive association is sensible. 
+```
+
+### Bonus: why log humidity and keep temp linear?
+
+Looking at the plot above we see that there may some outliers that doing a log transformation for humidity would help to reduce. Another reason, and the more likely one, is that the line of best fit seems like it would be curve upwards as temperature increases. The relationship between temperature and humidity might be better explained with a model that shows a multiplicative relationship. 
