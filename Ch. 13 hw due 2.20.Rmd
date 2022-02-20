@@ -126,7 +126,7 @@ c. From this table we can't tell if there's a statistical significance between h
 
 a. In Model 1 a one-unit increase in education is associated with an 110.073 increase in annual hours worked at the 99% level when adjusting for homeowner.  
 
-b. Assuming that annual hours worked is positively correlated with annual earnings then yes, annual earnings rise more quickly for homeowning families than nonhomeowning families. The regression table shows us that on average homeowners work 682.992 more hours (*note table shows hour not earnings*) annually than non-owners when adjusting for education. The difference between homeowners and nonhomeowners regarding hours worked is statistically significant at the 99% level. 
+b. Assuming that annual hours worked is positively correlated with annual earnings then yes, annual earnings rise more quickly for homeowning families than nonhomeowning families. The regression table shows us that on average homeowners work 682.992 more hours (*note table shows hour not earnings*) annually than non-owners when adjusting for education. The difference between homeowners and nonhomeowners regarding hours worked is statistically significant at the 99% level (which includes the 95% level).
 
 c. Homeowner x Education is an interaction term meaning that the effect of homeowner status on annual hours worked is moderated by education.  The effect of being a homeowner on annual hours worked is 53.994 weaker when education is increased by one unit. 
 
@@ -153,3 +153,95 @@ The pollsters can use sample weights to address this problem. Like the chapter d
 11) a 
 
 Non-classical measurement error is related to the true value. In a the true value is harder to access because it's a sensitive topic. 
+
+
+## Chapter 13: Coding HW
+
+1) Confirming that I've uploaded the dengue csv file and named in dengue. 
+
+```{r}
+library(readr)
+library(tibble)
+```
+
+```{r}
+dengue <- read_csv("dengue.csv")
+print(dengue)
+```
+
+2) run OLS regression using average humidity as x and dengue in area as y. 
+
+```{r}
+
+library(modelsummary)
+library(tidyverse)
+```
+
+
+
+```{r}
+
+m2 <- lm(NoYes ~ humid, data = dengue) #OLS using average humidity as predictor
+
+```
+
+```{r}
+msummary(list(m2))
+stars =TRUE
+```
+
+Let's plot the data to better visualize what's happening. 
+
+```{r}
+plot( x = dengue$humid,
+      y =dengue$NoYes,
+      xlab = "humidity",
+      ylab = "dengue",
+      pch = 20)
+
+plot (x = dengue$humid,
+      y = log(dengue$NoYes), #plotting the data with log transform of NoYes
+  main = "scatter with logy",
+              pch = 22)
+```
+
+3) Two sentences: A one unit increase in humidity as measured by average vapor density is associated with a 0.05 increase in the value of YesNo*. The intercept -0.416 is the value of YesNo when humidity is 0. 
+
+YesNo only has 2 values so the above interpretation of the coefficient and the intercept can be improved by log transforming YesNo as I did in the second plot. 
+Below is a regression with YesNo log transformed. Now the intercept is no longer negative; this makes more sense since we can't have negative dengue; the lowest the incidence/prevalence of dengue can be is 0. 
+
+```{r}
+dengue <- dengue |> mutate(newcol = 1 + (log(NoYes))) #adding 1 to log transformation since log(0) is undefined. 
+```
+
+
+```{r}
+mlog <- glm(NoYes ~ humid, data = dengue)
+msummary(list(mlog))
+stars =TRUE
+```
+
+For every unit increase of humidity, The value of NoYes(was dengue observed with 1 = yes) increases by 0.034. 0.712 is the value of NoYes when humidity is 0; this makes more sense since it's not negative. 
+
+
+4. 
+```{r}
+summary(dengue$humid) #getting summary statistics of humdity 
+IQR(dengue$humid, na.rm = TRUE)
+```
+
+The summary stats show that the lowest possible value of humidity in this set is 0.6714. This also makes sense realistically given that humidity can never be 0 in Earth's atmosphere.  (source: https://www.chicagotribune.com/news/ct-xpm-2011-12-16-ct-wea-1216-asktom-20111216-story.html). 
+
+In both the untransformed and log transformed regressions we now can calculate a new minimum value for NoYes.The regression with NoYes logtransformed has a minimum value of NoYes that is more realistic; for the non-transformed regression we still have a value for NoYes below 0 which is not possible.  
+
+```{r}
+a <- -0.416 + 0.05*0.6714
+b <- 0.712 + 0.034*0.6714
+a
+b
+
+```
+
+### 5: Controlling for temperature
+
+
