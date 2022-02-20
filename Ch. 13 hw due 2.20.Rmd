@@ -214,14 +214,7 @@ Below is a regression with YesNo log transformed. Now the intercept is no longer
 dengue <- dengue |> mutate(newcol = 1 + (log(NoYes))) #adding 1 to log transformation since log(0) is undefined. 
 ```
 
-
-```{r}
-mlog <- glm(NoYes ~ humid, data = dengue)
-msummary(list(mlog))
-stars =TRUE
-```
-
-For every unit increase of humidity, The value of NoYes(was dengue observed with 1 = yes) increases by 0.034. 0.712 is the value of NoYes when humidity is 0; this makes more sense since it's not negative. 
+I tried running a regression with newcol ~ humid which works with .rmd but not when I knit. In later exercises I correctly run a logit. The above chunk was good practice adding a column to a dataset. The model I created with mlog <- lm(NoYes ~humid, data = dengue) had the following interpretation:  For every unit increase of humidity, The value of NoYes increases by 0.034. 0.712 is the value of NoYes when humidity is 0; this makes more sense since it's not negative. 
 
 
 4. 
@@ -244,4 +237,51 @@ b
 
 ### 5: Controlling for temperature
 
+Add a control for temperature, rerun regression, and show results. 
+
+```{r}
+m5 <- lm(NoYes ~ humid + temp, data = dengue)
+msummary(list(m5))
+stars =TRUE
+output='regression_table.html'
+```
+
+
+# Binary dependent variable 
+
+Rerun regression from 5 as a logit model and report marginal effects of both slope coefficients. 
+
+```{r}
+library(margins) #loading library used in chapter 
+```
+
+```{r}
+m6 <- glm(NoYes ~ humid + temp, data = dengue, family =binomial(link='logit'))
+
+msummary(m6,
+         stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01)) #viewing results
+
+
+```
+
+```{r}
+#marginal effects of coefficients for humidity and temperature
+m6 |> margins(variables = 'humid') |> summary()
+m6 |> margins(variables = 'temp') |> summary() #when I tried putting humid and temp in one term I got subscript out of bounds error but it ran with them separate. 
+```
+
+The marginal effect for the coefficient on humid is 0.0317 and the marginal effect for the coefficient on temp is 0.0042.
+
+### Relationship b/w temp and humidity 
+
+```{r}
+m7 <- lm(humid ~ temp, data = dengue) #question says regression of humidity on temperature so humid is Y(dependent) and temp is x 
+msummary(list(m7))
+stars =TRUE
+```
+
+```{r}
+#calculate residuals
+resid(m7)
+```
 
