@@ -1,0 +1,102 @@
+---
+title: "Ch. 14 HW due 2.27.22"
+author: "Brenda Onyango"
+date: "2/25/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Chapter 14 Homework: Matching
+
+### Matching with Penmanship Data
+
+1) a. Create a set of weights for handedness groups so that treatment matches control.
+
+Like in 4.2 I will give a weight of 1 to everyone who is *treated.* The weights I give to the control group will fill in the spaces below. 
+
+10*__ = 6 for left 
+
+88*__ = 90 for right
+
+2*__ = 4 for ambidextrous 
+
+weights for control groups:
+
+```{r}
+leftweightcon <- 6/10
+rightweightcon <- 90/88
+ambweightcon <- 4/2
+
+leftweightcon
+rightweightcon
+ambweightcon
+```
+
+b. 
+```{r}
+leftweighttreat <- 10/6
+rightweighttreat <- 88/90
+ambweighttreat <- 2/4
+
+leftweighttreat 
+rightweighttreat 
+ambweighttreat
+
+```
+
+c. Use the weights in part b to calculate proportion of left-handed and other people in the treated group.
+
+```{r}
+lefttreatprop <- 6*leftweighttreat
+rightreatprop <- 90*rightweighttreat
+ambidextprop <- 4*ambweighttreat #this was number of observations times weight to find proportion
+
+lefttreatprop 
+rightreatprop 
+ambidextprop 
+```
+
+d. weighted average penmanship in treated group 
+```{r}
+# doing sum of weights times observation divided by sum of weights 
+
+wapt <- (leftweighttreat*7 + rightweighttreat*6 + ambweighttreat*4)/(leftweighttreat + rightweighttreat + ambweighttreat)
+
+wapt
+```
+
+e. The unweighted treatment effect on the treated is:
+
+```{r}
+unweightedteffect <- (.06*7) + (.9 * 6) + (.04*4)
+unweightedteffect
+```
+
+```{r}
+unweightedatt <-unweightedteffect - 5 #5 is average penmanship of people who don't practice 
+unweightedatt
+```
+
+If we use our weighted data then our effect of practicing cursive is the below ono a 10 point scale:
+
+```{r}
+practiceffect <- wapt - 5 #5 is the average penmanship of people who don't practice 
+practiceffect
+```
+
+### 2: Types of Matching 
+
+a. kernel matching 
+
+b. k-nearest-neighbor matching with k = 2 
+
+c. propensity score matching 
+
+d. one-to-one distance matching
+
+### 3: Bias v. Variance 
+
+
