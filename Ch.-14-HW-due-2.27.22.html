@@ -174,31 +174,15 @@ pre code {
 <div id="chapter-14-homework-matching" class="section level2">
 <h2>Chapter 14 Homework: Matching</h2>
 <div id="matching-with-penmanship-data" class="section level3">
-<h3>Matching with Penmanship Data</h3>
-<ol style="list-style-type: decimal">
-<li><ol style="list-style-type: lower-alpha">
+<h3>1: Matching with Penmanship Data</h3>
+<ol style="list-style-type: lower-alpha">
 <li>Create a set of weights for handedness groups so that treatment matches control.</li>
-</ol></li>
 </ol>
-<p>Like in 4.2 I will give a weight of 1 to everyone who is <em>treated.</em> The weights I give to the control group will fill in the spaces below.</p>
-<p>10*__ = 6 for left</p>
-<p>88*__ = 90 for right</p>
-<p>2*__ = 4 for ambidextrous</p>
-<p>weights for control groups:</p>
-<pre class="r"><code>leftweightcon &lt;- 6/10
-rightweightcon &lt;- 90/88
-ambweightcon &lt;- 4/2
-
-leftweightcon</code></pre>
-<pre><code>## [1] 0.6</code></pre>
-<pre class="r"><code>rightweightcon</code></pre>
-<pre><code>## [1] 1.022727</code></pre>
-<pre class="r"><code>ambweightcon</code></pre>
-<pre><code>## [1] 2</code></pre>
+<p>I will give a weight of 1 to everyone in the control group.</p>
 <ol start="2" style="list-style-type: lower-alpha">
-<li></li>
+<li>Weights for left, right, and ambidextrous in treated group.</li>
 </ol>
-<pre class="r"><code>leftweighttreat &lt;- 10/6
+<pre class="r"><code>leftweighttreat &lt;- 10/6 #control overtreated for each group to find weight
 rightweighttreat &lt;- 88/90
 ambweighttreat &lt;- 2/4
 
@@ -231,18 +215,19 @@ wapt &lt;- (leftweighttreat*7 + rightweighttreat*6 + ambweighttreat*4)/(leftweig
 wapt</code></pre>
 <pre><code>## [1] 6.212014</code></pre>
 <ol start="5" style="list-style-type: lower-alpha">
-<li>The unweighted treatment effect on the treated is:</li>
+<li>If we use our weighted data then our ATUT (because we’re matching treated observations to control observations) of practicing cursive is the below on a 10 point scale:</li>
 </ol>
-<pre class="r"><code>unweightedteffect &lt;- (.06*7) + (.9 * 6) + (.04*4)
-unweightedteffect</code></pre>
-<pre><code>## [1] 5.98</code></pre>
-<pre class="r"><code>unweightedatt &lt;-unweightedteffect - 5 #5 is average penmanship of people who don&#39;t practice 
-unweightedatt</code></pre>
-<pre><code>## [1] 0.98</code></pre>
-<p>If we use our weighted data then our effect of practicing cursive is the below ono a 10 point scale:</p>
 <pre class="r"><code>practiceffect &lt;- wapt - 5 #5 is the average penmanship of people who don&#39;t practice 
 practiceffect</code></pre>
 <pre><code>## [1] 1.212014</code></pre>
+<p>I also ran the below code to see what the unweighted effect would be:</p>
+<pre class="r"><code>unweightedteffect &lt;- (.06*7) + (.9 * 6) + (.04*4)
+unweightedteffect</code></pre>
+<pre><code>## [1] 5.98</code></pre>
+<p>The unweighted ATUT is:</p>
+<pre class="r"><code>unweightedate &lt;-unweightedteffect - 5 #5 is average penmanship of people who don&#39;t practice 
+unweightedate</code></pre>
+<pre><code>## [1] 0.98</code></pre>
 </div>
 <div id="types-of-matching" class="section level3">
 <h3>2: Types of Matching</h3>
@@ -255,6 +240,72 @@ practiceffect</code></pre>
 </div>
 <div id="bias-v.-variance" class="section level3">
 <h3>3: Bias v. Variance</h3>
+<ol style="list-style-type: lower-alpha">
+<li><ol start="2" style="list-style-type: upper-alpha">
+<li>selecting multiple control matches for each treatment <em>increases</em> bias. (A) selecting one control match for each treatment increases variance and decreases bias.</li>
+</ol></li>
+<li><ol style="list-style-type: upper-alpha">
+<li>using a relatively wide bandwidth <em>increases</em> bias. (B) Using a narrower bandwidth increases variance and decreases bias.</li>
+</ol></li>
+<li><ol start="2" style="list-style-type: upper-alpha">
+<li>selecting matches without replacement <em>increases</em> bias. (A) selecting matches with replacement <em>increases</em> variance and <em>reduces</em> bias.</li>
+</ol></li>
+<li><ol start="2" style="list-style-type: upper-alpha">
+<li>applying a weight that accepts many controls but decays with distances <em>increases</em> bias and reduces variance. (A) selection one control match for each treatment increases variance and decreases bias.</li>
+</ol></li>
+</ol>
+</div>
+<div id="exact-matching" class="section level3">
+<h3>4: Exact Matching</h3>
+<p>Exact matching (coarsened exact matching) should be reserved for very large samples or situations where a very small number of matching variables is appropriate because if applied to samples with moderate to few observations, treatment observations will be dropped. This leads to the average treatment effect being inaccurate since there is bias in which treated observations find matches. If using this method, it’s imporntnat to see how many treated observations are lost.</p>
+</div>
+<div id="mahalanobis-distance" class="section level3">
+<h3>5: Mahalanobis distance</h3>
+<p>The causal path we’re interested in is sports –&gt; grades. We are matching on 5 variables using Mahalanobis distance.</p>
+<p>A caliper/bandwidth of 0.3 means that the treated observation and control observations should be within 0.3 standard deviations of each other when matched.</p>
+<ol style="list-style-type: decimal">
+<li><p>To find Mahalanobis distance we found the difference between observed and control observations for high school athleticism, parental income, gender, race, and middle school grades.</p></li>
+<li><p>Then we use the distance formula for two points in matrix notation for all the differences of the 5 matched variables.The answer we get is the distance.</p></li>
+<li><p>We then compare this distance between treated observations and untreated observations and match with treated and untreated observations based on the lowest distance.</p></li>
+</ol>
+<p>3.5) Standard error adjustments.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>After creating matched datasets we can calculate the average treatment effect of sports participation by finding the following difference:effect on sportsplayers - effect on control = .1 grade points.</li>
+</ol>
+</div>
+<div id="downside-of-propensity-score-matching" class="section level3">
+<h3>6: Downside of Propensity Score Matching</h3>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>It requires that the model used to estimate the propensity score is properly specified.</li>
+</ol>
+<p>I eliminated a because it’s possible to combine both methods. I eliminated b because the point of matching, regardless of method, is to close back doors. I eliminated c because if we use inverse probability weighting with propensity score (there are other ways to find propensity scores) then we do use weights. D is true in that distance matching, the other main approach of matching we reviewed, doesn’t require a regression for propensity score. An incorrect regression (not the right variables or powers) for the propensity score will lead to an unhelpful propensity score.</p>
+</div>
+<div id="tax-rebate-for-small-businesses" class="section level3">
+<h3>7: Tax-Rebate for Small Businesses</h3>
+<ol style="list-style-type: lower-alpha">
+<li><p>The common support assumption is that there are are appropriate control observations to match to treated observations. The group of businesses with 1-5 employees fails the common support assumption.</p></li>
+<li><p>Not having treated retail businesses with 11-20 employees is not a concern for the common support assumption if we’re trying to estimate <em>average treatment on the treated</em> since we would only be interested in the six retailers and 11 services that were treated.</p></li>
+<li><p>With only one untreated service business in the 11-20 employee category we would be concerned about having to default to matching with replacement. Our sampling variation will be large i.e. “the sample mean for the controls would just be that one observation’s outcome value, and…standard error…equal to the standard deviation” even if bias is low.</p></li>
+<li><p>If we trim to resolve the common support problem then we create the problem that we are no longer estimating an average treatment effect or an average treatment effect on the treated, but rather a treatment effect “among the individuals that match well.” If we have to drop a lot of data to make matching work we may have back doors we are not able to close and maybe should use another stats method.</p></li>
+</ol>
+</div>
+<div id="matching-on-schooling-reform" class="section level3">
+<h3>8: Matching on Schooling Reform</h3>
+<ol style="list-style-type: lower-alpha">
+<li><p>There are no statistically significant differences in expenditure and income at the 95% level.</p></li>
+<li><p>I would consider the following two things:</p></li>
+</ol>
+<ol style="list-style-type: decimal">
+<li><p>visual diagnostics - if we had the observations for income in the treated and control group a visual plot like a density plot could help me see if there are any regions that are imbalanced.</p></li>
+<li><p>I would want to see the table with raw, un-matched data to see the extent of the balance problem matching was supposed to solve. If the unmatched means for income in the treatment and control group have a similar difference to the matched means then maybe we have not fixed the balance problem.</p></li>
+</ol>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>My next step would be to revisit the regression for the propensity score to see if I closed the backdoors that I intended to.</li>
+</ol>
+</div>
+<div id="att-v.-atut" class="section level3">
+<h3>9: ATT v. ATUT</h3>
+<p>Selecting untreated observations to match treated observations produces an average treatment effect on the treated (ATT) because we are comparing what we got from treatment against a group that was untreated. The reverse, matching treated observations to control observations, gives a treated group that is as similar to the untreated group as possible. Comparing the treatment and control in this scenario means we’re comparing the effect from no treatment to what we think the effect the control group would have if they were treated - an average treatment on the untreated.</p>
 </div>
 </div>
 

@@ -11,33 +11,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Chapter 14 Homework: Matching
 
-### Matching with Penmanship Data
+### 1: Matching with Penmanship Data
 
-1) a. Create a set of weights for handedness groups so that treatment matches control.
+a. Create a set of weights for handedness groups so that treatment matches control.
 
-Like in 4.2 I will give a weight of 1 to everyone who is *treated.* The weights I give to the control group will fill in the spaces below. 
+I will give a weight of 1 to everyone in the control group.  
 
-10*__ = 6 for left 
 
-88*__ = 90 for right
-
-2*__ = 4 for ambidextrous 
-
-weights for control groups:
+b. Weights for left, right, and ambidextrous in treated group.
 
 ```{r}
-leftweightcon <- 6/10
-rightweightcon <- 90/88
-ambweightcon <- 4/2
-
-leftweightcon
-rightweightcon
-ambweightcon
-```
-
-b. 
-```{r}
-leftweighttreat <- 10/6
+leftweighttreat <- 10/6 #control overtreated for each group to find weight
 rightweighttreat <- 88/90
 ambweighttreat <- 2/4
 
@@ -68,24 +52,29 @@ wapt <- (leftweighttreat*7 + rightweighttreat*6 + ambweighttreat*4)/(leftweightt
 wapt
 ```
 
-e. The unweighted treatment effect on the treated is:
+e. 
+If we use our weighted data then our ATUT (because we're matching treated observations to control observations) of practicing cursive is the below on  a 10 point scale:
+
+```{r}
+practiceffect <- wapt - 5 #5 is the average penmanship of people who don't practice 
+practiceffect
+```
+
+I also ran the below code to see what the unweighted effect would be:
 
 ```{r}
 unweightedteffect <- (.06*7) + (.9 * 6) + (.04*4)
 unweightedteffect
 ```
 
-```{r}
-unweightedatt <-unweightedteffect - 5 #5 is average penmanship of people who don't practice 
-unweightedatt
-```
-
-If we use our weighted data then our effect of practicing cursive is the below ono a 10 point scale:
+The unweighted ATUT is:
 
 ```{r}
-practiceffect <- wapt - 5 #5 is the average penmanship of people who don't practice 
-practiceffect
+unweightedate <-unweightedteffect - 5 #5 is average penmanship of people who don't practice 
+unweightedate
 ```
+
+
 
 ### 2: Types of Matching 
 
@@ -97,6 +86,66 @@ c. propensity score matching
 
 d. one-to-one distance matching
 
-### 3: Bias v. Variance 
+### 3: Bias v. Variance
+
+a. (B) selecting multiple control matches for each treatment *increases* bias. (A) selecting one control match for each treatment increases variance and decreases bias.
 
 
+b. (A) using a relatively wide bandwidth *increases* bias. (B) Using a narrower bandwidth increases variance and decreases bias. 
+
+
+c. (B) selecting matches without replacement *increases* bias. (A) selecting matches with replacement *increases* variance and *reduces* bias. 
+
+
+d. (B) applying a weight that accepts many controls but decays with distances *increases* bias and reduces variance. (A) selection one control match for each treatment increases variance and decreases bias. 
+
+### 4: Exact Matching 
+
+Exact matching (coarsened exact matching) should be reserved for very large samples or situations where a very small number of matching variables is appropriate because if applied to samples with moderate to few observations, treatment observations will be dropped. This leads to the average treatment effect being inaccurate since there is bias in which treated observations find matches. If using this method, it's imporntnat to see how many treated observations are lost. 
+
+### 5: Mahalanobis distance
+
+The causal path we're interested in is sports --> grades. We are matching on 5 variables using Mahalanobis distance. 
+
+A caliper/bandwidth of 0.3 means that the treated observation and control observations should be within 0.3 standard deviations of each other when matched. 
+
+1) To find Mahalanobis distance we found the difference between observed and control observations for high school athleticism, parental income, gender, race, and middle school grades. 
+
+2) Then  we use the distance formula for two points in matrix notation for all the differences of the 5 matched variables.The answer we get is the distance. 
+
+3) We then compare this distance between treated observations and untreated observations and match with treated and untreated observations based on the lowest distance. 
+
+3.5) Standard error adjustments. 
+
+4) After creating matched datasets we can calculate the average treatment effect of sports participation by finding the following difference:effect on sportsplayers - effect on control = .1 grade points.
+
+### 6: Downside of Propensity Score Matching 
+
+d. It requires that the model used to estimate the propensity score is properly specified. 
+
+I eliminated a because it's possible to combine both methods. I eliminated b because the point of matching, regardless of method, is to close back doors. I eliminated c because if we use inverse probability weighting with propensity score (there are other ways to find propensity scores) then we do use weights. D is true in that distance matching, the other main approach of matching we reviewed, doesn't require a regression for propensity score. An incorrect regression (not the right variables or powers) for the propensity score will lead to an unhelpful propensity score. 
+
+### 7: Tax-Rebate for Small Businesses 
+
+a. The common support assumption is that there are are appropriate control observations to match to treated observations. The group of businesses with 1-5 employees fails the common support assumption. 
+
+b. Not having treated retail businesses with 11-20 employees is not a concern for the common support assumption if we're trying to estimate *average treatment on the treated* since we would only be interested in the six retailers and 11 services that were treated. 
+
+c. With only one untreated service business in the 11-20 employee category we would be concerned about having to default to matching with replacement. Our sampling variation will be large i.e. "the sample mean for the controls would just be that one observation's outcome value, and...standard error...equal to the standard deviation" even if bias is low. 
+
+d. If we trim to resolve the common support problem then we create the problem that we are no longer estimating an average treatment effect or an average treatment effect on the treated, but rather a treatment effect "among the individuals that match well." If we have to drop a lot of data to make matching work we may have back doors we are not able to close and maybe should use another stats method. 
+
+### 8: Matching on Schooling Reform 
+
+a. There are no statistically significant differences in expenditure and income at the 95% level. 
+
+b. I would consider the following two things:
+  1) visual diagnostics - if we had the observations for income in the treated and control group a visual plot like a density plot could help me see if there are any regions that are imbalanced. 
+  
+  2) I would want to see the table with raw, un-matched data to see the extent of the balance problem matching was supposed to solve. If the unmatched means for income in the treatment and control group have a similar difference to the matched means then maybe we have not fixed the balance problem. 
+  
+c. My next step would be to revisit the regression for the propensity score to see if I closed the backdoors that I intended to. 
+
+### 9: ATT v. ATUT 
+
+Selecting untreated observations to match treated observations produces an average treatment effect on the treated (ATT) because we are comparing what we got from treatment against a group that was untreated. The reverse, matching treated observations to control observations, gives a treated group that is as similar to the untreated group as possible. Comparing the treatment and control in this scenario means we're comparing the effect from no treatment to what we think the effect the control group would have if they were treated - an average treatment on the untreated.  
