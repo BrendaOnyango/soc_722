@@ -149,3 +149,292 @@ c. My next step would be to revisit the regression for the propensity score to s
 ### 9: ATT v. ATUT 
 
 Selecting untreated observations to match treated observations produces an average treatment effect on the treated (ATT) because we are comparing what we got from treatment against a group that was untreated. The reverse, matching treated observations to control observations, gives a treated group that is as similar to the untreated group as possible. Comparing the treatment and control in this scenario means we're comparing the effect from no treatment to what we think the effect the control group would have if they were treated - an average treatment on the untreated.  
+
+## Ch. 14 Coding Homework 
+
+```{r}
+
+#loading packages we used in class 
+library(MatchIt)
+library(WeightIt)
+library(cobalt)
+library(tidyverse)
+library(broom)
+library(haven)
+```
+```{r}
+#viewing dataset 
+
+library(causaldata)
+data("nsw_mixtape")
+view(nsw_mixtape)
+```
+
+
+### 1: Drop variable from the data
+
+```{r}
+#removing variable"data_id" from data set 
+mixtape_noID <-  nsw_mixtape |> select(-data_id)
+```
+
+
+### 2
+
+First, create a variable called `weight` in your data equal to 1 for all observations (weights that are all 1 will have no effect, but this will give us a clue as to how we could incorporate matching weights easily).
+
+```{r}
+mixtape_noID <- mixtape_noID |> mutate(mixtape_noID, weight = 1)
+view(mixtape_noID)
+```
+
+Second, write code that uses a set of given weights to estimate the effect of `treat` on `re78`, using `weight` as weights, and prints out a summary of the regression results.
+
+```{r}
+library(modelsummary)
+```
+
+
+```{r}
+
+m1 <- lm(re78 ~ treat + age + educ + black + hisp + marr + nodegree + re74 + re75 + I(re74^2) + I(re75^2) + I(age^2) + I(educ^2), #effect of treatment (x) on re78(y) with some variables squared like Steve did in class to improve the model
+         data = mixtape_noID,
+         weights = weight) #using weight as weights
+
+msummary(m1,
+         stars = TRUE) #summary of regression results
+
+
+
+```
+
+
+Third, write code that creates and prints out a weighted balance table for all variables across values of `treat`, using `weight` as weighted. Get the means.
+
+```{r}
+weight1 <- weightit(treat ~ age + educ + black + hisp + marr + nodegree + re74 + re75 + I(re74^2) + I(re75^2) + I(age^2) + I(educ^2),
+                    data = mixtape_noID,
+                    weights = mixtape_noID$weight) #using weight as weighted
+```
+
+```{r}
+bal.tab(weight1, disp = c("means", "sds"), #including mean and stdev in balance table
+       stats = c("mean.diffs", "variance.ratios") )
+
+```
+
+Let's also do a plot.
+
+```{r}
+bal.plot(weight1,
+         which = "both",
+         mirror = TRUE)
+
+love.plot(weight1,
+          abs = TRUE,
+          binary = "std",
+          thresholds = .1)
+```
+
+
+### 2b 
+
+Is there anything potentially concerning about the balance table, given that this is a randomized experiment where `treat` was randomly assigned?
+
+Looking at the loveplot it's concerning that the unadjusted 'nodegree' and 'hispanic', and 'age' variables are have a lot of imbalance. These and other variables have arrows going to treatment and to the outcome re78 on a DAG. 
+
+### 3
+
+Using all of the variables in the data except `treat` and `re78` as matching variables, perform 3-nearest-neighbor Mahalanobis distance matching with replacement and no caliper and calculate the post-matching average treatment on the treated effect of `treat` on `re78`.
+
+```{r}
+match2 <- matchit(treat ~ age + educ + black + hisp + marr + nodegree + re74 + re75,
+                  data = mixtape_noID,
+                  method = "nearest",
+                  distance = "mahalanobis",
+                  estimand = "ATT",
+                  replace = TRUE) 
+```
+
+```{r}
+#summary of Mahalanobis distance matching 
+summary(match2,
+        un = FALSE,
+        improvement = FALSE)
+```
+
+
+```{r}
+#doing loveplot for balance check since I'm following process we were shown in class
+love.plot(match2,
+          abs = TRUE,
+          binary = "std",
+          thresholds = .1) #looks good in that the adjusted values are below the threshold 
+```
+
+
+```{r}
+#getting matched data for calculating weighted difference 
+
+matcheddata <- match.data(match2)
+```
+
+```{r}
+#now I can find the post-matching average treatment on the treated effect of treat on re78
+
+pstmatchatt <- lm(re78 ~ treat,
+                 data = matcheddata,
+                 weights = weights)
+tidy(pstmatchatt, conf.int = TRUE)
+```
+
+
+### 4
+
+Create a post-matching balance table showing balance for all the matching variables (you'll probably want to use the balance function designed to follow the matching function you used, from the same package). Write a sentence commenting on whether the balance looks good. You may have to read the documentation for the function you use to figure out what the results mean.
+
+```{r}
+bal.tab(match2, disp = c("means", "sds"), #including mean and stdev in balance table
+       stats = c("mean.diffs", "variance.ratios") )
+
+
+```
+
+
+This table and my earlier loveplot as part of the answer for 3 show me that the balance looks good. The loveplot shows that all the variables were under the .1 threshold. 
+
+#### Not part of Exercise - just seeing the means 
+
+  Trim the propensity score, setting to missing any values from 0 to .05 or from .95 to 1 (this is a different method than done in the chapter). Make sure the values are all between 0 and 1.
+
+First I'll do the pre-analysis in a different way to see means between treated and untreated people in the set on our 
+
+```{r}
+mixtape_noID |> group_by(treat) |> summarise(mean_re78 = mean(re78))
+```
+
+This was good for seeing how the unmatched means differ between the treated and untreated in an uncluttered way. 
+
+### 5
+
+Switching over to propensity score matching, use the same matching variables as in Question 3 to estimate the propensity to be treated (with a logit regression)... 
+
+```{r}
+treatmentpropen <- glm(treat ~ age + educ + black + hisp + marr + nodegree + re74 + re75,
+            family =binomial(), data = mixtape_noID)
+summary(treatmentpropen) #step 1 was creating a model with covariates for the propensity score 
+```
+
+and then add the treatment propensity to the data set as a new variable called `propensity`...
+
+```{r}
+propen_df <- data.frame(propensity = predict(treatmentpropen, type = "response"),
+                        treat = treatmentpropen$model$treat)
+
+head(propen_df) #viewing the first 5 and last 5 of the dataframe with propensity scores
+
+tail(propen_df)
+```
+
+```{r}
+#adding propensity column to mixtape_noID
+
+mixtape_noID <- mixtape_noID |> inner_join(propen_df, by = "treat")
+
+
+view(mixtape_noID)
+
+```
+
+
+Trim the propensity score, setting to missing any values from 0 to .05 or from .95 to 1 (this is a different method than done in the chapter).
+
+```{r}
+library(naniar)
+```
+
+
+```{r}
+
+replace_with_na_all(mixtape_noID$propensity, ~.x <0.05) 
+replace_with_na_all(mixtape_noID$propensity, ~.x >0.95)
+
+#were there values that met these conditions they would have been trimmed. 
+```
+
+
+### 6 
+
+Create a new variable in the data called `ipw` with the inverse probability weight...
+
+```{r}
+mixtape_noID <- mixtape_noID |> mutate(ipw = case_when (
+  treat == 1 ~ 1/propensity,
+  treat == 0 ~ 1/(1-propensity)
+))
+
+tail(mixtape_noID)
+head(mixtape_noID)
+```
+
+
+
+and then estimate the treatment effect using those weights in a linear regression (keeping in mind the standard errors won't be quite right).
+
+```{r}
+
+finalset <- mixtape_noID 
+
+m2 <- lm(re78 ~ treat,
+         data = finalset,
+         weights = finalset$ipw)
+tidy(m2, conf.int = TRUE)
+
+msummary(m2,
+         stars = TRUE) 
+```
+
+
+### 7
+
+ Make a common support graph, overlaying the density of the `propensity` variable for treated observations on top of the density of the `propensity` variable for untreated observations.
+ 
+```{r}
+weight2 <- weightit(treat ~ age + educ + black + hisp + marr + nodegree + re74 + re75,
+                    data = finalset,
+                    method = "ps",
+                    estimand = "ATT")
+
+summary(weight2,
+        un = FALSE,
+        improvement = FALSE)
+```
+ 
+```{r}
+bal.plot(weight2,
+         which = "both", #this bal.plot shows areas of common support
+         mirror = TRUE)
+
+
+love.plot(weight2,
+          abs = TRUE,
+          binary = "std",
+          thresholds = .1)
+```
+
+
+The above plot shows we've met our assumption of common support and the love plot shows we definetly met our threshold of 0.1 even for variables with large standardized mean differences when unadjusted like nodegree. 
+
+### 8 
+
+Use the prepackaged command for inverse probability weighting used in the chapter for your language to estimate the treatment effect. 
+
+```{r}
+#computing weighted difference ATT
+m3 <- lm(re78 ~ treat, data = finalset, weights = ipw)
+
+msummary(m3, 
+         stars = TRUE)
+```
+
+
