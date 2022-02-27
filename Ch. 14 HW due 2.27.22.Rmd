@@ -101,7 +101,7 @@ d. (B) applying a weight that accepts many controls but decays with distances *i
 
 ### 4: Exact Matching 
 
-Exact matching (coarsened exact matching) should be reserved for very large samples or situations where a very small number of matching variables is appropriate because if applied to samples with moderate to few observations, treatment observations will be dropped. This leads to the average treatment effect being inaccurate since there is bias in which treated observations find matches. If using this method, it's imporntnat to see how many treated observations are lost. 
+Exact matching (coarsened exact matching) should be reserved for very large samples or situations where a very small number of matching variables is appropriate because if applied to samples with moderate to few observations, treatment observations will be dropped. This leads to the average treatment effect being inaccurate since there is bias in which treated observations find matches. If using this method, it's important to see how many treated observations are lost. 
 
 ### 5: Mahalanobis distance
 
@@ -113,7 +113,7 @@ A caliper/bandwidth of 0.3 means that the treated observation and control observ
 
 2) Then  we use the distance formula for two points in matrix notation for all the differences of the 5 matched variables.The answer we get is the distance. 
 
-3) We then compare this distance between treated observations and untreated observations and match with treated and untreated observations based on the lowest distance. 
+3) We then compare this distance between treated observations and untreated observations and match with treated and untreated observations based on the lowest distance and check to see if these are within the 0.3 bandwidth. 
 
 3.5) Standard error adjustments. 
 
