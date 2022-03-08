@@ -1,0 +1,126 @@
+---
+title: "Ch. 16 HW due 3.13.22"
+author: "Brenda Onyango"
+date: "3/7/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+```{r, include=FALSE}
+library(MatchIt)
+library(WeightIt)
+library(cobalt)
+library(tidyverse)
+library(broom)
+library(haven)
+library(modelsummary)
+library(margins)
+
+#loading packages I might need 
+```
+
+## End of Chapter Homework
+
+### 1: Vacations 
+
+```{r}
+vacationdata <- data.frame(individual=c("Zac", "Zac", "Zac", "Skylar", "Skylar", "Skylar"),
+                           year=c("2012", "2013", "2014"),
+                           vacations=c(3, 7, 5, 2, 6, 10),
+                           meanvacation=c(5, 5, 5, 6, 6, 6),
+                           withinvacation=c(-2, 2, 0, -4, 0, 4))
+
+#display table 
+vacationdata
+
+
+```
+
+
+a) The numbers that represent the varation between Zac and Skylar in their vacation taking are 5 and 6, respectively. The average number of vacations that Zac took between 2012 and 2014 was 5 and for Skylar was 6. 
+
+b) The within variation of Zac is shown in the 5th column. In 2012, Zac took two fewer vacations than average, in 2013 Zack took 2 more than average, and in 2014 Zac took the same number of vacations as average. The variation within Skylar's vacation taking is -4, 0, and 4 relative to the average of 6 per year. 
+
+c) 
+```{r}
+zac <- c(3, 7, 5)
+skylar <- c(2, 6, 10)
+
+var(zac)
+var(skylar)
+```
+
+Fixed effects focuses on within variation so "the treatment effect estimated will focus a lot more heavily on people with a lot of within variation." Given this, our fixed effects estimate will likely give us an answer closer to 2. 
+
+### 2: DAG
+
+```{r, include=FALSE}
+library(ggdag)
+library(ggplot2)
+```
+
+```{r}
+citydag <- dagitty::dagitty("dag {
+  
+  trustlevel <- eventsperyear
+  trustlevel <- builtinfrastructure -> eventsperyear
+  trustlevel <- transportation -> eventsperyear
+  trustlevel <- history -> eventsperyear
+  trustlevel <- budget -> eventsperyear
+  trustlevel <- agestructure -> eventsperyear
+  trustlevel <- pandemic -> eventsperyear
+  eventsperyear <- weather 
+  weather [exposure]
+  trustlevel [outcome]  
+}") #eventsperyear is the true exposure
+
+tidy_dag <- tidy_dagitty(citydag)
+
+ggdag_adjustment_set(citydag, node_size = 10, text_size = 2.0, text_col = 'black')
+```
+
+The above dag shows that there are back doors between eventsperyear and citytrustlevels through built infrastructure (e.g., event space, parks, stadiums, etc.), transportation (e.g., public transportation and the quality of that transportation), budget, history, agestructure, and pandemic. Built infrastructure, transportation, budget, and history affect the ability of a city to host events and the willingness and ability of residents to attend events. Assuming these stay constant over time and within a city then the back doors of these variables can be closed with fixed effects. Agestructure (proportion of total population in age groups) is known to vary over time based on a lot of variables and age groups may vary in trust between each other. Pandemics are also not constant over time. Based on these assumptions builtinfrastructure, transportation, budget, and history can be combined in a DAG for fixed effects for city. 
+
+The new DAG would look like the below with agestructure and pandemic still open:   
+
+```{r}
+citydag2 <- dagitty::dagitty("dag {
+  
+  trustlevel <- eventsperyear
+  trustlevel <- city -> eventsperyear
+    trustlevel <- pandemic -> eventsperyear
+      trustlevel <- agestructure -> eventsperyear
+  eventsperyear <- weather 
+  city [exposure]
+  trustlevel [outcome]  
+}")
+
+tidy_dag <- tidy_dagitty(citydag2)
+
+ggdag_adjustment_set(citydag2, node_size = 20, text_size = 2.5, text_col = 'black')
+```
+
+### 3: Forms of variation
+
+a) within and the variation is within one person's height as they age 
+
+b) combination; the within variation is based on individuals varying the number of children they have in a single year (single, twins, triplets, etc.) over their childbearing years and the variation between people is number of children in a year 
+
+c) between; the variation is between cities names Paris 
+
+d) between; variation is between genres 
+
+e) within; within the jazz genre, Davis' album did well 
+
+f) between; between two albums and two genres Thriller sold more than Kind of Blue. 
+
+
+
+###: 4 
+
+
+e) within
