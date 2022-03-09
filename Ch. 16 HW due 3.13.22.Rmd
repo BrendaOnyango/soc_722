@@ -23,7 +23,7 @@ library(margins)
 #loading packages I might need 
 ```
 
-## End of Chapter Homework
+## Non-coding Homework
 
 ### 1: Vacations 
 
@@ -54,7 +54,7 @@ var(zac)
 var(skylar)
 ```
 
-Fixed effects focuses on within variation so "the treatment effect estimated will focus a lot more heavily on people with a lot of within variation." Given this, our fixed effects estimate will likely give us an answer closer to 2. 
+Fixed effects focus on within variation so "the treatment effect estimated will focus a lot more heavily on people with a lot of within variation." Given this, our fixed effects estimate will likely give us an answer closer to 2. 
 
 ### 2: DAG
 
@@ -83,7 +83,7 @@ tidy_dag <- tidy_dagitty(citydag)
 ggdag_adjustment_set(citydag, node_size = 10, text_size = 2.0, text_col = 'black')
 ```
 
-The above dag shows that there are back doors between eventsperyear and citytrustlevels through built infrastructure (e.g., event space, parks, stadiums, etc.), transportation (e.g., public transportation and the quality of that transportation), budget, history, agestructure, and pandemic. Built infrastructure, transportation, budget, and history affect the ability of a city to host events and the willingness and ability of residents to attend events. Assuming these stay constant over time and within a city then the back doors of these variables can be closed with fixed effects. Agestructure (proportion of total population in age groups) is known to vary over time based on a lot of variables and age groups may vary in trust between each other. Pandemics are also not constant over time. Based on these assumptions builtinfrastructure, transportation, budget, and history can be combined in a DAG for fixed effects for city. 
+The above dag shows that there are back doors between eventsperyear and citytrustlevels through built infrastructure (e.g., event space, parks, stadiums, etc.), transportation (e.g., public transportation and the quality of that transportation), budget, history, agestructure, and pandemic. Built infrastructure, transportation, budget, and history affect the ability of a city to host events and the willingness and ability of residents to attend events. Assuming these stay constant within a city, then the back doors of these variables can be closed with fixed effects. Agestructure (proportion of total population in age groups) is known to vary over time based on a lot of variables and age groups may vary in trust between each other. Pandemics are also not constant over time. Based on these assumptions builtinfrastructure, transportation, budget, and history can be combined in a DAG for fixed effects for city. 
 
 The new DAG would look like the below with agestructure and pandemic still open:   
 
@@ -116,11 +116,223 @@ d) between; variation is between genres
 
 e) within; within the jazz genre, Davis' album did well 
 
-f) between; between two albums and two genres Thriller sold more than Kind of Blue. 
+f) between; between two albums and two genres Thriller sold more than Kind of Blue.
+
+### 4: Controlling for individual  
+
+e) The process of taking each observation relative to its individual-level mean has the effect of "controlling for individual" because it removes variation between individuals. This leaves us with variation within individual. In the forms of variation above, the first example is one of controlling for individual, by removing variation between individuals, to see how height changes over time. E is another example of removing variation between genres, to see how well an album performed.
+
+## How is it performed?
+
+### 1
+
+For a regression of trust levels with city fixed effects and a coefficient on cultural events of 3.6 we can interpret this 3.6 by saying: for a given city, when cultural events increase by one unit than is average for the city, then we can except trust levels on a 0-100 scale to increase by 3.6.  
+
+### 2 
+
+This is a two-way fixed effect that includes fixed effects for both individual (city) and for time period. Now we interpret the 3.6 by saying: for a given city and a given year, a city which has a one unit increase in cultural events would increase trust levels by 3.6 on a 0-100 scale. In both this question and the one before we would need to define what a one unit increase cultural events means (i.e. is there a minimum threshold of attendees and does the event need to be in-person to be considered applicable for this question).
+
+### 3
+
+Including fixed effects for individuals and for years allow us to look at variation within individual and within a year. A researcher might want to do this if they're interested in within year variation when X and Y may have a lot of variation by year. The example the book gave is controlling for the 2009 recession with two-way fixed effects when researching earnings. Another example might be researchers interested in survival rates for new cancer treatments. These researchers would want to do at least two-way fixed effects for location (locations vary by environmental exposures to carcinogens) and year, since cancer patients in pandemic years [(2020-present) for the U.S. and 2019-present] in other countries have different access to regular treatment than non-pandemic years. For such a research question, adding a term for time is not enough to capture the within year variation. One term and/or coefficient for time implies a constant rate change that isn't the case.   
+
+### 4 
+
+A; I chose this because it seems like a rephrasing of the fourth attribute in the section about what random effects do; this assumption would be harder to meet for observational studies when individuals' variables may affect exposure to the exposure. Random effects might be better for a study using a truly randomly assigned experimental variable. 
+
+## Coding Homework
+
+## 1 
+
+```{r}
+library(readr)
+library(tibble)
+library(fixest)
+
+```
+
+```{r}
+mp <- read_csv("dataset-76230.csv") #tried installing mathpnl package but got "package 'mathpnl' is not available for this version of R" so I downloaded the csv file and added to R files to laod the set 
+
+```
+
+```{r}
+mp2 <- mp |> select(distid, year, math4, expp, lunch) #limiting data to the 5 variables we'll use and named mp2 dataset
+mp2
+```
+
+## 2 
+
+```{r}
+length(unique(mp2$distid)) #finding unique number of districts 
+length(unique(mp2$year)) #finding unique years 
+
+```
+
+### The above code tells me that there are 550 unique districts and 7 unique years. 
+
+## 3 
+
+Limit the data to just individual ID and year, drop any duplicates, and tabulate how many times each year appears.
+
+```{r}
+mp <- mp2 |> select(distid, year) #limiting data to just individual ID and year 
+```
+
+```{r, include=FALSE}
+duplicated(mp) #showed that there are no duplicates 
+```
+
+```{r}
+unique(mp) #this also returned that there are 3,850 unique rows; it seems each school district (n=500) has data for the years between 1992-1998
+```
+
+```{r}
+table(mp$year) #tabulating how many observations are in each year. 
+```
+
+### Based on the above, this is a balanced panel. 
+
+## 4
+
+Run an OLS regression, with no fixed effects, of math4 on expp and lunch. Store the results as m1.
+
+```{r}
+
+mexpp <- lm(math4 ~ expp, data = mp2) #seeing the effect of expenditure per pupil alone on percent satisfactory in 4th grade math
+
+mlunch <-  lm(math4 ~ lunch, data = mp2) #seeing the effect of percent eligible for free lunch alone 
+
+m1 <- lm(math4 ~ expp + lunch, data = mp2) #seeing the effect of expp and lunch on math4 without fixed effects 
+
+msummary(list(m1, mexpp, mlunch),
+stars = TRUE)
+```
+
+
+### m1 shows that adjusting for expenditure per pupil (expp), districts with one more unit increase of percent of students eligible for free lunch (lunch) have a 0.357 decrease in percent of satisfactory in 4th grade math (math4). 
+
+## 5 
+
+```{r}
+plot(mp2$math4 ~ mp2$year) #checking for skew among variables to decide if some should be logged 
+plot(mp2$math4 ~ mp2$expp)
+plot(mp2$math4 ~ mp2$lunch) #noticed a couple of outliers for expp but otherwise looks ok 
+```
+
+Subtract out the within-distid mean of math4, expp, and lunch, creating new variables math4_demean, expp_demean, and lunch_demean,
+
+```{r}
+mp2 <- mp2 |> 
+  group_by(distid) |> #performing calculation by distid 
+  mutate(math4_demean = math4 - mean(math4), #getting within variation by substracting mean 
+expp_demean = expp - mean(expp),
+lunch_demean = lunch - mean(lunch)) |> ungroup()
 
 
 
-###: 4 
+```
+
+re-estimate the model using those variables, storing the result as m2
+
+```{r}
+m2 <- lm(math4_demean ~ lunch_demean + expp_demean, data = mp2)
+msummary(m2, stars = TRUE)
+```
+
+### Notice in m2 that the intercept is 0. 
+
+## 6 
+
+Run the model from step 4 but with dummies for different values of distid, saving the result as m3. Then, do a joint F test on the dummies, and report if you can reject that the dummies are jointly zero at the 99% level.Use only the first 500 observations of your data.
+
+```{r}
+mp3 <- mp2 |> top_n(500, distid) #selecting top 500 rows as ordered by distid and putting that in new set called mp3
+mp3
+```
+
+```{r}
+m3 <- lm(math4 ~ lunch + expp +  factor(distid), data = mp3) #using factor on distid to ensure that distid turns into a binary variable; running regression from step 4 that didn't have means  
+msummary(m3, stars = TRUE)
+```
 
 
-e) within
+Doing joint F test using LinearHypothesis command in car package as instructed by chapter 13. 
+
+```{r}
+library(car)
+```
+
+```{r}
+
+linearHypothesis(m3, matchCoefs(m3, "distid"), stars=TRUE)
+```
+
+Reference: https://tyleransom.github.io/teaching/MetricsLabs/lab8.html
+
+
+### Based on this F test, we fail to reject the null that all district dummies equal 0 at the 99% level.
+
+## 7
+
+Use feols() to estimate the model from step 4 but with fixed effects for distid. Save the result as m4. Include standard errors clustered at the distid level.
+
+```{r}
+m4 <- feols(math4 ~ lunch + expp | distid, data = mp2)
+m4.2 <- feols(math4 ~ lunch + expp | factor(distid), data = mp2) #ran a v2 of m4 to see if factor() makes a difference when using feols; it doesn't. The standard errors are clustered by distid and are clustered by the first fixed effect by default. 
+msummary(list(m4, m4.2), stars = TRUE)
+```
+
+### Interpretation: Given its district, and adjusting for expp, in a year when lunch is one unit higher than average we would expect math4 to be 0.314 units higher than average for that district. 
+
+
+## 8 
+
+Now add fixed effects for year to your model from step 7 to create a two-way fixed effects model. Keep the standard errors clustered at the distid level. Save the results as m5.
+
+```{r}
+m5 <- feols(math4 ~ lunch + expp | distid + year, data = mp2)
+msummary((m5), stars = TRUE)
+```
+
+
+## 9 
+
+Using modelsummary() from **modelsummary**  make a regression table including m1 through m5 in the same table so you can compare them all. Read the documentation of your command to figure out how to include the expp, lunch, expp_demean, and lunch_demean predictors in the table without clogging the thing up with a bunch of dummy coefficients from m3.
+
+```{r}
+models <- list(m1, m2, m3, m4, m5)
+
+modelsummary(models, coef_omit = "factor") #hiding dummies for distid 
+
+```
+
+
+Write down two interesting things you notice from the table: 
+
+### Two interesting things on this table are that 1) the coefficient for lunch was negative in the first model without fixed effects and positive in the subsequent models and 2) the coefficient for expp increased between model 1 to model 2, but then decreased. It would be helpful to discuss in class how to interpret such changes in the size of coefficients across models. 
+
+## 10
+
+You already have expp_demean and lunch_demean from earlier. Now, modify the code from that slightly to add on expp_mean and lunch_mean (the mean within distid instead of the value minus that mean). Then, regress math4 on expp_demean, lunch_demean, expp_mean, and lunch_mean, with random effects for distid using lmer() from lme4. Show a summary of the regression results.
+
+```{r}
+mp2 <- mp2 |> 
+  group_by(distid) |> #performing calculation by distid 
+  mutate(expp_mean = mean(expp),
+lunch_mean = mean(lunch)) |> ungroup()
+```
+
+
+```{r}
+library(lme4)
+```
+
+```{r}
+m6 <- lmer(math4 ~ expp_demean + lunch_demean + expp_mean + lunch_mean | distid, data = mp2)
+msummary(m6, stars = TRUE)
+```
+
+After doing this correlated random effects process, I don't know how to interpret the above table. Should we think of some of this as interactions? 
+
+
