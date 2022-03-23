@@ -1,0 +1,219 @@
+---
+title: "ch. 18 DID HW due 3.27.22"
+author: "Brenda Onyango"
+date: "3/15/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Ch. 19 Non-coding HW
+
+### 1
+
+What assumption is made by no-control-group event studies that we don't have to make with difference-in-differences?
+
+Event studies assume that nothing else changes at the same time as an event or that what happened before the event would have continued but for the treatment. DID does not have to assume that the pattern before the treatment/event stays the same. The trends before treatment just need to meet an assumption of parallel trends between the treated and untreated groups; the trends don't have to be a constant rate. 
+
+### 2
+
+B. Comparing within variation between treated and control groups closes the back door through time. Option B is closest to capturing events (such as the passage of time) that affect both treated and untreated groups.
+
+### 3 
+
+a) The parallel trends assumption is that *if no treatment had occurred*, the difference between the treated group and the untreated group would be the same *in the pre-treatment and post-treatment periods*. 
+
+In this case where there is the same outcome *pre-treatment* and no confirmation of the outcome in *post-treatment* we can deduce that parallel trends were violated because of the post-treatment effects. 
+
+
+```{r, include=FALSE}
+
+trends <- matrix(c(50, 30, 20, 15, 30, 15), ncol=2, byrow=TRUE)
+colnames(trends) <- c("pre-treatment", "post-treatment")
+rownames(trends) <- c("treatment group", "control group", "column difference")
+
+
+```
+
+```{r}
+trends
+```
+
+In the above example, the parallel trends assumption does not hold because the difference in the post-treatment doesn't match the difference pre-treatment in this situation where we are imagining or modeling that no treatment had occurred.
+
+b) Using DID means doing effectoftreatment + othertreatedgroupchanges - otheruntreatedgroupchanges 
+
+When the parallel trends assumption fails then the last two terms are not equal. If the difference between the last two terms is positive then we would have an overestimate of our treatment effect on the treated. 
+
+### 4
+
+a) The test of prior trends examines if treated and untreated groups are trending similarly before treatment. Parallel trend does not hold since the prior trend looks like convergence would happen. Before treatment, the treated group stayed between 4 and 6 on the y-axis and the untreated group steadily increased from below 2 to above 4 on the y-axis. The difference/distance between the two lines did not stay constant and the untreated group looks like it would have reached values in the treated group without treatment. 
+
+b) If we estimate DID anyway for this example, remembering that DID means effectoftreatment + othertreatedgroupchanges - otheruntreatedgroupchanges, then we would have an underestimate. My thinking is that the untreated, dashed-line would have continued increasing steadily but for the treatment and converged or surpassed the treated line.The treated line would have stayed between 4 and 6. After treatment, the magnitude of the treatment effect is an underestimate given how the untreated group was trending. 
+
+### 5
+
+Based on the description, it seems like parallel trends holds based on a test of prior trends so comparing the U.S. and Canada would be a good control group. I would still have concerns about differences in populations and health care and public health structures, but these may be backdoors that explain case rates captured in other ways or are themselves part of the treatment.
+
+### 6 
+
+```{r, include=FALSE}
+meanoutcomes <- matrix(c(5, 9, 6, 7.5), ncol=2, byrow=TRUE)
+colnames(meanoutcomes) <- c("before", "after")
+rownames(meanoutcomes) <- c("treated", "untreated")
+```
+
+
+```{r}
+meanoutcomes
+```
+
+Calculation of DID in table that follows (treatedafter - treatedbefore) - (untreatedafter - untreatedbefore):
+
+```{r}
+did1 <- (9-5) - (7.5-6) 
+did1
+
+```
+
+The treatment increased the mean by 2.5. 
+
+## How is it performed?
+
+### 1 
+
+a) iv is what we need to regress state-and-year level voter turnout. 
+
+i. is wrong because we don't want to know if the year is 2016 or not; we want to know if we're pre or post 2-15. ii is getting closer to what we need for regression, but is missing an indicator for treated where the coefficient on treated (having voter protection laws) is our DID effect. 
+
+b) The coefficient on the interaction term, "is 2016 x is treated state", is the DID estimate. 
+
+### 2 
+
+Below is the sentence with blanks filled in: 
+
+Assuming that a school goes from having no laptops to receiving laptops, the effect of laptops on test scores was an increase of 5.034, and this effect was statistically significant at the 95% level (it is statistically signicant at the 99% level). 
+
+### 3
+
+This test is performed to confirm parallel trends in treated and untreated groups. This enables researchers to decide if the chosen comparison group is an appropriate comparison. If B3 is found to be large or significant in several different time periods pre-treatment, then we know the parallel trends assumption does not hold. This means the non-treatment changes in the treated group won't cancel out the non-treatment changes in the untreated group. In this scenario a different comparison group could be chosen or we could check to see how depedent variables are transformed. A B3 near 0  in a placebo test means the parallel trend assumption holds. 
+
+
+### 4 
+
+a) At t = 1, Y = 2 with a confidence interval spanning 1 to 3. This is concerning because Y for t = 1 is above 0 as is its confidence interval. Before-treatment coefficients should be close to 0 though the chapter says one dynamic effect "behaving badly isn't a reason to throw out the whole model." Another issue is that post-treatment, Y at t = 7 has a confidence interval that includes 0 and the values of Y at t = 2 and t = 3. 
+
+b) The chapter says that "...each group-time treatment effect is based on comparing the post-treatment outcomes of the groups treated in that period against the never-treated groups that are most similar to those treated groups." Based on this graph I'm not sure which group-time before 4 is most similar to the group-times of t = 5, 6, and 7. I can say that the effect of treatment is positive; Y moved from around 0 to up to about 3. The average treatment on the treated is (3 + 1 + .5)/3 = 1.5
+
+### 5 
+
+The chapter explains that if the effect of the treatment is dynamic or if the treatment effect varies across groups then the assumption of parallel trends won't hold when trying to DID on rollout designs. When we use an already treated group as control we are concerned that as it trends upwards/downwards over time in a way that a just-now treated group wouldn't if the effect gets stronger over time. 
+
+
+## Coding Homework 
+
+
+### 1
+
+We will be estimating whether COVID-19 lockdowns increased interest in sourdough bread using Google Trends in the USA. Search term "sourdough" will be compared against the controls: "cereal", "soup", and "sandwich." 
+
+```{r}
+library(readr) #loading package needed for loading data 
+library(ggplot2)
+library(dplyr)
+```
+
+
+```{r}
+urlfile="https://raw.githubusercontent.com/NickCH-K/TheEffectAssignments/main/sourdough_trends.csv"
+sourdough <- read_csv(url(urlfile)) 
+head(sourdough) #taking a look at some of the data 
+```
+
+
+```{r}
+sr <- sourdough |> select(date, hits, keyword) #limiting data to the variables we'll use and naming sr per instructions
+sr
+```
+Below I am converting the date column from what may read as characters to class Date. 
+
+```{r}
+library("tidyverse") #loading packages that I need 
+library("lubridate")
+
+```
+
+```{r}
+#checking class of the column with class
+class(sr$date)
+```
+
+```{r}
+sr <- sr |> 
+  mutate(date = lubridate::ymd(date))
+```
+
+```{r}
+class(sr$date) #now the class is appearing as date 
+```
+
+
+```{r}
+head(sr)
+tail(sr)
+```
+
+
+### 2
+
+Make a line graph with date on the x-axis and hits on the y-axis, with a separate line for each keyword. Also add a vertical line for the "start of the pandemic" which we'll decide for our purposes is March 15, 2020.
+
+```{r}
+
+sour <- ggplot(data = sr, 
+       mapping= aes(x = date, y = hits, color = keyword))  + 
+  geom_line(size = 1.5) + geom_vline(xintercept = as.Date("2020-03-15")) #adding vertical line for start of pandemic 
+  
+sour 
+```
+
+
+### 3
+
+a) Looking at the above graph, it does seem like prior to the lockdown searches for sourdough were steady, not trending up or down, and then had a boost when "treatment" happened.
+
+b) The boost was not sustained into summer months As it decreased it still stayed above its original hit values pre-treatment, but this may not be a statistically significant sustained increase (comparing Jan. to Jul.). 
+
+c) Cereal seems like the best comparison group as the assumption of parallel trends using prior trends holds for cereal. Soup is the worst control group as the parallel trends assumption based on prior trends doesn't hold. Sandwich is in the middle between soup and cereal. 
+
+### 4 
+
+Create a "Treated" indicator that's equal to 1 for sourdough and 0 otherwise (or True/False, either way). Do a test of whether the prior trends (keeping March 15 as the "treatment date") differ between the treated and control groups, using a linear trend and doing a statistical significance test at the 95% level. Then, if you were concerned about any of the control groups in question 3c, drop any you were concerned about (and keep them dropped for the rest of the assignment) and rerun the test.
+
+
+```{r}
+library("modelsummary")
+library("fixest")
+```
+
+
+
+```{r}
+sr2 <- sr |> filter(date <= ("2020-03-15")) #using only pre-treatment data 
+```
+
+```{r}
+#creating treatment variable 
+
+sr2 <- sr2 |> mutate(Treated = 'sourdough')
+```
+
+
+
+
+
+### 5 
+
+Create a `month` variable by shifting the `date` variable back 15 days (so that the treatment day is the first day of the month) and then taking the month of the resulting date. Also create an `After` variable equal to 1/0 (or True/False) if the date is March 15 or afterwards. Use `-days()` to subtract days from the date, and `month()` to get the month from the date. Then use `feols()` from **fixest** to estimate the model.
