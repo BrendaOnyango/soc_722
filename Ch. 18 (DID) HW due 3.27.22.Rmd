@@ -86,7 +86,7 @@ The treatment increased the mean by 2.5.
 
 a) iv is what we need to regress state-and-year level voter turnout. 
 
-i. is wrong because we don't want to know if the year is 2016 or not; we want to know if we're pre or post 2-15. ii is getting closer to what we need for regression, but is missing an indicator for treated where the coefficient on treated (having voter protection laws) is our DID effect. 
+i. is wrong because we don't want to know if the year is 2016 or not; we want to know if we're pre or post 2015. ii is getting closer to what we need for regression, but is missing an indicator for treated where the coefficient on treated (having voter protection laws) is our DID effect. 
 
 b) The coefficient on the interaction term, "is 2016 x is treated state", is the DID estimate. 
 
@@ -151,18 +151,19 @@ class(sr$date)
 ```
 
 ```{r}
-sr <- sr |> 
+sr2 <- sr |> 
   mutate(date = lubridate::ymd(date))
 ```
 
 ```{r}
-class(sr$date) #now the class is appearing as date 
+class(sr2$date) #now the class is appearing as date 
 ```
 
 
 ```{r}
-head(sr)
-tail(sr)
+
+head(sr2) #checking to see format of date
+tail(sr2)
 ```
 
 
@@ -172,7 +173,7 @@ Make a line graph with date on the x-axis and hits on the y-axis, with a separat
 
 ```{r}
 
-sour <- ggplot(data = sr, 
+sour <- ggplot(data = sr2, 
        mapping= aes(x = date, y = hits, color = keyword))  + 
   geom_line(size = 1.5) + geom_vline(xintercept = as.Date("2020-03-15")) #adding vertical line for start of pandemic 
   
@@ -199,21 +200,72 @@ library("fixest")
 ```
 
 
+```{r}
+sr3 <- sr2 |> group_by(Treated = keyword == 'sourdough') |> filter(date == 2020-03-15)
+
+#not sure how this data set ended up with 0 data. Hopefully we can go over some data cleaning issues like this on Tuesday. 
+                     
+```
+
+If the prior code had worked correctly I would have ~300 or observations, not 0 and then would do this 
+  priortrendstest <- feols(hits ~ Treated|date, data = sr3)
+msummary(priortrendstest, stars = TRUE). Can we discuss why this didn't work in class? 
+
+Trying another way: 
 
 ```{r}
-sr2 <- sr |> filter(date <= ("2020-03-15")) #using only pre-treatment data 
+sr4 <- sr2 |> arrange(ymd(sr2$date)) #arranging dataset by date to identify data in pretreatment period 
 ```
 
 ```{r}
-#creating treatment variable 
+sr5 <- sr4 |> filter(row_number() < 297) #filtering everything before 3/15/2020 (treatment date)
+```
 
-sr2 <- sr2 |> mutate(Treated = 'sourdough')
+```{r}
+sr5 <- sr5 |> mutate(Treated = keyword == 'sourdough') #creating treatment variable 
 ```
 
 
+```{r}
+priortrendstest <- feols(hits ~ Treated, data = sr5)
+msummary(priortrendstest, stars = TRUE) #doing priortrends test 
+```
+This result is concerning. I'm interpreting the coefficient on TreatedTrue as meaning Treated (or sourdough) is associated with fewer hits in the pre-treatment group than non-treated. It is significant at a 99% level. If the asssumption of prior trends holds then the coefficient should be closer to 0. Based on the model and results here I must reject equal prior trends in this model. 
 
 
 
 ### 5 
 
 Create a `month` variable by shifting the `date` variable back 15 days (so that the treatment day is the first day of the month) and then taking the month of the resulting date. Also create an `After` variable equal to 1/0 (or True/False) if the date is March 15 or afterwards. Use `-days()` to subtract days from the date, and `month()` to get the month from the date. Then use `feols()` from **fixest** to estimate the model.
+
+```{r}
+sr7 <-  sr2 |> mutate('month' = month(date))
+head(sr7) #checking to see if I have month variable 
+tail(sr7)
+```
+Month is following standard convention of 1 = January and 12 = December. 
+
+### 6 
+
+Estimate a difference-in-difference model allowing the effect to differ by month (using `month = 0` as a reference period), with standard errors clustered at the keyword level, and show the results.
+
+```{r}
+#treatment variable in dataset with month variable 
+sr7 <- sr7 |> mutate(Treat = keyword == 'sourdough')
+```
+
+
+```{r}
+diffindiff <- feols(hits ~i(month, Treat, ref = 1) |  keyword + month, data = sr7)
+#interacting month with being in the treated group and using January as reference month (1) since trying to use 0 resulted in an error
+
+```
+
+### 7 
+
+```{r}
+coefplot(diffindiff, stars = TRUE) #usiing coef for graph of effects 
+```
+
+
+The 95% confidence interval for hits includes 0 in June - August  and in Fabruary that's displayed on this plot. My interpretation is that hits for sourdough do increase and peak in May 2020 relative to where they were in January 2020, and then decrease, but in a way that is not statistically significant i.e. while sourdough searches did increase for some months in the early pandemic the CI of the increase in several months includes 0.  
