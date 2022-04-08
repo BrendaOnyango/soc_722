@@ -1,0 +1,226 @@
+---
+title: "Final Project Soc 723 due April 2022"
+author: "Brenda Onyango"
+date: "4/1/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background 
+
+### The many benefits of breastmilk 
+
+A 2017 review summarized the extensive health benefits of breast milk (Peres et al., 2017). There is growing evidence that breastfeeding promotes oral health though the authors of the review acknowledge methodological challenges in connecting breastfeeding behavior with oral health outcomes beyond infants reaching 12-24 months. 
+
+
+
+### Current Question
+
+The overall research question of this study is how does breastfeeding affect child dental health. Breastfeeding will be operationalized using definitions from the U.S. Centers for Disease Control and Prevention which collects several questions about breastfeeding via the National Immunization Survey landline sampling frame (U.S. CDC, n.d.).  The indicators used in this study are:
+
+Infants ever breastfed
+Breastfed supplmented with formula before 6 months 
+Infants exclusively breastfed through 6 months
+Infants breastfed at 12 months 
+
+These indicators are the independent variables that capture the extent and duration breastfeeding an infant may experience that there is data for from none to a mixture of breast milk and formula, to being breastfeed through 12 months. 
+
+The dependent variable of child dental health is operationalized with data from the National Oral Health Surveillance System (NOHSS), a collaboration between the U.S. CDC's Division of Oral Health and the Association of State and Territorial Dental Directors. The indicators are:
+
+
+
+These indicators capture child dental health. 
+```{r, include=FALSE}
+library(ggdag)
+```
+
+```{r}
+dentaldag <- dagitty::dagitty("dag {
+  
+  childoralhealth <- breastfeeding  
+  childoralhealth <- TANF -> breastfeeding
+  childoralhealth <- workstatus -> breastfeeding
+  childoralhealth <- CHIP
+ 
+  
+  TANF [exposure]
+  childoralhealth [outcome]  
+}")
+
+tidy_dagdrive <- tidy_dagitty(dentaldag)  #true exposure or predictor of interest is breastfeeding
+
+ggdag_adjustment_set(dentaldag, node_size = 19, text_size = 2.8, text_col = 'black')
+```
+
+
+## Methods 
+
+### Data
+
+To conduct this analysis I combined data from Excel sheets collected from several U.S. CDC hosted sites.
+
+First I installed and loaded packages needed to import data. 
+
+
+```{r, include=FALSE}
+library(readxl)
+library(readr)
+```
+
+
+
+```{r, include=FALSE}
+library("tidyverse") #loading other packages that will be used for visualization and analyses 
+library("dplyr")
+library("ggplot2")
+```
+
+Then I imported the datasets for the independent and dependent variables .
+
+```{r}
+bfsixmonths <- read.csv("/Users/brendaonyango/Downloads//ExportCSV (6).csv") #breastfedthroughsixmonths
+
+bfever <- read.csv("/Users/brendaonyango/Downloads//ExportCSV (5).csv") #ever breastfed 
+
+bfandformulasixmonths <-  read.csv("/Users/brendaonyango/Downloads//ExportCSV (7).csv") #breastfed and formula before 6 months 
+
+bftwelvemonths <- read.csv("/Users/brendaonyango/Downloads//ExportCSV (8).csv") #breastfed 12 months
+```
+
+
+```{r}
+childoralhealth <- read.csv("/Users/brendaonyango/Downloads//NOHSS_Child_Indicators (1).csv") #dependentvariables
+```
+
+## Data Wrangling Indepedent and Dependent Variables 
+
+### Dependent Variable 
+
+After importing the datasets, I need to clean and combine them. 
+
+I started with wrangling the childoralhealth set. 
+
+
+```{r}
+childoralhealth <- childoralhealth |> arrange(LocationAbbr) |> group_by(LocationAbbr, SchoolYearStart, Grade)
+```
+
+```{r}
+childoralhealth2 <- childoralhealth |> filter(SchoolYearStart %in% c("2016")) |> group_by(LocationAbbr, SchoolYearStart)
+
+```
+
+```{r}
+childoralhealthcleaner <- childoralhealth2  |> filter(Indicator == "Caries Experience: Percentage of students with caries experience (treated or untreated tooth decay)")  |> filter(Grade == "Third Grade")
+
+
+```
+
+```{r}
+childoralhealthcleaner <- childoralhealthcleaner |> select(LocationDesc, SchoolYearStart, SchoolYearEnd, Grade, Indicator, Data_Value, Low_Confidence_Interval, High_Confidence_Interval)
+
+```
+```{r}
+names(childoralhealthcleaner)[names(childoralhealthcleaner) == 'Data_Value'] <- 'Percent ever w cav' #switching name of datavalue to percent 
+```
+
+```{r}
+childoralhealthcleaner <- childoralhealthcleaner[-(6),] #removing IHS from data 
+
+```
+
+
+I had the most extensive data for third graders who started in school in 2016; these students were approximately 8 years old meaning they were born around 2008. Therefore I used breastfeeding data from 2008. I'll exclude the Indian Health Service and focus on 8 states. 
+
+### Independent Variable 
+
+Next it's time to clean the independent variable. After some consideration I decided to focus on using breastfeed at twelve months because this data point better temporally connects breastfeeding to the cavity data. I will also use infantseverbreastfed to compare extremes between longest recorded length of breastfeeding from this dataset and never breastfeeding. 
+
+```{r, include=FALSE}
+bftwelvemonths <- bftwelvemonths |> select(YearStart, LocationAbbr, LocationDesc, Question, Data_Value, Low_Confidence_Limit, High_Confidence_Limit)
+
+```
+
+
+```{r}
+bftwelvemonthsclean <- bftwelvemonths |> filter(LocationAbbr == "FL"| LocationAbbr == "CO" | LocationAbbr == "CT" | LocationAbbr == "GA" | LocationAbbr == "ID" | LocationAbbr == "LA" | LocationAbbr == "OR" | LocationAbbr == "VT") #selecting same states from depedendent variable 
+
+```
+
+```{r}
+names(bftwelvemonthsclean)[names(bftwelvemonthsclean) == 'Data_Value'] <- 'Percent BF at dozen months' #switching name of datavalue to percent bf at 12 months 
+
+```
+
+```{r, include=FALSE}
+bfeverclean <- bfever|> filter(LocationAbbr == "FL"| LocationAbbr == "CO" | LocationAbbr == "CT" | LocationAbbr == "GA" | LocationAbbr == "ID" | LocationAbbr == "LA" | LocationAbbr == "OR" | LocationAbbr == "VT")
+
+```
+
+```{r}
+bfeverclean <- bfeverclean |> select(YearStart, LocationAbbr, LocationDesc, Data_Value, Low_Confidence_Limit, High_Confidence_Limit)
+
+```
+
+```{r}
+names(bfeverclean)[names(bfeverclean) == 'Data_Value'] <- 'Percent ever breastfed' #switching name of datavalue to percent ever bf 
+```
+Next I joined the breastfed at 12 months and ever breastfed sets. 
+
+```{r}
+bfdata <- right_join(bftwelvemonthsclean, bfeverclean, by = "LocationAbbr")
+
+```
+
+```{r, include=FALSE}
+bfdata <- bfdata |> select(-YearStart.y) |> select(-LocationDesc.y) |> select(-Question)
+
+```
+
+Next I combined the datasets with independent and dependent variables. 
+
+
+```{r}
+combinedset <- left_join(bfdata, childoralhealthcleaner, by = "LocationAbbr")
+```
+
+```{r}
+combinedset <- combinedset |> select(-Indicator)
+```
+
+Because it was readily available I decided to include state fluoridation and childhood poverty levels for 2016 to use as control variables to better isolate the effects of breastfeeding on cavity rates. I imported a set made from data from the CDC and National Women's Law Center directly from Excel.
+
+```{r}
+library(readxl)
+state_fluoride <- read_excel("state fluoride.xlsx", 
+    col_types = c("text", "numeric", "numeric"))
+
+```
+
+```{r}
+combinedset <- left_join(combinedset, state_fluoride, by = "LocationAbbr")
+```
+
+
+
+
+## Results 
+
+## Discussion
+
+### Limitations 
+
+## References 
+
+Peres, K. G., Chaffee, B. W., Feldens, C. A., Flores-Mir, C., Moynihan, P., & Rugg-Gunn, A. (2018). Breastfeeding and Oral Health: Evidence and Methodological Challenges. Journal of dental research, 97(3), 251–258. https://doi.org/10.1177/0022034517738925
+
+Centers for Disease Control and Prevention. Community Water Flouridation: 2016 Flouridation Statistics [online]. [accessed April 07, 2022]. URL: https://www.cdc.gov/fluoridation/statistics/2016stats.htm
+
+Centers for Disease Control and Prevention.National Center for Chronic Disease Prevention and Health Promotion, Division of Nutrition, Physical Activity, and Obesity.Data, Trend and Maps [online]. [accessed Apr 03, 2022]. URL: https://www.cdc.gov/nccdphp/dnpao/data-trends-maps/index.html.
+
+CDC National Oral Health Surveillance System (NOHSS). NOHSS Child Indicators Oral Health. [access Apr 03, 2022]. URL: https://chronicdata.cdc.gov/Oral-Health/NOHSS-Child-Indicators/qcai-zfj9
+
+National Women's Law Center. Poverty Rates State by State, 2016. [access April 08, 2022]. URL: https://nwlc.org/wp-content/uploads/2017/09/Poverty-Rates-State-by-State-2016.pdf
