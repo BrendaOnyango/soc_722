@@ -1,7 +1,7 @@
 ---
-title: "Does Breastfeeding cause caries?"
+title: "Does Breastfeeding Cause Caries?"
 author: "Brenda Onyango"
-date: "4/1/2022"
+date: "4/10/2022"
 output: html_document
 ---
 <style type="text/css">
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Sociological Background on Breastfeeding 
 
-The individual decision to breastfeed an infant happens in the context of longstanding social forces including racial stereotypes and corporate advertising for formula with a global reach (Kirksey, 2021; Kaplan, 2008). In the United States, the scope of my analysis, breastfeeding rates are one of many maternal and child health disparities that fall along racial lines. In addition to the sociohistorical motivators/deterrents to breastfeeding, there are also concerns for economic well-being for the breastfeeding parent.  Rippeyoung and Noonan document how breastfeeding rather than formula-feeding affects post-birth earnings (2012). Using data from the National Longitudinal Survey of Youth, they find that those who breastfeed for six months or longer experience longer wage loss than those who breastfeed for a shorter period or not at all (Rippeyoung and Noonan, 2012). Indeed, *both* the ability to breastfeed and the decision for breastfeeding duration has economic components, as well as biological. The dynamic between social forces and biological processes are also applicable to caries and other oral health outcomes across the lifecourse. 
+The individual decision to breastfeed an infant happens in the context of longstanding social forces including racial stereotypes and corporate advertising for formula with a global reach (Kirksey, 2021; Kaplan, 2008). In the United States, the scope of my analysis, breastfeeding rates are one of many maternal and child health disparities that fall along racial lines. In addition to the sociohistorical motivators/deterrents to breastfeeding, there are also concerns for economic well-being for the breastfeeding parent.  Rippeyoung and Noonan document how breastfeeding rather than formula-feeding affects post-birth earnings (2012). Using data from the National Longitudinal Survey of Youth, they find that those who breastfeed for six months or longer experience longer wage loss than those who breastfeed for a shorter period or not at all (Rippeyoung and Noonan, 2012). Indeed, both the ability to breastfeed and the length one breastfeeds is affected by finances and biology. The dynamic between social forces and biological processes are also applicable to caries and other oral health outcomes across the lifecourse. 
 
 ### Breastfeeding and Child Oral Health  
 
@@ -28,15 +28,15 @@ A 2017 review summarized the extensive health benefits of breast milk that inclu
 
 The research question is does breastfeeding cause caries? Breastfeeding will be operationalized using definitions from the U.S. Centers for Disease Control and Prevention which collects several questions about breastfeeding via the National Immunization Survey landline sampling frame (U.S. CDC, n.d.).  The indicators used in this study are "Infants breastfed at 12 months" and "Infants ever breastfed" (CDC^2^) from 2008; data from before 2009 in this set "represents children born over three years and each birth year can consist of respondent data from up to three years" (CDC^2^). These indicators are the independent variables. The dependent variable of child dental health is operationalized with data from the National Oral Health Surveillance System for third graders in 2016, who would be ~eight years old (CDC^3^). The indicator is "Caries Experience: Percentage of students with caries experience (treated or untreated tooth decay)." 
 
-The control variables in this analysis are fluoridation and child poverty rates from CDC^1^ and the National Women's Law Center. 
+The control variables in this analysis are fluoridation and child poverty rates from CDC^1^ and the National Women's Law Center, respectively. 
 
 ### Causal Diagram 
 
 Childhood caries formation and breastfeeding behavior have causes not included in the dataset used in this analysis but is captured in the diagram below. These determinants include:
 
-Supplemental Nutrition Assistance Program (SNAP): Colloquially known as food stamps, SNAP likely affects the physical ability to breastfeed and child oral health because people who are lactating require sufficient nutrition to produce milk and children's diets is also a cause of caries. 
+Supplemental Nutrition Assistance Program (SNAP): Colloquially known as food stamps, SNAP likely affects the physical ability to breastfeed and child oral health because people who are lactating require sufficient nutrition to produce milk and children's diets also cause of caries. 
 
-Work status: The lactating parent's work status (type of work, wages, and work hours) can be reasonably assumed to affect their ability to breastfeed and the ability to afford dental care for ones children. 
+Work status: The lactating parent's work status (type of work, wages, and work hours) can be reasonably assumed to affect their ability to breastfeed and the ability to afford dental care for children. 
 
 Children's Health Insurance Program (CHIP): CHIP provides more affordable health coverage for children in families that do not qualify for Medicaid. States vary in CHIP structure and eligibility, but all CHIP plans cover dental (HHS). Having dental coverage provides children the possibility of preventive dental services. 
 
@@ -143,11 +143,11 @@ childoralhealthcleaner <- childoralhealthcleaner[-(6),] #removing IHS from data
 ```
 
 
-I had the most extensive data for third graders who started in school in 2016; these students were approximately 8 years old meaning they were born around 2008. Therefore I used breastfeeding data from 2008. I'll exclude the Indian Health Service and focus on 8 states. 
+I had the most extensive data for children who began third grade in 2016; these students were approximately 8 years old meaning they were born around 2008. Therefore, I used breastfeeding data from 2008. 
 
 #### Independent Variable 
 
-Next it's time to clean the independent variable. After some consideration I decided to focus on using breastfeed at twelve months because this data point better temporally connects breastfeeding to the cavity data. I will also use infantseverbreastfed to compare extremes between longest recorded length of breastfeeding from this dataset and never breastfeeding. 
+Next I cleaned the independent variable. After some consideration I decided to focus on using breastfeed at twelve months because this data point better temporally connects breastfeeding to the cavity data. I will also use infantseverbreastfed to capture periods of breastfeeding that were less than 12 months.
 
 ```{r, include=FALSE}
 bftwelvemonths <- bftwelvemonths |> select(YearStart, LocationAbbr, LocationDesc, Question, Data_Value, Low_Confidence_Limit, High_Confidence_Limit, Sample_Size)
@@ -190,7 +190,7 @@ bfdata <- bfdata |> select(-YearStart.y) |> select(-LocationDesc.y) |> select(-Q
 
 ```
 
-Next I combined the datasets with independent and dependent variables. 
+Next, I combined the datasets with independent and dependent variables. 
 
 ```{r}
 combinedset <- left_join(bfdata, childoralhealthcleaner, by = "LocationAbbr")
@@ -202,7 +202,7 @@ combinedset <- combinedset |> select(-Indicator)
 
 #### Control Variables 
 
-Because it was readily available I decided to include state fluoridation and childhood poverty levels for 2016 to use as control variables to better isolate the effects of breastfeeding on cavity rates.
+Because it was readily available, I included state fluoridation and childhood poverty levels for 2016 to use as control variables to better isolate the effects of breastfeeding on cavity rates.
 
 ```{r}
 library(readxl)
@@ -237,7 +237,7 @@ ggplot(combinedsetfinal) + geom_point(aes(x= LocationAbbr, y=PercentBFdozenmonth
 ggplot(combinedsetfinal) + geom_point(aes(x= LocationAbbr, y=percenteverbreastfed, color =LocationAbbr, size = 2.5))
 ```
 
-From the above plots we see variation in percent of children being breastfed at 12 months and ever being breastfed in 2008, respectively. Oregon and Vermont are among the highest a,ong both independent variables and Lousiiana is the least. 
+From the above plots we see variation in percent of children being breastfed at 12 months and ever being breastfed in 2008, respectively. Oregon and Vermont are among the highest among both independent variables and Louisiana is the lowest. 
 
 #### Dependent Variable 
 
@@ -260,7 +260,7 @@ ggplot(combinedsetfinal) + geom_point(aes(x= LocationAbbr, y=percentchildpoverty
 
 Louisiana had the highest child (individuals under age 18) poverty in 2016 (28.6%). Oregon had the lowest level of the percent of the population being served by a community water system receiving fluoridated water. 
 
-These data visualizations show variation across the independent, dependent, and control variables and a sense of values to use in a simulation. 
+These data visualizations show variation across the independent, dependent, and control variables. 
 
 ### Linear Regression 
 
@@ -325,9 +325,9 @@ msummary(list(mbf12b, meverfedb),
 ```
 
 
-### Log Transformation and  Regression
+### Log Transformation and Regression
 
-The challenge with the above results is that they are based on 8 (small sample size even though it represents thousands of kids) states, some of which have outliers in child poverty, fluoridation, and caries experience.  and each variable is expressed as a percentage. Linear regression is often used for continuous variables and these percentages are proportions. Recognizing this challenge, there are several pathways to provide additional information to answer "does breastfeeding cause cavities?" One option is to log transform all the variables to give them statistical properties that are more compatible with regression. 
+The challenge with the above results is that they are based on 8 (small sample size even though it represents thousands of kids) states - some of which have outliers in child poverty, fluoridation, and caries experience - and each variable is expressed as a percentage. Linear regression is often used for continuous variables and these percentages are proportions. Recognizing this challenge, there are several pathways to provide additional information to answer "does breastfeeding cause cavities?" One option is to log transform all the variables to give them statistical properties that are more compatible with regression. 
 
 ```{r}
 mbf12log <- lm(log(Percentevercav) ~ log(PercentBFdozenmonths) + log(percentreceivingFwater) + log(percentchildpoverty), data = combinedsetfinal)
@@ -337,9 +337,9 @@ msummary(list(mbf12log, meverfedlog),
          stars = TRUE)
 ```
 
-### Secondary Linear Regression 
+### Second Linear Regression 
 
-Another is to do similar linear regression with a different dataset with more observations. I created a second dataset using the number of births in 2008 with data from Infoplease; breastfeeding data from CDC^2^; and percent of kids (ages 1-17) with oral health problems data from 2020 from KFF. Using the percentage data I estimated the number of kids born in 2008 that were ever breastfed, breastfed at six months, breastfed at 12 months, and developed dental problems. This dataset has many assumptions. 
+Another option is to do a similar linear regression with a different dataset with more observations. I created a second dataset using the number of births in 2008 with data from Infoplease; breastfeeding data from CDC^2^; and percent of kids (ages 1-17) with oral health problems data from 2020 from KFF. Using the percentage data I estimated the number of kids born in 2008 that were ever breastfed, breastfed at six months, breastfed at 12 months, and developed dental problems. This dataset has many assumptions. 
 
 ```{r}
  #importing second constructed dataset
@@ -384,13 +384,19 @@ Without log transforming variables, regressions of percent ever with caries on p
 
 Based on the regressions with log-transformed variables, controlling for fluoridation and child poverty, a one percent increase in breastfed at 12 months results in a 0.07% decrease in ever having caries in the third grade at the state level. These results are not statistically significant.  A one percent increase in ever breastfed results in a 0.08% decrease in ever having caries in the third grade, controlling for fluoridation and child poverty, at the state level. These result are also not statistically significant.
 
-The regression done with estimated figures for number of children ever breastfed, breastfed at six months, breastfed at 12 months, ever having any dental problems, and child poverty had statistically significant results showing that breastfeeding causes dental problems (defined by KFF as having toothpain in the past 12 months, bleeding gums, or decayed teeth/cavities) with the highest coefficient being at 12 months; a one unit increase in number of kids being breastfed at 12 months resulted in a 0.27 unit increase in kids with dental problems, when controlling for child poverty, and is signficant at 99% level. 
+The regression done with estimated figures for number of children ever breastfed, breastfed at six months, breastfed at 12 months, ever having any dental problems, and child poverty had statistically significant results showing that breastfeeding causes dental problems (defined by KFF as having toothpain in the past 12 months, bleeding gums, or decayed teeth/cavities) with the highest coefficient being at 12 months; a one unit increase in number of kids being breastfed at 12 months resulted in a 0.27 unit increase in kids with dental problems, when controlling for child poverty, and is significant at 99% level. 
 
 ## Discussion
 
 ### Limitations 
 
-% white population; dental workforce availability; children diet; whether propensity to breastfeed correlates to other health behaviors like diet or if there's a biological pathway (e.g. sugar and acid content of milk v formula v early baby food )
+The first set of linear regressions based on data from eight states has a small sample size, but its strengths are that the data is from reputable organizations and relies on fewer assumptions then the second regression. The 8 states are also varied and could be thought to be representative of 50 states. These regressions also account for fluoridation, an important causal factor for the development of caries.
+
+The second regression is based on data I constructed by assuming I could multiply percentage data on poverty, dental problems, and breastfeeding from various sources and a few different years to the number of births for 50 states and the District of Columbia in 2008 to estimate how many third graders (8 year olds) had caries. The fault with this assumption is that number of births does not correspond to number of children still alive; some metrics for breastfeeding in 2008 mean by definition the child was born in 2007; the dental health data used in this assumption was for all kids age 1-17; and the poverty data was from 2016 (and not year of birth or year of being 8). All that said, these sets of regressions, which controlled for child poverty, had statistically significant results. 
+
+Both sets of regressions did not account for demographics of kids (age and race/racism experience of parents), dental workforce availability, or children's diet. 
+
+These regressions also approach breastfeeding as a behavior. Perhaps breastfeeding behavior is associated with other parental behaviors that affect dental health like diet and age at first dentist visit. The regressions do not incorporate the biological pathways between breast milk (its acidity, sugar content, etc.), formula, and early baby food on caries development. A regression that accounts for these other factors would provide stronger evidence of the relationship between breastfeeding as behavior and caries development since a randomized trial is likely unethical. More research is needed to distinguish the behavioral and biological relationship between breastfeeding and caries. 
 
 ## References 
 
