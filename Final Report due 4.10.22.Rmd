@@ -24,7 +24,7 @@ The individual decision to breastfeed an infant happens in the context of longst
 
 A 2017 review summarized the extensive health benefits of breast milk that includes preventing teeth from  being misaligned (Peres et al., 2017). The review also cites studies showing breastfeeding up to 12 months has been associated with fewer caries, but there is a positive association with caries when breastfeeding lasts longer (Peres et al., 2017).  The authors of the review acknowledge methodological challenges in connecting breastfeeding behavior with oral health outcomes beyond infants aged 12-24 months. This present analysis attempts to understand the causal relationship between breastfeeding and caries. "Caries is a chronic disease process that... is an imbalance between destructive and oral forces...cavities are the holes in teeth that result from the underlying chronic caries process" (Centers for Medicare & Medicaid Services, 2015, p. 8-9).
 
-### Current Question
+### Research Question
 
 The research question is does breastfeeding cause caries? Breastfeeding will be operationalized using definitions from the U.S. Centers for Disease Control and Prevention which collects several questions about breastfeeding via the National Immunization Survey landline sampling frame (U.S. CDC, n.d.).  The indicators used in this study are "Infants breastfed at 12 months" and "Infants ever breastfed" (CDC^2^) from 2008; data from before 2009 in this set "represents children born over three years and each birth year can consist of respondent data from up to three years" (CDC^2^). These indicators are the independent variables. The dependent variable of child dental health is operationalized with data from the National Oral Health Surveillance System for third graders in 2016, who would be ~eight years old (CDC^3^). The indicator is "Caries Experience: Percentage of students with caries experience (treated or untreated tooth decay)." 
 
@@ -215,17 +215,17 @@ state_fluoride <- read_excel("state fluoride.xlsx",
 combinedset <- left_join(combinedset, state_fluoride, by = "LocationAbbr")
 ```
 
-### Data Visualization
 
-Before I can manipulate and visualize data I need to confirm that my combinedset object is a dataframe and not a list. 
+Before I performed regressions and visualizations, I confirmed that my combinedsetfinal object is a dataframe and not a list. 
 
 ```{r}
 combinedsetfinal <- as.data.frame(combinedset) #ensures object I created in wrangling is a dataframe
 
 ```
 
+#### Data Visualization
 
-#### Independent Variables 
+##### Independent Variables 
 
 ```{r}
 ggplot(combinedsetfinal) + geom_point(aes(x= LocationAbbr, y=PercentBFdozenmonths, color = LocationAbbr,  size = 2.5))
@@ -239,7 +239,7 @@ ggplot(combinedsetfinal) + geom_point(aes(x= LocationAbbr, y=percenteverbreastfe
 
 From the above plots we see variation in percent of children being breastfed at 12 months and ever being breastfed in 2008, respectively. Oregon and Vermont are among the highest among both independent variables and Louisiana is the lowest. 
 
-#### Dependent Variable 
+##### Dependent Variable 
 
 ```{r}
 ggplot(combinedsetfinal) + geom_point(aes(x= LocationAbbr, y=Percentevercav, color =LocationAbbr, size = 2.5))
@@ -248,7 +248,7 @@ ggplot(combinedsetfinal) + geom_point(aes(x= LocationAbbr, y=Percentevercav, col
 
 From this visualization we see variation in percent ever having caries (treated or untreated) among third graders in 2016. Idaho has the highest and Vermont the lowest. 
 
-### Control Variables 
+##### Control Variables 
 
 ```{r}
 ggplot(combinedsetfinal) + geom_point(aes(x= LocationAbbr, y=percentreceivingFwater, color =LocationAbbr, size = 2.5))
