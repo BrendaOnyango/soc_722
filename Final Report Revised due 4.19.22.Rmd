@@ -1,0 +1,357 @@
+---
+title: "Does Breastfeeding Cause Caries?"
+author: "Brenda Onyango"
+date: "4/19/2022"
+output:
+  html_document: default
+---
+<style type="text/css">
+  body{
+  font-size: 13pt;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+## Background 
+
+### Sociological Background on Breastfeeding 
+
+The individual decision to breastfeed an infant happens in the context of longstanding social forces including racial stereotypes and corporate advertising for formula with a global reach (Kirksey, 2021; Kaplan, 2008). In the United States, the scope of my analysis, breastfeeding rates are one of many maternal and child health disparities that fall along racial lines. In addition to the sociohistorical motivators/deterrents to breastfeed, there are also concerns for economic well-being for the breastfeeding parent.  Rippeyoung and Noonan document how breastfeeding rather than formula-feeding affects post-birth earnings (2012). Using data from the National Longitudinal Survey of Youth, they find that those who breastfeed for six months or longer experience longer wage loss than those who breastfeed for a shorter period or not at all (Rippeyoung and Noonan, 2012). Indeed, both the ability to breastfeed and the length one breastfeeds is affected by finances and biology. The dynamic between social forces and biological processes are also applicable to caries and other oral health outcomes across the lifecourse. 
+
+### Breastfeeding and Child Oral Health  
+
+A 2017 review summarized the extensive health benefits of breastfeeding that includes preventing teeth from  being misaligned (Peres et al., 2017). The review also cites studies showing breastfeeding up to 12 months has been associated with fewer caries, but there is a positive association with caries when breastfeeding lasts longer (Peres et al., 2017).  The authors of the review acknowledge methodological challenges in connecting breastfeeding behavior with oral health outcomes beyond infants aged 12-24 months. This present analysis attempts to understand the causal relationship between breastfeeding and caries. "Caries is a chronic disease process that... is an imbalance between destructive and protective oral forces...cavities are the holes in teeth that result from the underlying chronic caries process" (Centers for Medicare & Medicaid Services, 2015, p. 8-9).
+
+### Research Question
+
+The research question is does breastfeeding cause caries? Breastfeeding will be operationalized using definitions from the U.S. Centers for Disease Control and Prevention which collects several questions about breastfeeding via the National Immunization Survey landline sampling frame (U.S. CDC, n.d.).  The indicators used in this study are "Infants breastfed at 12 months," "Infants ever breastfed", and "Infants breastfed at 6 months" (CDC^2^) from 2008; data from before 2009 in this set "represents children born over three years and each birth year can consist of respondent data from up to three years" (CDC^2^). These indicators are the independent variables. 
+
+For the dependent variable, I first tried to operationalize child dental health with the indicator "Caries Experience: Percentage of students with caries experience (treated or untreated tooth decay)" from National Oral Health Surveillance System data for third graders in 2016, who would be ~eight years old (CDC^3^). The most complete set of data with this indicator was comprised from 8 states. 
+
+For more statistical power, I created a second dataset using the number of births in 2008 with data from Infoplease; breastfeeding data from CDC^2^; and percent of kids (ages 1-17) with oral health problems data from 2020 from KFF.  The KFF measure - "One or More Oral Health Problems" - is a combination of responses from three survey questions: "whether the child has had a toothache in the past 12 months, whether the child had bleeding gums in the past 12 months, or whether the child had decayed teeth/cavities in the past 12 months" (KFF).  Using the number of births, I estimated the number of kids born in 2008 that were ever breastfed, breastfed at six months, breastfed at 12 months, and developed dental problems. This dataset has many assumptions. Using the available KFF data from 2020 might provide an underestimate of the distribution of the dependent variable given that dental decay is more prevalent among  9-11 year olds (31.36%) than 16-19  year olds (22.24%) (National Institute of Dental and Craniofacial Research). It also assumes that there are no major changes in child oral health between 2016 and 2020 (likely true). 
+
+The control variables in this analysis are percent of population served by community water system receiving fluoridated water
+ and child poverty rates from CDC^1^ and the National Women's Law Center, respectively. I also included a control for number of dentists per 100,000 residents for 2015 (when children who experienced breastfeeding in 2008 would be between 7-8 years old; this is well after when dentists recommend a child's first visit (12 months is the recommended age for first visit)) (National Library of Medicine). The method of analysis is linear regression. 
+ 
+The estimand is the average treatment effect on the treated; the treated population is children who were breastfed. 
+
+### Causal Diagram 
+
+Childhood caries formation and breastfeeding behavior have causes not included in the dataset used in this analysis but is captured in the diagram below. These determinants include:
+
+Supplemental Nutrition Assistance Program (SNAP): Colloquially known as food stamps, SNAP likely affects the physical ability to breastfeed and child oral health because people who are lactating require sufficient nutrition to produce milk and children's diets also cause of caries. 
+
+Work status: The lactating parent's work status (type of work, wages, and work hours) can be reasonably assumed to affect their ability to breastfeed and the ability to afford dental care for children. 
+
+Children's Health Insurance Program (CHIP): CHIP provides more affordable health coverage for children in families that do not qualify for Medicaid. States vary in CHIP structure and eligibility, but all CHIP plans cover dental (HHS). Having dental coverage provides children the possibility of preventive dental services. 
+
+
+
+```{r, include=FALSE}
+library(ggdag)
+```
+
+```{r}
+dentaldag <- dagitty::dagitty("dag {
+  
+  childoralhealth <- breastfeeding  
+  childoralhealth <- SNAP -> breastfeeding
+  childoralhealth <- workstatus -> breastfeeding
+  childoralhealth <- CHIP
+  childoralhealth <- dentistavailability
+  workstatus <- racismexperience -> breastfeeding
+ 
+  
+  SNAP [exposure]
+  childoralhealth [outcome]  
+}")
+
+tidy_dagdrive <- tidy_dagitty(dentaldag)  #true exposure or predictor of interest is breastfeeding
+
+ggdag_adjustment_set(dentaldag, node_size = 19, text_size = 2.5, text_col = 'black')
+```
+
+
+## Data
+
+To conduct the analysis with a a sample of n = 51 (50 states and the District of Columbia) I combined data on community water fluoridation (CDC^1^), breastfeeding (CDC^2^), child dental health (KFF), child poverty (National Women's Law Center), and dentist density (National Library of Medicine).
+
+First I installed and loaded packages needed to import data. 
+
+
+```{r, include=FALSE}
+library(readxl)
+library(readr)
+```
+
+```{r, include=FALSE}
+library(tidyverse) #loading other packages that will be used for visualization and analyses 
+library(dplyr)
+library(ggplot2)
+```
+
+Then I imported the dataset containing the independent, dependent variables, and control variables.
+
+```{r}
+
+library(readxl)
+reviseddataset <- read_excel("~/Downloads/reviseddataset.xlsx", 
+    col_types = c("text", "text", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric"))
+
+
+```
+
+
+
+#### Data Description Using Data Visualization
+
+##### Independent Variables 
+
+```{r}
+ggplot(reviseddataset) + geom_point(aes(x= State, y=breastfedevergpercent)) + theme(axis.text.x = element_text(face = "bold", 
+                           size = 5, angle = 45))
+
+ggplot(reviseddataset) + geom_point(aes(x= State, y=breastfed6monthspercent)) +  theme(axis.text.x = element_text(face = "bold", size = 5, angle = 45))
+
+ggplot(reviseddataset) + geom_point(aes(x= State, y=BreastfedPercent12months)) +   theme(axis.text.x = element_text(face = "bold", size = 5, angle = 45))
+
+
+```
+
+
+From the above plots we see variation in percent of children being breastfed at six months, 12 months, and ever being breastfed in 2008, respectively.  We also observe outliers.
+
+##### Dependent Variable 
+
+```{r}
+ggplot(reviseddataset) + geom_point(aes(x= State, y=percentofkidswithoralhealthproblems)) +  theme(axis.text.x = element_text(face = "bold", size = 5, angle = 45))
+```
+
+From this visualization we see variation in percent of kids having one or more oral health problems ranging from 9% (Nebraska) to 22% (Mississippi).
+
+```{r}
+ggplot(reviseddataset) + geom_point(aes(x= State, y=numberofkidswithdentalproblems)) + 
+  theme(axis.text.x = element_text(face = "bold", 
+                           size = 5, angle = 45))
+
+```
+
+In this visualization we see that California has the highest number of kids with dental problems and Vermont the least. This is probably related to their relative population sizes rather than differences in dental health, which is what my question is about. Therefore, the regressions will use percentage data (standardized) to determine the relationship between breastfeeding and tooth decay. 
+
+###### Reference for aspects of data visualization is Datanovia (2018). 
+
+##### Control Variables 
+
+```{r}
+ggplot(reviseddataset) + geom_point(aes(x= State, y=percentkidsinpoverty)) +  
+   theme(axis.text.x = element_text(face = "bold", 
+                           size = 5, angle = 45))
+```
+
+
+```{r}
+ggplot(reviseddataset) + geom_point(aes(x= State, y=percentpopwithFwater)) +  
+   theme(axis.text.x = element_text(face = "bold", 
+                           size = 5, angle = 45))
+```
+This visualization shows that the percent population served by communit water systems receiving fluoridated water has a few outliers below 50%. 
+
+```{r}
+ggplot(reviseddataset) + geom_point(aes(x= State, y=dentistperonehundredkresidents)) +  
+  theme(axis.text.x = element_text(face = "bold", 
+                           size = 6, angle = 45))
+
+```
+
+
+These data visualizations show variation and outliers among the independent, dependent, and control variables. 
+
+## Methods: Linear Regressions 
+
+
+
+```{r}
+library(modelsummary) #loading package needed to display model summaries 
+```
+
+#### Regression of Percent of Kids with Oral Health Problems on Three Breastfeeding Indicators
+
+The first regression is percent of kids with oral health problems on the three breastfeeding indicators without any controls. 
+
+```{r}
+
+#performing one predictor regression on independent variables and plotting regression
+
+mbfever<- lm(percentofkidswithoralhealthproblems ~ breastfedevergpercent, data = reviseddataset)
+mbf6months <- lm(percentofkidswithoralhealthproblems ~ breastfed6monthspercent, data = reviseddataset)
+mbf12months <- lm(percentofkidswithoralhealthproblems ~ BreastfedPercent12months, data = reviseddataset)
+
+
+msummary(list(mbfever, mbf6months, mbf12months),
+         stars = TRUE)
+```
+
+From these models I see that for every one unit increase in the percent of infants breastfed ever, at six months, and at 12 months, the percent of kids with dental health problems decreased by 0.059, 0.082, and .124 units, respectively. The association between breastfed at six months and breastfed at 12 months with dental problems is statistically significant at the 95% level. Note that standard errors are in parentheses. 
+
+
+```{r}
+
+
+ggplot(reviseddataset, aes(breastfedevergpercent, percentofkidswithoralhealthproblems)) + geom_point() + 
+                                          geom_smooth(method = 'lm')
+
+ggplot(reviseddataset, aes(breastfed6monthspercent, percentofkidswithoralhealthproblems)) + geom_point() + 
+                                          geom_smooth(method = 'lm')
+
+ggplot(reviseddataset, aes(BreastfedPercent12months, percentofkidswithoralhealthproblems)) + geom_point() + 
+                                          geom_smooth(method = 'lm')
+```
+
+
+After looking at the visualization of these initial models and seeing how many observations fall outside the 95% confidence interval, I repeated the regressions with logs of both the independent and dependent variables to de-emphasize outliers. 
+
+```{r}
+mbfever2 <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfedevergpercent), data = reviseddataset)
+mbf6months2  <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfed6monthspercent), data = reviseddataset)
+mbf12months2 <- lm(log(percentofkidswithoralhealthproblems) ~ log(BreastfedPercent12months), data = reviseddataset)
+
+msummary(list(mbfever2, mbf6months2, mbf12months2),
+         stars = TRUE)
+```
+
+
+### Result 1 
+
+In this regression both the independent and dependent variables are log-transformed. For every one percent increase in the percent of infants breastfed ever, at six months, and at 12 months, the percent of kids with dental health problems decreased by 0.283, 0.243, and .199, respectively. The results for six months and 12 months are significant at the 99% level. 
+
+Next, I confirmed that using linear regression was appropriate with a plot of residuals compared to the fitted line and Q-Q plots. 
+
+```{r}
+plot(mbfever2)
+plot(mbf6months2)
+plot(mbf12months2)
+```
+
+
+The first plots in the above three outputs show residuals versus the fitted line for the three models. There is a slight U shape indicating that there might be a quadratic relationship between breastfeeding and dental problems. The second plot show in this output, the Q-Q plots, indicate that the distribution of the data is normal since the Q-Q plot is not showing skew. The third plots (scale-location) are checking for homoscedasticity (Statology^1^). The fourth plots which show residuals v. leverage demonstrate influential observations (Statology^2^). Based on these plots, the assumptions for linear regression are met.
+
+Before making conclusions on the relationship between breastfeeding and tooth decay/caries, I will add the control variables to the regression. 
+
+#### Regression of Percent of Kids with Oral Health Problems on Three Breastfeeding Indicators, Controlled for Fluoridation
+
+Next, I added one control to see if the relationship between breastfeeding and caries changes. 
+
+```{r}
+#performing one predictor regression on independent variables and one control variable (fluoridation) 
+
+mbfever3 <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfedevergpercent) + log(percentpopwithFwater), data = reviseddataset)
+mbf6months3  <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfed6monthspercent) + log(percentpopwithFwater) , data = reviseddataset)
+mbf12months3 <- lm(log(percentofkidswithoralhealthproblems) ~ log(BreastfedPercent12months) + log(percentpopwithFwater), data = reviseddataset)
+
+msummary(list(mbfever3, mbf6months3, mbf12months3),
+         stars = TRUE)
+```
+
+### Result 2
+
+Note that R2 has increased from the prior models and that when controlling for fluoridation, breastfed ever shows the largest association with a decrease in tooth problems and is statistically significant; this was not the case with the earlier models. 
+
+#### Regression of Percent of Kids with Oral Health Problems on Three Breastfeeding Indicators, Controlled for Fluoridation and Child Poverty 
+
+
+Next, I'll run regressions with child poverty included as a control. 
+
+```{r}
+mbfever4 <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfedevergpercent) + log(percentpopwithFwater) + log(percentkidsinpoverty), data = reviseddataset)
+
+mbf6months4  <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfed6monthspercent) + log(percentpopwithFwater) + log(percentkidsinpoverty), data = reviseddataset)
+
+mbf12months4 <- lm(log(percentofkidswithoralhealthproblems) ~ log(BreastfedPercent12months) + log(percentpopwithFwater) + log(percentkidsinpoverty), data = reviseddataset)
+
+msummary(list(mbfever4, mbf6months4, mbf12months4),
+         stars = TRUE)
+```
+
+### Result 3 
+
+Note that R2 has increased again. For models two and three above, about a third of the variation in the log percent of dental problems among kids is explained by the log percent of breastfeeding at 6 and 12 months. The third model has the lowest BIC and AIC values, indicating that model 3 may be the best model (Brownlee, 2020). 
+
+#### Regression of Percent of Kids with Oral Health Problems on Three Breastfeeding Indicators, Controlled for Fluoridation, Child Poverty, and Dentist Density 
+
+
+```{r}
+
+#performing one predictor regression on independent variables and three control variables
+
+mbfever5 <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfedevergpercent) + log(percentpopwithFwater) + log(percentkidsinpoverty) + log(dentistperonehundredkresidents) , data = reviseddataset)
+
+mbf6months5  <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfed6monthspercent) + log(percentpopwithFwater) + log(percentkidsinpoverty) + log(dentistperonehundredkresidents), data = reviseddataset)
+
+mbf12months5 <- lm(log(percentofkidswithoralhealthproblems) ~ log(BreastfedPercent12months) + log(percentpopwithFwater) + log(percentkidsinpoverty) + log(dentistperonehundredkresidents), data = reviseddataset)
+
+msummary(list(mbfever5, mbf6months5, mbf12months5),
+         stars = TRUE)
+```
+
+### Result 4
+
+Interestingly, when controlled for dentist density (dentists per 100,000 residents), fluoridation, and child poverty, for every one percent increase in the percent of infants breastfed ever the percent of kids with dental health problems *increased* by 0.019 percent for breastfed ever. The percent of kids with dental health problems decreased by 0.097 percent for breastfed at 6 months, and decreased by 0.097 percent for breastfed at 12 months. The results are not statistically significant, though are significant in magnitude. The results for model 2 and 3, which have greater R2 than model 1, are consistent with earlier models showing a negative association between breastfeeding and oral health problems among children. 
+
+
+## Discussion
+
+### Limitations 
+
+The percentage data used to construct a dataset for the above regressions is from reputable sources, however, assumptions about the match between data on those born and breastfed in 2008 and the available dentists, child poverty, and prevalence of caries among youth were made and could lead to over or underestimates of the coefficients. The fault with the assumptions include: some metrics for breastfeeding in 2008 mean by definition the child was born in 2007; the dental health data used in this assumption was for all kids age 1-17 (could be underestimate); the poverty data was from 2016 (and not year of birth or year of being 8); and the dentistry data was from 2015. Nonetheless, these regressions, except for one, showed negative associations between breastfeeding and caries (tooth decay). Given that the dependent variable indicator is likely an underestimate, the coefficient estimates could be interpreted as conservative. 
+
+These regressions did not account for demographics of kids (age and race/racism experience of parents), dental visit frequency, or children's diet. However, my results were consistent with the 2014 Hong et al. longitudinal cohort study which found that for 5 and 9 year olds, longer breastfeeding duration (at least six months) was associated with fewer caries experience. Their study did control for child gender, soda intake, and much more. 
+
+Finally, the regressions I performed approached breastfeeding as a behavior. Perhaps breastfeeding behavior is associated with other parental behaviors that affect dental health like diet, age at first dentist visit, and brushing frequency. The regressions do not incorporate the biological pathways between breast milk (its acidity, sugar content, etc.), formula, and early baby food on caries development. A study that accounts for these other factors and is structured as panel data with infants followed until they develop their permanent teeth would provide stronger evidence for the relationship between breastfeeding as behavior and caries development since a randomized trial is unethical. More research is needed to distinguish the behavioral and biological relationship between breastfeeding and caries. 
+
+## References 
+
+Brownlee, J. (2020). Probabilistic Model Selection with AIC, BIC, and MDL. [accessed April 15, 2022]. URL: https://machinelearningmastery.com/probabilistic-model-selection-measures/
+
+Centers for Disease Control and Prevention^1^. Community Water Fluoridation: 2016 Flouridation Statistics [online]. [accessed April 07, 2022]. URL: https://www.cdc.gov/fluoridation/statistics/2016stats.htm
+
+Centers for Disease Control and Prevention^2^. National Center for Chronic Disease Prevention and Health Promotion, Division of Nutrition, Physical Activity, and Obesity. Data, Trend and Maps Category: Breastfeeding [online]. [accessed Apr 03, 2022]. URL: https://www.cdc.gov/nccdphp/dnpao/data-trends-maps/index.html.
+
+Centers for Diseease Control and Prevention National Oral Health Surveillance System (NOHSS)^3^. NOHSS Child Indicators Oral Health. [access Apr 03, 2022]. URL: https://chronicdata.cdc.gov/Oral-Health/NOHSS-Child-Indicators/qcai-zfj9
+
+Centers for Medicare & Medicaid Services.(2015). Reducing Early Childhood Tooth Decay: Approaches in Medicaid. [online PowerPoint]. [accessed April 08, 2022]. URL: https://www.medicaid.gov/sites/default/files/2019-12/learninglabslides12.pdf
+
+Datanovia. (2018). GGPlot Axis Ticks: Set and Rotate Text Labels. [accessed April 15, 2022]. URL: https://www.datanovia.com/en/blog/ggplot-axis-ticks-set-and-rotate-text-labels/
+
+Hong, L., Levy, S. M., Warren, J. J., & Broffitt, B. (2014). Infant breast-feeding and childhood caries: a nine-year study. Pediatric dentistry, 36(4), 342–347.
+
+Infoplease. Births, Birth Rates, and Fertility Rates 2008. [accessed April 09, 2022]. URL: https://www.infoplease.com/us/population/births-birth-rates-and-fertility-rates-2008
+
+Kaplan, D. L., & Graff, K. M. (2008). Marketing breastfeeding—reversing corporate influence on infant feeding practices. Journal of Urban Health, 85(4), 486-504.
+
+KFF. (2020). Percent of Children (ages 1-17) with Oral Health Problems. [accessed April 09, 2022]. URL: https://www.kff.org/other/state-indicator/children-with-oral-health-problems/?currentTimeframe=0&sortModel=%7B%22colId%22:%22Location%22,%22sort%22:%22asc%22%7D
+
+Kirksey, K. (2021). A social history of racial disparities in breastfeeding in the United States. Social Science & Medicine, 289, 114365.
+
+National Women's Law Center. Poverty Rates State by State, 2016. [accessed April 08, 2022]. URL: https://nwlc.org/wp-content/uploads/2017/09/Poverty-Rates-State-by-State-2016.pdf
+
+National Institute of Dental and Craniofacial Research. (2018). Dental Caries (Tooth Decay). [accessed April 14, 2022]. URL:https://www.nidcr.nih.gov/research/data-statistics/dental-caries
+
+National Library of Medicine (2019). Active dentists, by state: United States, selected years 2001-2019. [accessed April 14, 2022]. URL: https://www.ncbi.nlm.nih.gov/books/NBK569311/table/ch3.tab42/ 
+
+Statology. (2020). How to interpret a scale-location plot (with examples). [accessed April 14, 2022]. URL: https://www.statology.org/scale-location-plot/#:~:text=A%20scale%2Dlocation%20plot%20is,residuals%20along%20the%20y%2Daxis.
+
+Statology. (2020). What is a Residuals vs. Leverage Plot? (Definition & Example). [access April 14, 2022]. URL: https://www.statology.org/residuals-vs-leverage-plot/
+
+Rippeyoung, P. L., & Noonan, M. C. (2012). Is breastfeeding truly cost free? Income consequences of breastfeeding for women. American Sociological Review, 77(2), 244-267.
+
+Peres, K. G., Chaffee, B. W., Feldens, C. A., Flores-Mir, C., Moynihan, P., & Rugg-Gunn, A. (2018). Breastfeeding and Oral Health: Evidence and Methodological Challenges. Journal of dental research, 97(3), 251–258. https://doi.org/10.1177/0022034517738925
+
+U.S. Department of Health and Human Services (HHS). Medicaid & CHIP: The Children's Health Insurance Program (CHIP). [accessed April 08, 2022]. URL: https://www.healthcare.gov/medicaid-chip/childrens-health-insurance-program/
