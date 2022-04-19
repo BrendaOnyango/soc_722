@@ -3,8 +3,8 @@ title: "Does Breastfeeding Cause Caries?"
 author: "Brenda Onyango"
 date: "4/19/2022"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 ---
 <style type="text/css">
@@ -270,8 +270,10 @@ Before making conclusions on the relationship between breastfeeding and tooth de
 Next, I added one control to see if the relationship between breastfeeding and caries changes. 
 
 
+
+
 ```{r}
-#performing one predictor regression on independent variables and one control variable (fluoridation) 
+
 
 mbfever3 <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfedevergpercent) + log(percentpopwithFwater), data = reviseddataset)
 mbf6months3  <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfed6monthspercent) + log(percentpopwithFwater) , data = reviseddataset)
@@ -279,6 +281,8 @@ mbf12months3 <- lm(log(percentofkidswithoralhealthproblems) ~ log(BreastfedPerce
 
 msummary(list(mbfever3, mbf6months3, mbf12months3),
          stars = TRUE)
+
+
 ```
 
 ### Result 2
@@ -310,7 +314,7 @@ Note that R2 has increased again. For models two and three above, about a third 
 
 ```{r}
 
-#performing one predictor regression on independent variables and three control variables
+
 
 mbfever5 <- lm(log(percentofkidswithoralhealthproblems) ~ log(breastfedevergpercent) + log(percentpopwithFwater) + log(percentkidsinpoverty) + log(dentistperonehundredkresidents) , data = reviseddataset)
 
